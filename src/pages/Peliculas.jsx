@@ -1,0 +1,149 @@
+import MovieCard from "../components/MovieCard";
+
+const peliculas = [
+  {
+    id: 1,
+    titulo: "Inception",
+    poster: "https://image.tmdb.org/t/p/w500/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg",
+    anio: 2010,
+  },
+  {
+    id: 2,
+    titulo: "Interstellar Interstellar Interstellar Interstellar",
+    poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    anio: 2014,
+  },
+  {
+    id: 3,
+    titulo: "The Dark Knight",
+    poster: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    anio: 2008,
+  },
+  {
+    id: 4,
+    titulo: "Avatar",
+    poster: "https://image.tmdb.org/t/p/w500/jRXYjXNq0Cs2TcJjLkki24MLp7u.jpg",
+    anio: 2009,
+  },
+  {
+    id: 5,
+    titulo: "Avengers: Endgame",
+    poster: "https://image.tmdb.org/t/p/w500/ulzhLuWrPK07P1YkdWQLZnQh1JL.jpg",
+    anio: 2019,
+  },
+  {
+    id: 6,
+    titulo: "Dune",
+    poster: "https://image.tmdb.org/t/p/w500/d5NXSklXo0qyIYkgV94XAgMIckC.jpg",
+    anio: 2021,
+  },
+  {
+    id: 7,
+    titulo: "Oppenheimer",
+    poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykIGj7ei855eZ.jpg",
+    anio: 2023,
+  },
+  {
+    id: 8,
+    titulo: "The Matrix",
+    poster: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+    anio: 1999,
+  },
+  {
+    id: 9,
+    titulo: "Gladiator",
+    poster: "https://image.tmdb.org/t/p/w500/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg",
+    anio: 2000,
+  },
+  {
+    id: 10,
+    titulo: "Titanic",
+    poster: "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
+    anio: 1997,
+  },
+  {
+    id: 11,
+    titulo: "Joker",
+    poster: "https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg",
+    anio: 2019,
+  },
+  {
+    id: 12,
+    titulo: "Fight Club",
+    poster: "https://image.tmdb.org/t/p/w500/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg",
+    anio: 1999,
+  },
+  {
+    id: 13,
+    titulo: "Forrest Gump",
+    poster: "https://image.tmdb.org/t/p/w500/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
+    anio: 1994,
+  },
+  {
+    id: 14,
+    titulo: "The Lord of the Rings",
+    poster: "https://image.tmdb.org/t/p/w500/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg",
+    anio: 2001,
+  },
+  {
+    id: 15,
+    titulo: "Star Wars: A New Hope",
+    poster: "https://image.tmdb.org/t/p/w500/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg",
+    anio: 1977,
+  },
+  {
+    id: 16,
+    titulo: "Spider-Man: No Way Home",
+    poster: "https://image.tmdb.org/t/p/w500/uJYYizSuA9Y3DCs0qS4qWvHfZg4.jpg",
+    anio: 2021,
+  },
+  {
+    id: 17,
+    titulo: "Doctor Strange",
+    poster: "https://image.tmdb.org/t/p/w500/uGBVj3bEbCoZbDjjl9wTxcygko1.jpg",
+    anio: 2016,
+  },
+  {
+    id: 18,
+    titulo: "Black Panther",
+    poster: "https://image.tmdb.org/t/p/w500/uxzzxijgPIY7slzFvMotPv8wjKA.jpg",
+    anio: 2018,
+  },
+  {
+    id: 19,
+    titulo: "Toy Story",
+    poster: "https://image.tmdb.org/t/p/w500/uXDfjJbdP4ijW5hWSBrPrlKpxab.jpg",
+    anio: 1995,
+  },
+  {
+    id: 20,
+    titulo: "Jurassic Park",
+    poster: "https://image.tmdb.org/t/p/w500/c414cDeQ9b6qLPLeKmiJuLDUREJ.jpg",
+    anio: 1993,
+  },
+];
+
+
+const Peliculas = () => {
+  return (
+    <div className="min-h-screen bg-[#0f172a] px-8 md:px-16 pt-28 pb-20">
+      
+      {/* Título */}
+      <h1 className="text-3xl md:text-4xl font-bold text-white mb-10 border-l-4 border-red-500 pl-4">
+        🎬 Todas las películas
+      </h1>
+
+      {/* Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+        {peliculas.map((movie) => (
+          <MovieCard key={movie.id} movie={{
+            title: movie.titulo,
+            image: movie.poster
+          }} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default Peliculas;

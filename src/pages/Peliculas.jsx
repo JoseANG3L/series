@@ -1,10 +1,11 @@
 import MovieCard from "../components/MovieCard";
+import MovieSection from "../components/MovieSection";
 
-const peliculas = [
+const PELICULAS = [
   {
     id: 1,
     titulo: "Inception",
-    poster: "https://image.tmdb.org/t/p/w500/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg",
+    poster: "https://m.media-amazon.com/images/I/71uKM+LdgFL.jpg",
     anio: 2010,
   },
   {
@@ -40,7 +41,7 @@ const peliculas = [
   {
     id: 7,
     titulo: "Oppenheimer",
-    poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykIGj7ei855eZ.jpg",
+    poster: "https://moviepostermexico.com/cdn/shop/files/oppenheimer_ver3_xxlg_1024x1024@2x.jpg?v=1690337282",
     anio: 2023,
   },
   {
@@ -118,32 +119,40 @@ const peliculas = [
   {
     id: 20,
     titulo: "Jurassic Park",
-    poster: "https://image.tmdb.org/t/p/w500/c414cDeQ9b6qLPLeKmiJuLDUREJ.jpg",
+    poster: "https://cdn.shopify.com/s/files/1/0747/3829/products/HP3038_4be877cf-40be-4cd6-8973-3c5063475b14.jpg?v=1748536972",
     anio: 1993,
   },
 ];
 
 
-const Peliculas = () => {
-  return (
-    <div className="min-h-screen bg-[#0f172a] px-8 md:px-16 pt-28 pb-20">
+// const Peliculas = () => {
+//   return (
+//     <div className="min-h-screen bg-[#0f172a] px-8 md:px-16 pt-28 pb-20">
       
-      {/* Título */}
-      <h1 className="text-3xl md:text-4xl font-bold text-white mb-10 border-l-4 border-red-500 pl-4">
-        🎬 Todas las películas
-      </h1>
+//       {/* Título */}
+//       <h1 className="text-3xl md:text-4xl font-bold text-white mb-10 border-l-4 border-red-500 pl-4">
+//         🎬 Todas las películas
+//       </h1>
 
-      {/* Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-        {peliculas.map((movie) => (
-          <MovieCard key={movie.id} movie={{
-            title: movie.titulo,
-            image: movie.poster
-          }} />
-        ))}
-      </div>
+//       {/* Grid */}
+//       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+//         {peliculas.map((movie) => (
+//           <MovieCard key={movie.id} movie={{
+//             title: movie.titulo,
+//             image: movie.poster
+//           }} />
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+function Peliculas() {
+  return (
+    <div className="mt-28">
+      <MovieSection title="Todas las Peliculas" movies={PELICULAS} layout="grid" />
     </div>
   );
-};
+}
 
 export default Peliculas;

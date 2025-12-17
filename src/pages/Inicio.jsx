@@ -2,14 +2,15 @@ import React from 'react';
 // 1. Importamos los iconos de Lucide React
 import { Search, Play, Bookmark, Facebook, Twitter, Instagram, Heart, Mail } from 'lucide-react';
 import MovieCard from "../components/MovieCard";
+import MovieSection from "../components/MovieSection";
 import useDragScroll from "../hooks/useDragScroll";
 
 // --- DATOS DE EJEMPLO ---
-const MOVIES = [
+const PELICULAS = [
   {
     id: 1,
     titulo: "Inception",
-    poster: "https://image.tmdb.org/t/p/w500/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg",
+    poster: "https://m.media-amazon.com/images/I/71uKM+LdgFL.jpg",
     anio: 2010,
   },
   {
@@ -45,7 +46,7 @@ const MOVIES = [
   {
     id: 7,
     titulo: "Oppenheimer",
-    poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykIGj7ei855eZ.jpg",
+    poster: "https://moviepostermexico.com/cdn/shop/files/oppenheimer_ver3_xxlg_1024x1024@2x.jpg?v=1690337282",
     anio: 2023,
   },
   {
@@ -123,7 +124,7 @@ const MOVIES = [
   {
     id: 20,
     titulo: "Jurassic Park",
-    poster: "https://image.tmdb.org/t/p/w500/c414cDeQ9b6qLPLeKmiJuLDUREJ.jpg",
+    poster: "https://cdn.shopify.com/s/files/1/0747/3829/products/HP3038_4be877cf-40be-4cd6-8973-3c5063475b14.jpg?v=1748536972",
     anio: 1993,
   },
 ];
@@ -189,29 +190,29 @@ const BrandRow = () => (
   </div>
 );
 
-const MovieSection = ({ title }) => (
-  <section className="px-8 md:px-16 pb-20">
-    <h3 className="text-2xl font-bold text-white mb-6 border-l-4 border-red-500 pl-4">
-      {title}
-    </h3>
-    <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x scrollbar-red">
-      {MOVIES.map((movie) => (
-        <MovieCard key={movie.id} movie={{
-          title: movie.titulo,
-          image: movie.poster
-        }} variant="carousel" />
-      ))}
-    </div>
-  </section>
-);
+// const MovieSection = ({ title }) => (
+//   <section className="px-8 md:px-16 pb-20">
+//     <h3 className="text-2xl font-bold text-white mb-6 border-l-4 border-red-500 pl-4">
+//       {title}
+//     </h3>
+//     <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x scrollbar-red">
+//       {MOVIES.map((movie) => (
+//         <MovieCard key={movie.id} movie={{
+//           title: movie.titulo,
+//           image: movie.poster
+//         }} variant="carousel" />
+//       ))}
+//     </div>
+//   </section>
+// );  
 
 function Inicio() {
   return (
     <div className="min-h-screen bg-[#0f172a] font-sans selection:bg-red-500 selection:text-white">
       <Hero />
       <BrandRow />
-      <MovieSection title="Just Release" />
-      <MovieSection title="Trending Now" />
+      <MovieSection title="Más Reciente" movies={PELICULAS} layout="carousel" />
+      <MovieSection title="En Tendencia" movies={PELICULAS} layout="carousel" />
     </div>
   );
 }

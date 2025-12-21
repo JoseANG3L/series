@@ -10,7 +10,7 @@ const Navbar = () => {
         </h1>
         <ul className="hidden md:flex gap-8 font-medium text-sm">
             <NavLink to="/" end className={({ isActive }) => isActive ? "text-red-500" : "text-gray-300 hover:text-red-500 transition"}>
-            Home
+            Inicio
             </NavLink>
             <NavLink to="/peliculas" end className={({ isActive }) => isActive ? "text-red-500" : "text-gray-300 hover:text-red-500 transition"}>
             Peliculas

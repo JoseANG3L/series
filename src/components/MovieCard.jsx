@@ -1,4 +1,5 @@
 import { Play } from "lucide-react";
+import Badge from "./Badge";
 
 const MovieCard = ({ movie, variant = "grid" }) => {
   return (
@@ -57,6 +58,27 @@ const MovieCard = ({ movie, variant = "grid" }) => {
             blur-2xl transition
           "
         />
+
+
+        {/* Etiqueta de Calidad en la esquina superior */}
+        {/* <div className="absolute top-3 left-3 z-20">
+          <div className="bg-blue-600/90 backdrop-blur-md px-3 py-1 rounded-md shadow-lg border border-blue-400/30 flex items-center gap-1">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-200 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+            </span>
+            <span className="text-[10px] font-extrabold text-white uppercase tracking-wider ml-1">
+              Actualizado
+            </span>
+          </div>
+        </div> */}
+        
+        {/* --- ZONA DE BADGES --- */}
+        <div className="absolute top-3 left-3 z-20 flex flex-col gap-1">
+          <Badge type="new" />
+        </div>
+        {/* ---------------------- */}
+        
       </div>
 
       {/* Título */}

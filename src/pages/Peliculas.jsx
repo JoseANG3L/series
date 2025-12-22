@@ -124,29 +124,6 @@ const PELICULAS = [
   },
 ];
 
-
-// const Peliculas = () => {
-//   return (
-//     <div className="min-h-screen bg-[#0f172a] px-8 md:px-16 pt-28 pb-20">
-      
-//       {/* Título */}
-//       <h1 className="text-3xl md:text-4xl font-bold text-white mb-10 border-l-4 border-red-500 pl-4">
-//         🎬 Todas las películas
-//       </h1>
-
-//       {/* Grid */}
-//       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-//         {peliculas.map((movie) => (
-//           <MovieCard key={movie.id} movie={{
-//             title: movie.titulo,
-//             image: movie.poster
-//           }} />
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
 function Peliculas() {
   return (
     <div className="mt-28">

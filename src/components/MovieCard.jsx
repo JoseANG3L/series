@@ -3,24 +3,12 @@ import Badge from "./Badge";
 
 const MovieCard = ({ movie, variant = "grid" }) => {
   return (
-    <div
-      className={`
-        relative cursor-pointer group
-        ${variant === "carousel" ? "min-w-[220px]" : "w-full"}
-      `}
-    >
+    <div className={`relative cursor-pointer group ${variant === "carousel" ? "min-w-[220px]" : "w-full"}`}>
       {/* Contenedor */}
       <div className="relative overflow-hidden rounded-2xl aspect-[2/3]">
         {/* Imagen */}
-        <img
-          src={movie.image}
-          alt={movie.title}
-          className="
-            w-full h-full object-cover
-            transition-transform duration-500
-            group-hover:scale-105
-          "
-        />
+        <img src={movie.image} alt={movie.title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
 
         {/* Overlay */}
         <div

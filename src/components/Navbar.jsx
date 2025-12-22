@@ -1,14 +1,16 @@
-import { Search, Play, Bookmark, Facebook, Twitter, Instagram, Heart, Mail } from 'lucide-react';
+import { Search, Play, Bookmark, Facebook, Twitter, Instagram, Heart, Mail, Star } from 'lucide-react';
 import { Link, NavLink } from "react-router-dom";
 
 const Navbar = () => {
   return (
     <nav className="absolute top-0 left-0 w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
         <div className="flex items-center gap-12">
-        <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-600 tracking-tighter cursor-pointer">
-            LUISFSERIES
-        </h1>
-        <ul className="hidden md:flex gap-8 font-medium text-sm">
+        <NavLink to="/">
+            <h1 className="flex gap-2 justify-center items-center text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-600 tracking-tighter cursor-pointer">
+                LUIS<span className=""><Star size={24} color="gold" /></span>FSERIES</h1>
+        </NavLink>
+        
+        <ul className="hidden md:flex gap-8 font-medium">
             <NavLink to="/" end className={({ isActive }) => isActive ? "text-red-500" : "text-gray-300 hover:text-red-500 transition"}>
             Inicio
             </NavLink>

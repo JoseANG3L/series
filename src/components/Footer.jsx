@@ -2,7 +2,7 @@ import { Facebook, Twitter, Instagram, Heart, Mail } from "lucide-react";
 
 const Footer = () => (
   <footer className="bg-slate-950 pt-16 pb-8 px-8 md:px-16 border-t border-slate-800">
-    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
       {/* Columna 1: Brand */}
       <div className="col-span-1 md:col-span-1">
         <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-600 tracking-tighter mb-4">

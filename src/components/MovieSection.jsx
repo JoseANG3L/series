@@ -6,7 +6,7 @@ const MovieSection = ({
   layout = "carousel", // "carousel" | "grid"
 }) => {
   return (
-    <section className="px-8 md:px-16 pb-20">
+    <section className="px-8 md:px-16 pb-12">
       
       {/* Título */}
       <h3 className="text-2xl font-bold text-white mb-8 border-l-4 border-red-500 pl-4">

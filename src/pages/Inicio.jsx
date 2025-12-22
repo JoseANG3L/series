@@ -4,6 +4,7 @@ import { Search, Play, Bookmark, Facebook, Twitter, Instagram, Heart, Mail } fro
 import MovieCard from "../components/MovieCard";
 import MovieSection from "../components/MovieSection";
 import useDragScroll from "../hooks/useDragScroll";
+import Hero from "../components/Hero";
 
 // --- DATOS DE EJEMPLO ---
 const PELICULAS = [
@@ -131,53 +132,6 @@ const PELICULAS = [
 
 const BRANDS = ["Disney", "Netflix", "HBOmax", "Pixar", "Marvel", "StarWars", "NatGeo"];
 
-// --- COMPONENTES ---
-
-const Hero = () => (
-  <header className="relative w-full h-screen overflow-hidden">
-    {/* Imagen de Fondo */}
-    <div
-      className="absolute inset-0 bg-cover bg-center"
-      style={{ backgroundImage: "url('https://wallpapers.com/images/featured/personajes-de-star-wars-rzma8krur1w1m4rn.jpg')" }}
-    >
-      <div className="absolute inset-0 bg-black/40"></div>
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/20 to-transparent"></div>
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] via-[#0f172a]/40 to-transparent"></div>
-    </div>
-
-    {/* Contenido Hero */}
-    <div className="relative z-10 flex flex-col justify-center h-full px-8 md:px-16 max-w-3xl space-y-6 pt-20">
-      <span className="bg-slate-800/80 w-fit px-3 py-1 rounded text-xs font-bold text-gray-300 uppercase tracking-widest backdrop-blur-sm">
-        Movie
-      </span>
-
-      <h2 className="text-5xl md:text-7xl font-bold text-white leading-tight">
-        Star Wars: <br /> The Force Awakens
-      </h2>
-
-      <div className="flex items-center gap-4 text-gray-300 text-sm font-medium">
-        <span>2h 40m</span> • <span>2022</span> • <span>Fantasy</span> • <span>Actions</span>
-      </div>
-
-      <p className="text-gray-400 text-base md:text-lg leading-relaxed line-clamp-3">
-        Thirty years after the defeat of the Galactic Empire, the galaxy faces a new threat from the evil Kylo Ren and the First Order.
-        A defector named Finn crashes on a desert planet and meets Rey, a scavenger.
-      </p>
-
-      <div className="flex gap-4 pt-4">
-        <button className="flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-full font-bold hover:bg-green-500 transition shadow-lg shadow-green-900/50">
-          <Play className="w-5 h-5 fill-current" />
-          Watch Trailer
-        </button>
-        <button className="flex items-center gap-2 px-8 py-3 border border-gray-600 bg-black/30 backdrop-blur-md text-white rounded-full font-bold hover:bg-white hover:text-black transition">
-          <Bookmark className="w-5 h-5" />
-          Add Watchlist
-        </button>
-      </div>
-    </div>
-  </header>
-);
-
 const BrandRow = () => (
   <div className="px-8 md:px-16 pb-12">
     <div className="flex flex-wrap justify-center md:justify-between items-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
@@ -190,29 +144,16 @@ const BrandRow = () => (
   </div>
 );
 
-// const MovieSection = ({ title }) => (
-//   <section className="px-8 md:px-16 pb-20">
-//     <h3 className="text-2xl font-bold text-white mb-6 border-l-4 border-red-500 pl-4">
-//       {title}
-//     </h3>
-//     <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x scrollbar-red">
-//       {MOVIES.map((movie) => (
-//         <MovieCard key={movie.id} movie={{
-//           title: movie.titulo,
-//           image: movie.poster
-//         }} variant="carousel" />
-//       ))}
-//     </div>
-//   </section>
-// );  
-
 function Inicio() {
   return (
     <div className="min-h-screen bg-[#0f172a] font-sans selection:bg-red-500 selection:text-white">
       <Hero />
-      <BrandRow />
+      {/* <BrandRow /> */}
+      <br />
       <MovieSection title="Más Reciente" movies={PELICULAS} layout="carousel" />
       <MovieSection title="En Tendencia" movies={PELICULAS} layout="carousel" />
+      <MovieSection title="Series 2000s" movies={PELICULAS} layout="carousel" />
+      <MovieSection title="Series 90s" movies={PELICULAS} layout="carousel" />
     </div>
   );
 }

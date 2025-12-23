@@ -9,7 +9,7 @@ const MovieCard = ({ movie, variant = "grid" }) => {
   console.log(movie.id);
 
   return (
-    <div className={`relative cursor-pointer group ${variant === "carousel" ? "min-w-[220px]" : "w-full"}`} onClick={() => navigate(`/movie/${movie.id}`)}>
+    <div className={`relative cursor-pointer group ${variant === "carousel" ? "min-w-[200px]" : "w-full"}`} onClick={() => navigate(`/movie/${movie.id}`)}>
       {/* Contenedor */}
       <div className="relative overflow-hidden rounded-2xl aspect-[2/3]">
         {/* Imagen */}

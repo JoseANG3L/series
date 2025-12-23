@@ -26,19 +26,19 @@ const MovieDetail = ({ movies }) => {
         {/* Botón Volver */}
         <button 
           onClick={() => navigate(-1)}
-          className="absolute top-6 left-6 z-30 flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full hover:bg-white hover:text-black transition"
+          className="absolute top-0 left-6 z-30 flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 mt-24 rounded-full hover:bg-white hover:text-black transition"
         >
           <ChevronLeft className="w-5 h-5" /> Volver
         </button>
 
         <img 
-          src={movie.backdrop || movie.image} 
+          src={movie.backdrop || movie.poster} 
           alt={movie.title} 
-          className="w-full h-full object-cover"
+          className="absolute w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/40 to-transparent"></div>
 
-        <div className="absolute bottom-0 left-0 w-full px-8 md:px-16 pb-12">
+        <div className="absolute bottom-0 left-0 w-full px-4 md:px-8 lg:px-16 pb-12 pt-24">
           <h1 className="text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-2xl">{movie.title}</h1>
           
           <div className="flex flex-wrap items-center gap-6 text-gray-300 text-sm md:text-base mb-8">

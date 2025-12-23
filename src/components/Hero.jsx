@@ -13,7 +13,7 @@ const Hero = () => {
       </div>
 
       {/* Contenido Hero */}
-      <div className="relative z-10 flex flex-col justify-end align-items-bottom min-h-screen max-h-fit px-4 md:px-16 lg:px-16 max-w-3xl space-y-6 pt-24 pb-16">
+      <div className="relative z-10 flex flex-col justify-end align-items-bottom min-h-screen max-h-fit px-4 md:px-8 lg:px-16 max-w-3xl space-y-6 pt-24 pb-16">
         <span className="bg-slate-800/80 w-fit px-3 py-1 rounded text-xs font-bold text-gray-300 uppercase tracking-widest backdrop-blur-sm">
           Serie
         </span>

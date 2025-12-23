@@ -1,34 +1,24 @@
 import { Play } from "lucide-react";
 import Badge from "./Badge";
+import { useNavigate } from "react-router-dom";
 
 const MovieCard = ({ movie, variant = "grid" }) => {
+  const navigate = useNavigate();
+
+  console.log(movie);
+  console.log(movie.id);
+
   return (
-    <div className={`relative cursor-pointer group ${variant === "carousel" ? "min-w-[220px]" : "w-full"}`}>
+    <div className={`relative cursor-pointer group ${variant === "carousel" ? "min-w-[220px]" : "w-full"}`} onClick={() => navigate(`/movie/${movie.id}`)}>
       {/* Contenedor */}
       <div className="relative overflow-hidden rounded-2xl aspect-[2/3]">
         {/* Imagen */}
-        <img src={movie.image} alt={movie.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <img src={movie.image} alt={movie.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
 
         {/* Overlay */}
-        <div
-          className="
-            absolute inset-0
-            bg-gradient-to-t from-black/95 via-black/30 to-transparent
-            opacity-0 group-hover:opacity-100
-            transition-opacity duration-300
-            flex flex-col justify-end p-4
-          "
-        >
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
           {/* Botón */}
-          <button
-            className="
-              bg-red-600 text-white
-              p-3 rounded-full w-fit mb-3
-              shadow-xl shadow-red-900/40
-              hover:bg-red-500 transition
-            "
-          >
+          <button className="bg-red-600 text-white p-3 rounded-full w-fit mb-3 shadow-xl shadow-red-900/40 hover:bg-red-500 transition">
             <Play className="w-4 h-4 fill-current" />
           </button>
 
@@ -39,14 +29,7 @@ const MovieCard = ({ movie, variant = "grid" }) => {
         </div>
 
         {/* Glow inferior */}
-        <div
-          className="
-            pointer-events-none absolute inset-x-0 bottom-0 h-20
-            bg-red-500/0 group-hover:bg-red-500/10
-            blur-2xl transition
-          "
-        />
-
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-red-500/0 group-hover:bg-red-500/10 blur-2xl transition" />
 
         {/* Etiqueta de Calidad en la esquina superior */}
         {/* <div className="absolute top-3 left-3 z-20">
@@ -70,12 +53,7 @@ const MovieCard = ({ movie, variant = "grid" }) => {
       </div>
 
       {/* Título */}
-      <h4
-        className="
-          mt-3 text-sm font-medium text-white truncate
-          group-hover:text-red-500 transition
-        "
-      >
+      <h4 className="mt-3 text-sm font-medium text-white truncate group-hover:text-red-500 transition">
         {movie.title}
       </h4>
     </div>

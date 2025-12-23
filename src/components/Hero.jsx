@@ -4,9 +4,8 @@ const Hero = () => {
   return (
     <header className="relative w-full h-screen">
       {/* Imagen de Fondo */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('https://wallpapers.com/images/featured/personajes-de-star-wars-rzma8krur1w1m4rn.jpg')" }}
+      <div className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('https://latam.bubbleblabber.com/wp-content/uploads/2024/09/la-casa-de-los-dibujos.jpeg" }}
       >
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/20 to-transparent"></div>
@@ -14,14 +13,17 @@ const Hero = () => {
       </div>
 
       {/* Contenido Hero */}
-      <div className="relative z-10 flex flex-col justify-end align-items-bottom min-h-screen max-h-fit px-8 md:px-16 max-w-3xl space-y-6 pt-24 pb-16">
+      <div className="relative z-10 flex flex-col justify-end align-items-bottom min-h-screen max-h-fit px-4 md:px-16 lg:px-16 max-w-3xl space-y-6 pt-24 pb-16">
         <span className="bg-slate-800/80 w-fit px-3 py-1 rounded text-xs font-bold text-gray-300 uppercase tracking-widest backdrop-blur-sm">
           Serie
         </span>
 
         <h2 className="text-5xl md:text-7xl font-bold text-white leading-tight">
-          Star Wars: <br /> The Force Awakens
+          La casa de los dibujos<br />(Drawn Together)
         </h2>
+        {/* <h2 className="text-5xl md:text-7xl font-bold text-white leading-tight">
+          Star Wars: <br /> The Force Awakens
+        </h2> */}
 
         <div className="flex items-center gap-4 text-gray-300 text-sm font-medium">
           <span>2h 40m</span> • <span>2022</span> • <span>Fantasy</span> • <span>Actions</span>

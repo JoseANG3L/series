@@ -1,10 +1,6 @@
 import MovieCard from "./MovieCard";
 
-const MovieSection = ({
-  title,
-  movies,
-  layout = "carousel", // "carousel" | "grid"
-}) => {
+const MovieSection = ({ title, movies, layout = "carousel" }) => {
   return (
     <section className="px-8 md:px-16 pb-12">
       
@@ -15,47 +11,18 @@ const MovieSection = ({
 
       {/* Carrusel */}
       {layout === "carousel" && (
-        <div
-          className="
-            flex gap-6 overflow-x-auto pb-8
-            snap-x snap-mandatory
-            scrollbar-hide scrollbar-red
-          "
-        >
+        <div className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide scrollbar-red">
           {movies.map((movie) => (
-            <MovieCard
-              key={movie.id}
-              movie={{
-                title: movie.titulo,
-                image: movie.poster,
-              }}
-              variant="carousel"
-            />
+            <MovieCard key={movie.id} movie={{ title: movie.titulo, image: movie.poster }} variant="carousel" />
           ))}
         </div>
       )}
 
       {/* Grid */}
       {layout === "grid" && (
-        <div
-          className="
-            grid gap-6
-            grid-cols-2
-            sm:grid-cols-3
-            md:grid-cols-4
-            lg:grid-cols-5
-            xl:grid-cols-6
-          "
-        >
+        <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {movies.map((movie) => (
-            <MovieCard
-              key={movie.id}
-              movie={{
-                title: movie.titulo,
-                image: movie.poster,
-              }}
-              variant="grid"
-            />
+            <MovieCard key={movie.id} movie={{ title: movie.titulo, image: movie.poster }} variant="grid" />
           ))}
         </div>
       )}

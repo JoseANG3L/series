@@ -23,47 +23,49 @@ const MovieDetail = ({ movies }) => {
       
       {/* --- HERO SECTION --- */}
       <div className="relative h-[60vh] md:h-[70vh] w-full">
-        {/* Botón Volver */}
-        <button 
-          onClick={() => navigate(-1)}
-          className="absolute top-0 left-6 z-30 flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 mt-24 rounded-full hover:bg-white hover:text-black transition"
+        {/* Imagen de Fondo */}
+        <div className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('https://latam.bubbleblabber.com/wp-content/uploads/2024/09/la-casa-de-los-dibujos.jpeg" }}
         >
-          <ChevronLeft className="w-5 h-5" /> Volver
-        </button>
+          <div className="absolute inset-0 bg-black/40"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/20 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] via-[#0f172a]/40 to-transparent"></div>
+        </div>
+        
+        {/* Contenido Hero */}
+        <div className="relative z-30 flex flex-col justify-between h-full pt-24 px-4 md:px-8 lg:px-16 pb-8">
+          {/* Botón Volver */}
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full hover:bg-white hover:text-black transition" style={{width: 'fit-content'}}>
+            <ChevronLeft className="w-5 h-5" /> Volver
+          </button>
 
-        <img 
-          src={movie.backdrop || movie.poster} 
-          alt={movie.title} 
-          className="absolute w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/40 to-transparent"></div>
+          <div className="">
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-2xl">{movie.title}</h1>
+            
+            <div className="flex flex-wrap items-center gap-6 text-gray-300 text-sm md:text-base mb-8">
+              <span className="flex items-center gap-1 text-green-400 font-bold"><Star className="w-4 h-4 fill-current"/> 9.8</span>
+              <span className="flex items-center gap-1"><Calendar className="w-4 h-4"/> 2024</span>
+              <span className="flex items-center gap-1"><Clock className="w-4 h-4"/> 2h 15m</span>
+              <span className="border border-gray-500 px-2 py-0.5 rounded text-xs">HD</span>
+            </div>
 
-        <div className="absolute bottom-0 left-0 w-full px-4 md:px-8 lg:px-16 pb-12 pt-24">
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-2xl">{movie.title}</h1>
-          
-          <div className="flex flex-wrap items-center gap-6 text-gray-300 text-sm md:text-base mb-8">
-            <span className="flex items-center gap-1 text-green-400 font-bold"><Star className="w-4 h-4 fill-current"/> 9.8</span>
-            <span className="flex items-center gap-1"><Calendar className="w-4 h-4"/> 2024</span>
-            <span className="flex items-center gap-1"><Clock className="w-4 h-4"/> 2h 15m</span>
-            <span className="border border-gray-500 px-2 py-0.5 rounded text-xs">HD</span>
-          </div>
-
-          <div className="flex gap-4">
-            <button className="flex items-center gap-2 px-8 py-3 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition">
-              <Play className="w-5 h-5 fill-black" /> Reproducir
-            </button>
-            <button className="p-3 bg-gray-800/80 rounded-full hover:bg-gray-700 transition border border-gray-600">
-              <Plus className="w-5 h-5" />
-            </button>
-            <button className="p-3 bg-gray-800/80 rounded-full hover:bg-gray-700 transition border border-gray-600">
-              <ThumbsUp className="w-5 h-5" />
-            </button>
+            <div className="flex gap-4">
+              <button className="flex items-center gap-2 px-8 py-3 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition">
+                <Play className="w-5 h-5 fill-black" /> Reproducir
+              </button>
+              <button className="p-3 bg-gray-800/80 rounded-full hover:bg-gray-700 transition border border-gray-600">
+                <Plus className="w-5 h-5" />
+              </button>
+              <button className="p-3 bg-gray-800/80 rounded-full hover:bg-gray-700 transition border border-gray-600">
+                <ThumbsUp className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* --- CONTENT SECTION --- */}
-      <div className="px-8 md:px-16 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12 max-w-7xl mx-auto">
+      <div className="px-4 md:px-8 lg:px-16 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
         
         {/* Columna Principal */}
         <div className="lg:col-span-2 space-y-8">

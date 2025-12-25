@@ -3,120 +3,36 @@ export const PELICULAS = [
     id: 1,
     titulo: "Inception",
     poster: "https://m.media-amazon.com/images/I/71uKM+LdgFL.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg",
     anio: 2010,
+    director: "Christopher Nolan",
+    duracion: "2h 28m",
+    rating: 8.8,
+    sinopsis: "Dom Cobb es un ladrón con una extraña habilidad para entrar a los sueños...",
+    trailer: "https://www.youtube.com/embed/YoHD9XEInc0", // <--- URL Embed de YouTube
+    // Convertimos el elenco en objetos con foto
+    elenco: [
+      { nombre: "Leonardo DiCaprio", personaje: "Cobb", foto: "https://image.tmdb.org/t/p/w200/wo2hJpn04vbtmh0B9utCFdsQhxM.jpg" },
+      { nombre: "Joseph Gordon-Levitt", personaje: "Arthur", foto: "https://image.tmdb.org/t/p/w200/4X1WbT8685kL12M28J1uQWjQGj5.jpg" },
+      { nombre: "Elliot Page", personaje: "Ariadne", foto: "https://image.tmdb.org/t/p/w200/tp5p45FLL9x7YQ9k8dM8lWbN5q.jpg" },
+      { nombre: "Tom Hardy", personaje: "Eames", foto: "https://image.tmdb.org/t/p/w200/d81K0RH8UX7tZj49tZaQhZ9ewH.jpg" },
+    ],
+    // 1. NUEVO: Array de Imágenes para la Galería
+    galeria: [
+        "https://image.tmdb.org/t/p/w500/8ZTVqvKDQ8emSguM1agfeX5o2Z.jpg",
+        "https://image.tmdb.org/t/p/w500/iiZZdoQBEYBv6id8su7ImL0oCbD.jpg",
+        "https://image.tmdb.org/t/p/w500/s3TBrRGB1iav7gFOCNx3H31MoES.jpg",
+        "https://image.tmdb.org/t/p/w500/citn1apBkOEwyPQVOwvzxhtkTqS.jpg"
+    ],
+
+    // 2. NUEVO: Array de Reseñas de usuarios
+    resenas: [
+        { usuario: "Cinéfilo99", avatar: null, rating: 10, comentario: "Simplemente una obra maestra. Nolan lo hizo de nuevo.", fecha: "2024-01-15" },
+        { usuario: "Maria_Movie", avatar: "https://i.pravatar.cc/150?u=maria", rating: 9, comentario: "Visualmente impresionante, aunque la trama es compleja.", fecha: "2024-02-10" },
+        { usuario: "JuanPerez", avatar: null, rating: 8, comentario: "Un poco larga, pero vale la pena por el final.", fecha: "2024-03-05" }
+    ],
+    tagline: "Tu mente es la escena del crimen.", // <--- Esto se verá genial
+    genero: "Ciencia Ficción, Thriller, Acción", // Asegúrate que sea un string separado por comas o un array
   },
-  {
-    id: 2,
-    titulo: "Interstellar Interstellar Interstellar Interstellar",
-    poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-    anio: 2014,
-  },
-  {
-    id: 3,
-    titulo: "The Dark Knight",
-    poster: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
-    anio: 2008,
-  },
-  {
-    id: 4,
-    titulo: "Avatar",
-    poster: "https://image.tmdb.org/t/p/w500/jRXYjXNq0Cs2TcJjLkki24MLp7u.jpg",
-    anio: 2009,
-  },
-  {
-    id: 5,
-    titulo: "Avengers: Endgame",
-    poster: "https://image.tmdb.org/t/p/w500/ulzhLuWrPK07P1YkdWQLZnQh1JL.jpg",
-    anio: 2019,
-  },
-  {
-    id: 6,
-    titulo: "Dune",
-    poster: "https://image.tmdb.org/t/p/w500/d5NXSklXo0qyIYkgV94XAgMIckC.jpg",
-    anio: 2021,
-  },
-  {
-    id: 7,
-    titulo: "Oppenheimer",
-    poster: "https://moviepostermexico.com/cdn/shop/files/oppenheimer_ver3_xxlg_1024x1024@2x.jpg?v=1690337282",
-    anio: 2023,
-  },
-  {
-    id: 8,
-    titulo: "The Matrix",
-    poster: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
-    anio: 1999,
-  },
-  {
-    id: 9,
-    titulo: "Gladiator",
-    poster: "https://image.tmdb.org/t/p/w500/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg",
-    anio: 2000,
-  },
-  {
-    id: 10,
-    titulo: "Titanic",
-    poster: "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
-    anio: 1997,
-  },
-  {
-    id: 11,
-    titulo: "Joker",
-    poster: "https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg",
-    anio: 2019,
-  },
-  {
-    id: 12,
-    titulo: "Fight Club",
-    poster: "https://image.tmdb.org/t/p/w500/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg",
-    anio: 1999,
-  },
-  {
-    id: 13,
-    titulo: "Forrest Gump",
-    poster: "https://image.tmdb.org/t/p/w500/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
-    anio: 1994,
-  },
-  {
-    id: 14,
-    titulo: "The Lord of the Rings",
-    poster: "https://image.tmdb.org/t/p/w500/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg",
-    anio: 2001,
-  },
-  {
-    id: 15,
-    titulo: "Star Wars: A New Hope",
-    poster: "https://image.tmdb.org/t/p/w500/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg",
-    anio: 1977,
-  },
-  {
-    id: 16,
-    titulo: "Spider-Man: No Way Home",
-    poster: "https://image.tmdb.org/t/p/w500/uJYYizSuA9Y3DCs0qS4qWvHfZg4.jpg",
-    anio: 2021,
-  },
-  {
-    id: 17,
-    titulo: "Doctor Strange",
-    poster: "https://image.tmdb.org/t/p/w500/uGBVj3bEbCoZbDjjl9wTxcygko1.jpg",
-    anio: 2016,
-  },
-  {
-    id: 18,
-    titulo: "Black Panther",
-    poster: "https://image.tmdb.org/t/p/w500/uxzzxijgPIY7slzFvMotPv8wjKA.jpg",
-    anio: 2018,
-  },
-  {
-    id: 19,
-    titulo: "Toy Story",
-    poster: "https://image.tmdb.org/t/p/w500/uXDfjJbdP4ijW5hWSBrPrlKpxab.jpg",
-    anio: 1995,
-  },
-  {
-    id: 20,
-    titulo: "Jurassic Park",
-    poster: "https://cdn.shopify.com/s/files/1/0747/3829/products/HP3038_4be877cf-40be-4cd6-8973-3c5063475b14.jpg?v=1748536972",
-    anio: 1993,
-  },
+  // ... resto de películas
 ];

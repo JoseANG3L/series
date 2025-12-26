@@ -4,7 +4,7 @@ import { PELICULAS } from "../data/movies";
 
 function Peliculas() {
   return (
-    <div className="mt-28">
+    <div className="pt-20 md:pt-24">
       <MovieSection title="Todas las Peliculas" movies={PELICULAS} layout="grid" />
     </div>
   );

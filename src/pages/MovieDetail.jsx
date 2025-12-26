@@ -17,13 +17,13 @@ const MovieDetail = ({ movies }) => {
     <div className="min-h-screen bg-[#0f172a] text-white font-sans">
       
       {/* --- HERO SECTION --- */}
-      <div className="relative h-[60vh] md:h-[70vh] w-full">
+      <div className="relative h-[60vh] md:h-[70vh] min-h-screen max-h-fit">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${movie.backdrop || movie.poster}')` }}>
             <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/40 to-black/60"></div>
             <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] via-[#0f172a]/60 to-transparent"></div>
         </div>
         
-        <div className="relative z-30 flex flex-col justify-between h-full pt-24 px-4 md:px-8 lg:px-16 pb-8">
+        <div className="relative z-30 flex flex-col justify-between h-full pt-20 md:pt-24 px-4 md:px-8 lg:px-16 pb-8 gap-5">
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full hover:bg-white hover:text-black transition w-fit">
             <ChevronLeft className="w-5 h-5" /> Volver
           </button>
@@ -36,7 +36,7 @@ const MovieDetail = ({ movies }) => {
               PELÍCULA EXCLUSIVA
             </p>
 
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-2 drop-shadow-2xl leading-tight">{movie.titulo}</h1>
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-3 drop-shadow-2xl leading-tight">{movie.titulo}</h1>
             
             {/* 2. NUEVO: Frase Gancho (Tagline) */}
             {movie.tagline && (
@@ -270,7 +270,7 @@ const MovieDetail = ({ movies }) => {
         </div>
 
         {/* COLUMNA DERECHA (Similares - Estático) */}
-        <div className="lg:col-span-1 border-l border-slate-800 pl-0 lg:pl-8">
+        <div className="lg:col-span-1 border-l border-slate-800 pl-4 lg:pl-8">
           <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
             <Users className="w-5 h-5 text-red-500"/> Recomendados
           </h3>

@@ -2,7 +2,7 @@ import MovieCard from "./MovieCard";
 
 const MovieSection = ({ title, movies, layout = "carousel" }) => {
   return (
-    <section className="px-4 md:px-8 lg:px-16 pb-12">
+    <section className="px-4 md:px-8 lg:px-16 pb-8 md:pb-12">
       
       {/* Título */}
       <h3 className="text-2xl font-bold text-white mb-8 border-l-4 border-red-500 pl-4">

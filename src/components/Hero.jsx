@@ -13,7 +13,7 @@ const Hero = () => {
       </div>
 
       {/* Contenido Hero */}
-      <div className="relative z-10 flex flex-col justify-end align-items-bottom min-h-screen max-h-fit px-4 md:px-8 lg:px-16 max-w-3xl space-y-6 pt-24 pb-16">
+      <div className="relative z-10 flex flex-col justify-end align-items-bottom min-h-screen max-h-fit px-4 md:px-8 lg:px-16 max-w-3xl space-y-6 pt-20 md:pt-24 pb-16">
         <span className="bg-slate-800/80 w-fit px-3 py-1 rounded text-xs font-bold text-gray-300 uppercase tracking-widest backdrop-blur-sm">
           Serie
         </span>
@@ -37,11 +37,11 @@ const Hero = () => {
         <div className="flex gap-4 pt-3">
           <button className="flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-full font-bold hover:bg-green-500 transition shadow-lg shadow-green-900/50">
             <Play className="w-5 h-5 fill-current" />
-            Watch Trailer
+            Ver
           </button>
           <button className="flex items-center gap-2 px-8 py-3 border border-gray-600 bg-black/30 backdrop-blur-md text-white rounded-full font-bold hover:bg-white hover:text-black transition">
             <Bookmark className="w-5 h-5" />
-            Add Watchlist
+            Agregar
           </button>
         </div>
       </div>

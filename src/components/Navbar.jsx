@@ -10,7 +10,7 @@ const Navbar = () => {
   const closeMenu = () => setIsOpen(false);
 
   return (
-    <nav className="absolute top-0 left-0 w-full z-50 px-4 md:px-8 lg:px-16 py-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
+    <nav className="absolute top-0 left-0 w-full z-50 px-4 md:px-8 lg:px-16 py-4 md:py-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
       
       {/* --- LOGO --- */}
       <div className="flex items-center gap-12 z-50"> {/* z-50 para que el logo se vea sobre el menú móvil */}

@@ -90,7 +90,7 @@ const MovieDetail = ({ movies }) => {
         <div className="lg:col-span-2 space-y-8">
           
           {/* 1. NAVEGACIÓN DE PESTAÑAS */}
-          <div className="flex gap-8 border-b border-gray-700 pb-2 mb-6">
+          <div className="flex gap-8 border-b border-gray-700 pb-2 mb-6 overflow-x-auto">
             <button 
               onClick={() => setActiveTab('resumen')}
               className={`pb-2 text-lg font-bold transition ${activeTab === 'resumen' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}

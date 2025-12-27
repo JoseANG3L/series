@@ -14,16 +14,17 @@ const MovieDetail = ({ movies }) => {
   if (!movie) return <div className="text-white text-center mt-20">Película no encontrada</div>;
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white font-sans">
+    <div className="min-h-screen h-full bg-[#0f172a] text-white font-sans">
       
       {/* --- HERO SECTION --- */}
-      <div className="relative h-[60vh] md:h-[70vh] min-h-screen max-h-fit">
+      <div className="relative ">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${movie.backdrop || movie.poster}')` }}>
             <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/40 to-black/60"></div>
             <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] via-[#0f172a]/60 to-transparent"></div>
         </div>
         
-        <div className="relative z-30 flex flex-col justify-between h-full pt-20 md:pt-24 px-4 md:px-8 lg:px-16 pb-8 gap-5">
+        <div className="relative z-30 flex flex-col justify-between min-h-screen pt-16 md:pt-20 px-4 md:px-8 lg:px-16 pb-8 gap-5">
+
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full hover:bg-white hover:text-black transition w-fit">
             <ChevronLeft className="w-5 h-5" /> Volver
           </button>
@@ -36,7 +37,7 @@ const MovieDetail = ({ movies }) => {
               PELÍCULA EXCLUSIVA
             </p>
 
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-3 drop-shadow-2xl leading-tight">{movie.titulo}</h1>
+            <h1 className="text-3xl md:text-5xl font-extrabold mb-3 drop-shadow-2xl leading-tight">{movie.titulo}</h1>
             
             {/* 2. NUEVO: Frase Gancho (Tagline) */}
             {movie.tagline && (
@@ -46,7 +47,7 @@ const MovieDetail = ({ movies }) => {
             )}
 
             {/* DATOS TÉCNICOS MEJORADOS */}
-            <div className="flex flex-wrap items-center gap-4 text-gray-200 text-sm md:text-base mb-8 font-medium">
+            <div className="flex flex-wrap items-center gap-4 text-gray-200 text-sm md:text-base mb-6 md:mb-8 font-medium">
               <span className="flex items-center gap-1 text-green-400 font-bold"><Star className="w-4 h-4 fill-current"/> {movie.rating || "N/A"}</span>
               <span className="flex items-center gap-1"><Calendar className="w-4 h-4"/> {movie.anio}</span>
               <span className="flex items-center gap-1"><Clock className="w-4 h-4"/> {movie.duracion || "N/A"}</span>
@@ -64,7 +65,7 @@ const MovieDetail = ({ movies }) => {
             </div>
 
             {/* 4. NUEVO: Géneros como píldoras */}
-            <div className="flex flex-wrap gap-2 mb-8">
+            <div className="flex flex-wrap gap-2 mb-6 md:mb-8">
               {movie.genero && movie.genero.split(', ').map((g, i) => (
                 <span key={i} className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full text-white cursor-pointer transition">
                   {g}
@@ -82,9 +83,11 @@ const MovieDetail = ({ movies }) => {
           </div>
         </div>
       </div>
-
+      
+      <br />
+      
       {/* --- CONTENT SECTION --- */}
-      <div className="px-4 md:px-8 lg:px-16 py-8 mb-12 grid grid-cols-1 lg:grid-cols-3 gap-12 max-w-7xl mx-auto">
+      <div className="px-4 md:px-8 lg:px-16 mb-12 grid grid-cols-1 lg:grid-cols-3 gap-12 max-w-7xl mx-auto">
         
         {/* COLUMNA IZQUIERDA (Principal) */}
         <div className="lg:col-span-2 space-y-8">
@@ -130,27 +133,64 @@ const MovieDetail = ({ movies }) => {
           {/* TAB: RESUMEN */}
           {activeTab === 'resumen' && (
             <div className="animate-fadeIn">
+              {/* Sinopsis */}
               <p className="text-gray-300 leading-relaxed text-lg mb-8">
                 {movie.sinopsis || "No hay descripción disponible."}
               </p>
               
-              <div className="grid grid-cols-2 gap-6 p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              {/* Grid de Detalles Técnicos */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+                
+                {/* 1. Director */}
                 <div>
-                  <span className="block text-gray-500 text-sm mb-1 uppercase">Director</span>
-                  <span className="font-medium text-white">{movie.director}</span>
+                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Director</span>
+                  <span className="font-medium text-white">{movie.director || "N/A"}</span>
                 </div>
+
+                {/* 2. Guion (Nuevo) */}
                 <div>
-                  <span className="block text-gray-500 text-sm mb-1 uppercase">Género</span>
+                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Guion</span>
+                  <span className="font-medium text-white">{movie.guion || movie.director || "N/A"}</span>
+                </div>
+
+                {/* 3. Género */}
+                <div>
+                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Género</span>
                   <span className="font-medium text-white">{movie.genero}</span>
                 </div>
+
+                {/* 4. Fecha de Estreno (Nuevo) */}
                 <div>
-                  <span className="block text-gray-500 text-sm mb-1 uppercase">Estudio</span>
-                  <span className="font-medium text-white">Warner Bros.</span>
+                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Estreno</span>
+                  <span className="font-medium text-white">{movie.estreno || String(movie.anio)}</span>
                 </div>
+
+                {/* 5. País (Nuevo) */}
                 <div>
-                  <span className="block text-gray-500 text-sm mb-1 uppercase">Idioma Original</span>
-                  <span className="font-medium text-white">Inglés</span>
+                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">País</span>
+                  <span className="font-medium text-white">{movie.pais || "Estados Unidos"}</span>
                 </div>
+
+                {/* 6. Clasificación (Nuevo) */}
+                <div>
+                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Clasificación</span>
+                  <span className="inline-block bg-gray-700 px-2 py-0.5 rounded text-xs font-bold text-white border border-gray-600">
+                      {movie.clasificacion || "PG-13"}
+                  </span>
+                </div>
+
+                {/* 7. Estudio (Ahora dinámico) */}
+                <div>
+                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Estudio</span>
+                  <span className="font-medium text-white">{movie.estudio || "Warner Bros."}</span>
+                </div>
+
+                {/* 8. Idioma (Ahora dinámico) */}
+                <div className="col-span-2 md:col-span-1"> {/* Ocupa espacio extra si es necesario */}
+                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Audio Original</span>
+                  <span className="font-medium text-white">{movie.idioma || "Inglés"}</span>
+                </div>
+
               </div>
             </div>
           )}

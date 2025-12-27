@@ -20,7 +20,7 @@ const MovieSection = ({ title, movies, layout = "carousel" }) => {
 
       {/* Grid */}
       {layout === "grid" && (
-        <div className="grid gap-6 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
+        <div className="grid gap-6 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
           {movies.map((movie) => (
             <MovieCard key={movie.id} movie={{ id: movie.id, title: movie.titulo, image: movie.poster }} variant="grid" />
           ))}

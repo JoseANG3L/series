@@ -13,28 +13,28 @@ const Hero = () => {
       </div>
 
       {/* Contenido Hero */}
-      <div className="relative z-10 flex flex-col justify-end align-items-bottom min-h-screen max-h-fit px-4 md:px-8 lg:px-16 max-w-3xl space-y-6 pt-20 md:pt-24 pb-16">
+      <div className="relative z-10 flex flex-col justify-end align-items-bottom min-h-screen max-h-fit px-4 md:px-8 lg:px-16 max-w-3xl pt-16 md:pt-24 pb-8">
         <span className="bg-slate-800/80 w-fit px-3 py-1 rounded text-xs font-bold text-gray-300 uppercase tracking-widest backdrop-blur-sm">
           Serie
         </span>
 
-        <h2 className="text-5xl md:text-7xl font-bold text-white leading-tight">
+        <h2 className="text-5xl md:text-7xl font-bold text-white leading-tight mt-3">
           La casa de los dibujos<br />(Drawn Together)
         </h2>
         {/* <h2 className="text-5xl md:text-7xl font-bold text-white leading-tight">
           Star Wars: <br /> The Force Awakens
         </h2> */}
 
-        <div className="flex items-center gap-4 text-gray-300 text-sm font-medium">
+        <div className="flex items-center gap-4 text-gray-300 text-sm font-medium mt-4">
           <span>2h 40m</span> • <span>2022</span> • <span>Fantasy</span> • <span>Actions</span>
         </div>
 
-        <p className="text-gray-400 text-base md:text-lg leading-relaxed line-clamp-3">
+        <p className="text-gray-400 text-base md:text-lg leading-relaxed line-clamp-3 mt-6">
           Thirty years after the defeat of the Galactic Empire, the galaxy faces a new threat from the evil Kylo Ren and the First Order.
           A defector named Finn crashes on a desert planet and meets Rey, a scavenger.
         </p>
 
-        <div className="flex gap-4 pt-3">
+        <div className="flex gap-4 mt-7">
           <button className="flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-full font-bold hover:bg-green-500 transition shadow-lg shadow-green-900/50">
             <Play className="w-5 h-5 fill-current" />
             Ver

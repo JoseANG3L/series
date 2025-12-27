@@ -5,11 +5,8 @@ import { useNavigate } from "react-router-dom";
 const MovieCard = ({ movie, variant = "grid" }) => {
   const navigate = useNavigate();
 
-  console.log(movie);
-  console.log(movie.id);
-
   return (
-    <div className={`relative cursor-pointer group ${variant === "carousel" ? "w-[200px]" : "w-full"}`} onClick={() => navigate(`/movie/${movie.id}`)}>
+    <div className={`relative cursor-pointer group ${variant === "carousel" ? "min-w-[156px] w-[156px]" : "w-full"}`} onClick={() => navigate(`/movie/${movie.id}`)}>
       {/* Contenedor */}
       <div className="relative overflow-hidden rounded-2xl aspect-[2/3]">
         {/* Imagen */}

@@ -282,5 +282,230 @@ export const PELICULAS = [
     resenas: [
         { usuario: "RomanceFan", rating: 10, comentario: "Un clásico eterno.", fecha: "2015-08-14" }
     ],
+  },
+  {
+    id: 12,
+    titulo: "Fight Club",
+    poster: "https://image.tmdb.org/t/p/w500/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/hZkgoQYus5vegHoetLkCJzb17zJ.jpg",
+    anio: 1999,
+    director: "David Fincher",
+    duracion: "2h 19m",
+    rating: 8.4,
+    tagline: "El caos está por comenzar.",
+    genero: "Drama, Thriller",
+    sinopsis: "Un oficinista insomne y un desentendido fabricante de jabones forman un club de lucha clandestino que se convierte en algo mucho más grande y peligroso.",
+    trailer: "https://www.youtube.com/embed/qtRKdVHc-cE",
+    elenco: [
+      { nombre: "Edward Norton", personaje: "El Narrador", foto: "https://image.tmdb.org/t/p/w200/5XBzD5WuTyVQZeS4VI25z2moMeY.jpg" },
+      { nombre: "Brad Pitt", personaje: "Tyler Durden", foto: "https://image.tmdb.org/t/p/w200/cckcYc2v0yh1tc9QjRelptcOBko.jpg" }
+    ],
+    galeria: [
+      "https://image.tmdb.org/t/p/w500/c7fP32vXwK0s2s5b3T1h5w.jpg",
+      "https://image.tmdb.org/t/p/w500/m8JTwHFwX7I7tZ3s2s2.jpg"
+    ],
+    resenas: [
+      { usuario: "TylerFan", rating: 10, comentario: "La primera regla es no hablar de esto.", fecha: "2018-10-10" }
+    ]
+  },
+  {
+    id: 13,
+    titulo: "Forrest Gump",
+    poster: "https://image.tmdb.org/t/p/w500/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/qdIMHd4sCCa71T5jfYyWlX704m9.jpg",
+    anio: 1994,
+    director: "Robert Zemeckis",
+    duracion: "2h 22m",
+    rating: 8.8,
+    tagline: "La vida es como una caja de bombones.",
+    genero: "Comedia, Drama, Romance",
+    sinopsis: "Las presidencias de Kennedy y Johnson, la guerra de Vietnam y otros eventos históricos se desarrollan a través de la perspectiva de un hombre de Alabama con un coeficiente intelectual bajo.",
+    trailer: "https://www.youtube.com/embed/bLvqoHBptjg",
+    elenco: [
+      { nombre: "Tom Hanks", personaje: "Forrest Gump", foto: "https://image.tmdb.org/t/p/w200/xndWFsBlClOJFRdhSt4NBwiPq2o.jpg" },
+      { nombre: "Robin Wright", personaje: "Jenny Curran", foto: "https://image.tmdb.org/t/p/w200/ro1A1d98o6CjJ6hK5P4.jpg" }
+    ],
+    galeria: [
+      "https://image.tmdb.org/t/p/w500/3h1.jpg",
+      "https://image.tmdb.org/t/p/w500/4k2.jpg"
+    ],
+    resenas: [
+      { usuario: "RunForrest", rating: 10, comentario: "Inspiradora y conmovedora.", fecha: "2020-05-12" }
+    ]
+  },
+  {
+    id: 14,
+    titulo: "The Lord of the Rings: The Fellowship of the Ring",
+    poster: "https://image.tmdb.org/t/p/w500/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/9DeGfFIqjph5CBFVZxD6wv9t7SH.jpg",
+    anio: 2001,
+    director: "Peter Jackson",
+    duracion: "2h 58m",
+    rating: 8.8,
+    tagline: "Un anillo para gobernarlos a todos.",
+    genero: "Aventura, Fantasía, Acción",
+    sinopsis: "Un joven hobbit, Frodo, que ha encontrado el Anillo Único, comienza su viaje hacia el Monte del Destino, el único lugar donde puede ser destruido.",
+    trailer: "https://www.youtube.com/embed/V75dMMIW2B4",
+    elenco: [
+      { nombre: "Elijah Wood", personaje: "Frodo Baggins", foto: "https://image.tmdb.org/t/p/w200/7uq.jpg" },
+      { nombre: "Ian McKellen", personaje: "Gandalf", foto: "https://image.tmdb.org/t/p/w200/5NX.jpg" }
+    ],
+    galeria: [
+      "https://image.tmdb.org/t/p/w500/pI.jpg",
+      "https://image.tmdb.org/t/p/w500/sW.jpg"
+    ],
+    resenas: [
+      { usuario: "MiddleEarth", rating: 10, comentario: "La mejor adaptación de fantasía jamás hecha.", fecha: "2002-01-20" }
+    ]
+  },
+  {
+    id: 15,
+    titulo: "Star Wars: A New Hope",
+    poster: "https://image.tmdb.org/t/p/w500/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/jOrgZPL27yD5wTbdkI3B5b2K9.jpg",
+    anio: 1977,
+    director: "George Lucas",
+    duracion: "2h 1m",
+    rating: 8.6,
+    tagline: "Hace mucho tiempo en una galaxia muy, muy lejana...",
+    genero: "Aventura, Acción, Ciencia Ficción",
+    sinopsis: "Luke Skywalker une fuerzas con un caballero Jedi, un piloto arrogante, un wookiee y dos droides para salvar la galaxia de la estación de batalla del Imperio.",
+    trailer: "https://www.youtube.com/embed/vZ734NWnAHA",
+    elenco: [
+      { nombre: "Mark Hamill", personaje: "Luke Skywalker", foto: "https://image.tmdb.org/t/p/w200/9W.jpg" },
+      { nombre: "Harrison Ford", personaje: "Han Solo", foto: "https://image.tmdb.org/t/p/w200/5M.jpg" }
+    ],
+    galeria: [
+      "https://image.tmdb.org/t/p/w500/4i.jpg",
+      "https://image.tmdb.org/t/p/w500/db.jpg"
+    ],
+    resenas: [
+      { usuario: "JediMaster", rating: 9, comentario: "El inicio de una leyenda.", fecha: "2019-12-15" }
+    ]
+  },
+  {
+    id: 16,
+    titulo: "Spider-Man: No Way Home",
+    poster: "https://image.tmdb.org/t/p/w500/uJYYizSuA9Y3DCs0qS4qWvHfZg4.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/14QbnygCurellNA33jwwC6kw9sy.jpg",
+    anio: 2021,
+    director: "Jon Watts",
+    duracion: "2h 28m",
+    rating: 8.0,
+    tagline: "El multiverso se desata.",
+    genero: "Acción, Aventura, Ciencia Ficción",
+    sinopsis: "Peter Parker es desenmascarado y ya no puede separar su vida normal de las altas apuestas de ser un superhéroe. Cuando pide ayuda al Doctor Strange, lo que está en juego se vuelve aún más peligroso.",
+    trailer: "https://www.youtube.com/embed/JfVOs4VSpmA",
+    elenco: [
+      { nombre: "Tom Holland", personaje: "Peter Parker", foto: "https://image.tmdb.org/t/p/w200/2qh.jpg" },
+      { nombre: "Zendaya", personaje: "MJ", foto: "https://image.tmdb.org/t/p/w200/cbC.jpg" }
+    ],
+    galeria: [
+      "https://image.tmdb.org/t/p/w500/s3.jpg",
+      "https://image.tmdb.org/t/p/w500/t4.jpg"
+    ],
+    resenas: [
+      { usuario: "WebHead", rating: 10, comentario: "Ver a los tres juntos fue un sueño.", fecha: "2021-12-18" }
+    ]
+  },
+  {
+    id: 17,
+    titulo: "Doctor Strange",
+    poster: "https://image.tmdb.org/t/p/w500/uGBVj3bEbCoZbDjjl9wTxcygko1.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/tM98E256EggKobqIXMLiBRGU4Jb.jpg",
+    anio: 2016,
+    director: "Scott Derrickson",
+    duracion: "1h 55m",
+    rating: 7.5,
+    tagline: "Abre tu mente. Cambia tu realidad.",
+    genero: "Acción, Aventura, Fantasía",
+    sinopsis: "Tras un accidente de coche que acaba con su carrera, un brillante pero arrogante cirujano recibe una nueva oportunidad en la vida cuando un hechicero lo toma bajo su tutela.",
+    trailer: "https://www.youtube.com/embed/HSzx-zryEgM",
+    elenco: [
+      { nombre: "Benedict Cumberbatch", personaje: "Dr. Stephen Strange", foto: "https://image.tmdb.org/t/p/w200/wz.jpg" },
+      { nombre: "Chiwetel Ejiofor", personaje: "Mordo", foto: "https://image.tmdb.org/t/p/w200/kq.jpg" }
+    ],
+    galeria: [
+      "https://image.tmdb.org/t/p/w500/ys.jpg",
+      "https://image.tmdb.org/t/p/w500/kf.jpg"
+    ],
+    resenas: [
+      { usuario: "MagicMan", rating: 8, comentario: "Efectos visuales alucinantes.", fecha: "2017-03-01" }
+    ]
+  },
+  {
+    id: 18,
+    titulo: "Black Panther",
+    poster: "https://image.tmdb.org/t/p/w500/uxzzxijgPIY7slzFvMotPv8wjKA.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/b6ZJZHUdMEFECvGiDpJjlfUWela.jpg",
+    anio: 2018,
+    director: "Ryan Coogler",
+    duracion: "2h 14m",
+    rating: 7.3,
+    tagline: "Larga vida al rey.",
+    genero: "Acción, Aventura, Ciencia Ficción",
+    sinopsis: "T'Challa, heredero del reino oculto pero avanzado de Wakanda, debe dar un paso adelante para guiar a su pueblo hacia un nuevo futuro y enfrentarse a un retador del pasado de su país.",
+    trailer: "https://www.youtube.com/embed/xjDjIWPwcPU",
+    elenco: [
+      { nombre: "Chadwick Boseman", personaje: "T'Challa", foto: "https://image.tmdb.org/t/p/w200/nL.jpg" },
+      { nombre: "Michael B. Jordan", personaje: "Killmonger", foto: "https://image.tmdb.org/t/p/w200/4D.jpg" }
+    ],
+    galeria: [
+      "https://image.tmdb.org/t/p/w500/6E.jpg",
+      "https://image.tmdb.org/t/p/w500/vA.jpg"
+    ],
+    resenas: [
+      { usuario: "Wakanda4Ever", rating: 9, comentario: "Wakanda por siempre.", fecha: "2018-02-20" }
+    ]
+  },
+  {
+    id: 19,
+    titulo: "Toy Story",
+    poster: "https://image.tmdb.org/t/p/w500/uXDfjJbdP4ijW5hWSBrPrlKpxab.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/lxD5ak7BOcohD9J8IKCbIMYmp_7.jpg",
+    anio: 1995,
+    director: "John Lasseter",
+    duracion: "1h 21m",
+    rating: 8.3,
+    tagline: "Un juguete vaquero se siente amenazado y celoso.",
+    genero: "Animación, Aventura, Familia",
+    sinopsis: "Un muñeco vaquero se siente profundamente amenazado y celoso cuando una nueva figura de acción de un hombre espacial lo suplanta como el juguete favorito en la habitación de un niño.",
+    trailer: "https://www.youtube.com/embed/v-PjgYDrg70",
+    elenco: [
+      { nombre: "Tom Hanks", personaje: "Woody (Voz)", foto: "https://image.tmdb.org/t/p/w200/xndWFsBlClOJFRdhSt4NBwiPq2o.jpg" },
+      { nombre: "Tim Allen", personaje: "Buzz Lightyear (Voz)", foto: "https://image.tmdb.org/t/p/w200/6QL.jpg" }
+    ],
+    galeria: [
+      "https://image.tmdb.org/t/p/w500/9k.jpg",
+      "https://image.tmdb.org/t/p/w500/3R.jpg"
+    ],
+    resenas: [
+      { usuario: "Andy", rating: 10, comentario: "Mi infancia en una película.", fecha: "2010-05-30" }
+    ]
+  },
+  {
+    id: 20,
+    titulo: "Jurassic Park",
+    poster: "https://image.tmdb.org/t/p/w500/9i3plLl89DMIz0uaHFwfoYS3MJ.jpg",
+    backdrop: "https://image.tmdb.org/t/p/original/j29ekbcLpBvxnGk6LbkLs24GOGP.jpg",
+    anio: 1993,
+    director: "Steven Spielberg",
+    duracion: "2h 7m",
+    rating: 8.2,
+    tagline: "Una aventura de hace 65 millones de años.",
+    genero: "Aventura, Ciencia Ficción",
+    sinopsis: "Un empresario adinerado invita en secreto a un grupo de expertos a recorrer su parque temático de dinosaurios clonados antes de su apertura.",
+    trailer: "https://www.youtube.com/embed/lc0UehYemQA",
+    elenco: [
+      { nombre: "Sam Neill", personaje: "Dr. Alan Grant", foto: "https://image.tmdb.org/t/p/w200/bO.jpg" },
+      { nombre: "Laura Dern", personaje: "Dr. Ellie Sattler", foto: "https://image.tmdb.org/t/p/w200/gB.jpg" }
+    ],
+    galeria: [
+      "https://image.tmdb.org/t/p/w500/da.jpg",
+      "https://image.tmdb.org/t/p/w500/fJ.jpg"
+    ],
+    resenas: [
+      { usuario: "DinoFan", rating: 10, comentario: "Sigue viéndose increíble hoy en día.", fecha: "2023-06-11" }
+    ]
   }
 ];

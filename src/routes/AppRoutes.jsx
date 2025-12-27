@@ -6,6 +6,7 @@ import { PELICULAS } from "../data/movies";
 import Series from "../pages/Series";
 import Novedades from "../pages/Novedades";
 import MiLista from "../pages/MiLista";
+import SearchResults from "../pages/SearchResults";
 
 export default function AppRoutes() {
   return (
@@ -19,6 +20,7 @@ export default function AppRoutes() {
       <Route path="/series" element={<Series />} />
       <Route path="/novedades" element={<Novedades />} />
       <Route path="/mi-lista" element={<MiLista />} />
+      <Route path="/buscar" element={<SearchResults />} />
 
       {/* --- Ruta Dinámica de Detalles --- */}
       <Route path="/movie/:id" element={<MovieDetail movies={PELICULAS} />} />

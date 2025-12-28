@@ -6,7 +6,7 @@ const MovieCard = ({ movie, variant = "grid" }) => {
   const navigate = useNavigate();
 
   return (
-    <div className={`relative cursor-pointer group ${variant === "carousel" ? "min-w-[156px] w-[156px]" : "w-full"}`} onClick={() => navigate(`/movie/${movie.id}`)}>
+    <div className={`relative cursor-pointer group ${variant === "carousel" ? "min-w-[150px] w-[150px]" : "w-full"}`} onClick={() => navigate(`/movie/${movie.id}`)}>
       {/* Contenedor */}
       <div className="relative overflow-hidden rounded-2xl aspect-[2/3]">
         {/* Imagen */}

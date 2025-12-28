@@ -18,7 +18,7 @@ const Hero = () => {
           Serie
         </span>
 
-        <h2 className="text-5xl md:text-7xl font-bold text-white leading-tight mt-3">
+        <h2 className="text-4xl md:text-7xl font-bold text-white leading-tight mt-3">
           La casa de los dibujos<br />(Drawn Together)
         </h2>
         {/* <h2 className="text-5xl md:text-7xl font-bold text-white leading-tight">

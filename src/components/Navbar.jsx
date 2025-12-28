@@ -110,7 +110,7 @@ const Navbar = () => {
         <div className="flex items-center gap-6 lg:gap-12 z-20 flex-1">
           
           <NavLink to="/" onClick={closeMenu} className="shrink-0 relative z-30">
-            <h1 className="flex gap-1 md:gap-2 justify-center items-center text-xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-600 tracking-tighter cursor-pointer">
+            <h1 className="flex gap-1 md:gap-2 justify-center items-center text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-600 tracking-tighter cursor-pointer">
               LUIS<Star className="w-5 h-5 md:w-8 md:h-8" color="gold" fill="gold" />FSERIES
             </h1>
           </NavLink>
@@ -183,8 +183,8 @@ const Navbar = () => {
 
           {/* B. BOTONES AUTH */}
           <div className="hidden md:flex gap-3 relative z-40 bg-transparent">
-              <button onClick={() => navigate('/signup')} className="px-5 py-2 border border-gray-500 text-white rounded-full text-sm font-semibold hover:border-white transition whitespace-nowrap">Sign up</button>
-              <button onClick={() => navigate('/login')} className="px-5 py-2 bg-green-600 text-white rounded-full text-sm font-semibold hover:bg-green-500 shadow-lg shadow-green-900/50 transition whitespace-nowrap">Login</button>
+              <button onClick={() => { navigate('/signup'); closeMenu(); }} className="px-5 py-2 border border-gray-500 text-white rounded-full text-sm font-semibold hover:border-white transition whitespace-nowrap">Sign up</button>
+              <button onClick={() => { navigate('/login'); closeMenu(); }} className="px-5 py-2 bg-green-600 text-white rounded-full text-sm font-semibold hover:bg-green-500 shadow-lg shadow-green-900/50 transition whitespace-nowrap">Login</button>
           </div>
 
           {/* C. ELEMENTOS MÓVILES */}
@@ -214,8 +214,8 @@ const Navbar = () => {
           ))}
         </ul>
         <div className="flex flex-col gap-4 mt-4 w-64">
-          <button onClick={() => navigate('/login')} className="px-5 py-3 bg-green-600 text-white rounded-full font-semibold hover:bg-green-500 shadow-lg">Login</button>
-          <button onClick={() => navigate('/signup')} className="px-5 py-3 border border-gray-500 text-white rounded-full font-semibold hover:border-white">Sign up</button>
+          <button onClick={() => { navigate('/login'); closeMenu(); }} className="px-5 py-3 bg-green-600 text-white rounded-full font-semibold hover:bg-green-500 shadow-lg">Login</button>
+          <button onClick={() => { navigate('/signup'); closeMenu(); }} className="px-5 py-3 border border-gray-500 text-white rounded-full font-semibold hover:border-white">Sign up</button>
         </div>
       </div>
     </nav>

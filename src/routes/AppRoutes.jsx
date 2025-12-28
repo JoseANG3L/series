@@ -7,6 +7,8 @@ import Series from "../pages/Series";
 import Novedades from "../pages/Novedades";
 import MiLista from "../pages/MiLista";
 import SearchResults from "../pages/SearchResults";
+import Login from "../pages/Login";
+import Signup from "../pages/Signup";
 
 export default function AppRoutes() {
   return (
@@ -24,6 +26,9 @@ export default function AppRoutes() {
 
       {/* --- Ruta Dinámica de Detalles --- */}
       <Route path="/movie/:id" element={<MovieDetail movies={PELICULAS} />} />
+
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
 
       {/* --- Ruta 404 (Opcional: Por si escriben mal la URL) --- */}
       <Route path="*" element={<div className="text-white text-center pt-40">Página no encontrada (404)</div>} />

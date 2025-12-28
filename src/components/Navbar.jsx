@@ -183,8 +183,8 @@ const Navbar = () => {
 
           {/* B. BOTONES AUTH */}
           <div className="hidden md:flex gap-3 relative z-40 bg-transparent">
-              <button className="px-5 py-2 border border-gray-500 text-white rounded-full text-sm font-semibold hover:border-white transition whitespace-nowrap">Sign up</button>
-              <button className="px-5 py-2 bg-green-600 text-white rounded-full text-sm font-semibold hover:bg-green-500 shadow-lg shadow-green-900/50 transition whitespace-nowrap">Login</button>
+              <button onClick={() => navigate('/signup')} className="px-5 py-2 border border-gray-500 text-white rounded-full text-sm font-semibold hover:border-white transition whitespace-nowrap">Sign up</button>
+              <button onClick={() => navigate('/login')} className="px-5 py-2 bg-green-600 text-white rounded-full text-sm font-semibold hover:bg-green-500 shadow-lg shadow-green-900/50 transition whitespace-nowrap">Login</button>
           </div>
 
           {/* C. ELEMENTOS MÓVILES */}
@@ -214,8 +214,8 @@ const Navbar = () => {
           ))}
         </ul>
         <div className="flex flex-col gap-4 mt-4 w-64">
-          <button className="px-5 py-3 bg-green-600 text-white rounded-full font-semibold hover:bg-green-500 shadow-lg">Login</button>
-          <button className="px-5 py-3 border border-gray-500 text-white rounded-full font-semibold hover:border-white">Sign up</button>
+          <button onClick={() => navigate('/login')} className="px-5 py-3 bg-green-600 text-white rounded-full font-semibold hover:bg-green-500 shadow-lg">Login</button>
+          <button onClick={() => navigate('/signup')} className="px-5 py-3 border border-gray-500 text-white rounded-full font-semibold hover:border-white">Sign up</button>
         </div>
       </div>
     </nav>

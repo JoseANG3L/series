@@ -11,6 +11,7 @@ import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
+import NotFound from "../pages/NotFound";
 
 export default function AppRoutes() {
   return (
@@ -35,7 +36,7 @@ export default function AppRoutes() {
       <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* --- Ruta 404 (Opcional: Por si escriben mal la URL) --- */}
-      <Route path="*" element={<div className="text-white text-center pt-40">Página no encontrada (404)</div>} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

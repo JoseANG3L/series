@@ -1,6 +1,7 @@
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import AppRoutes from "./routes/AppRoutes";
+import CookieConsent from "./components/CookieConsent";
 
 function App() {
   return (
@@ -12,6 +13,9 @@ function App() {
       </main>
 
       <Footer />
+
+      {/* --- BANNER DE COOKIES (Flotante) --- */}
+      <CookieConsent />
     </div>
   );
 }

@@ -199,9 +199,9 @@ const Navbar = () => {
 
       {/* --- PANELES MÓVILES --- */}
       {showMobileSearch && (
-        <div className="md:hidden absolute top-full left-0 w-full backdrop-blur-md px-4 animate-fadeIn z-40">
+        <div className="md:hidden absolute top-full left-0 w-full px-4 animate-fadeIn z-40">
            <form onSubmit={handleSearch} className="relative w-full shadow-2xl">
-              <input autoFocus type="text" placeholder="Buscar..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-black/50 border border-gray-600 text-white px-4 py-3 pl-10 rounded-lg outline-none focus:border-red-500" />
+              <input autoFocus type="text" placeholder="Buscar..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-black/50 border border-gray-600 text-white px-4 py-3 pl-10 rounded-lg outline-none focus:border-red-500 backdrop-blur-md" />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
            </form>
         </div>

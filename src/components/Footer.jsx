@@ -1,4 +1,5 @@
 import { Facebook, Twitter, Instagram, Heart, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => (
   <footer className="bg-slate-950 pt-16 pb-8 px-8 md:px-16 border-t border-slate-800">
@@ -17,10 +18,28 @@ const Footer = () => (
       <div>
         <h4 className="text-white font-bold mb-4">Navegación</h4>
         <ul className="space-y-2 text-slate-400 text-sm">
-          <li className="hover:text-red-500 cursor-pointer transition">Inicio</li>
-          <li className="hover:text-red-500 cursor-pointer transition">Descubrir</li>
-          <li className="hover:text-red-500 cursor-pointer transition">Lanzamientos</li>
-          <li className="hover:text-red-500 cursor-pointer transition">Series TV</li>
+          <li>
+            <Link to="/" className="hover:text-red-500 transition duration-200">
+              Inicio
+            </Link>
+          </li>
+          <li>
+            {/* "Descubrir" suele llevar al catálogo completo de películas */}
+            <Link to="/peliculas" className="hover:text-red-500 transition duration-200">
+              Descubrir
+            </Link>
+          </li>
+          <li>
+            {/* "Lanzamientos" encaja perfecto con tu ruta de Novedades */}
+            <Link to="/novedades" className="hover:text-red-500 transition duration-200">
+              Lanzamientos
+            </Link>
+          </li>
+          <li>
+            <Link to="/series" className="hover:text-red-500 transition duration-200">
+              Series TV
+            </Link>
+          </li>
         </ul>
       </div>
 
@@ -28,10 +47,26 @@ const Footer = () => (
       <div>
         <h4 className="text-white font-bold mb-4">Legal</h4>
         <ul className="space-y-2 text-slate-400 text-sm">
-          <li className="hover:text-red-500 cursor-pointer transition">Términos de uso</li>
-          <li className="hover:text-red-500 cursor-pointer transition">Privacidad</li>
-          <li className="hover:text-red-500 cursor-pointer transition">Cookies</li>
-          <li className="hover:text-red-500 cursor-pointer transition">Contacto</li>
+          <li>
+            <Link to="/terms" className="hover:text-red-500 transition duration-200">
+              Términos de uso
+            </Link>
+          </li>
+          <li>
+            <Link to="/privacy" className="hover:text-red-500 transition duration-200">
+              Privacidad
+            </Link>
+          </li>
+          <li>
+            <Link to="/cookies" className="hover:text-red-500 transition duration-200">
+              Cookies
+            </Link>
+          </li>
+          <li>
+            <Link to="/contact" className="hover:text-red-500 transition duration-200">
+              Contacto
+            </Link>
+          </li>
         </ul>
       </div>
 

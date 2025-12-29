@@ -12,31 +12,42 @@ import Signup from "../pages/Signup";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import NotFound from "../pages/NotFound";
+import LegalPage from "../pages/LegalPage";
+import ScrollToTop from "../components/ScrollToTop";
 
 export default function AppRoutes() {
   return (
-    <Routes>
-      {/* --- Rutas Principales --- */}
-      <Route path="/" element={<Inicio />} />
-      <Route path="/peliculas" element={<Peliculas />} />
+    <>
+      <ScrollToTop />
+      <Routes>
+        {/* --- Rutas Principales --- */}
+        <Route path="/" element={<Inicio />} />
+        <Route path="/peliculas" element={<Peliculas />} />
 
-      {/* --- Rutas Nuevas del Navbar --- */}
-      {/* Usamos elementos temporales hasta que crees las páginas reales */}
-      <Route path="/series" element={<Series />} />
-      <Route path="/novedades" element={<Novedades />} />
-      <Route path="/mi-lista" element={<MiLista />} />
-      <Route path="/buscar" element={<SearchResults />} />
+        {/* --- Rutas Nuevas del Navbar --- */}
+        {/* Usamos elementos temporales hasta que crees las páginas reales */}
+        <Route path="/series" element={<Series />} />
+        <Route path="/novedades" element={<Novedades />} />
+        <Route path="/mi-lista" element={<MiLista />} />
+        <Route path="/buscar" element={<SearchResults />} />
 
-      {/* --- Ruta Dinámica de Detalles --- */}
-      <Route path="/movie/:id" element={<MovieDetail movies={PELICULAS} />} />
+        {/* --- Ruta Dinámica de Detalles --- */}
+        <Route path="/movie/:id" element={<MovieDetail movies={PELICULAS} />} />
 
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* --- Ruta 404 (Opcional: Por si escriben mal la URL) --- */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* RUTAS LEGALES - Reutilizan el mismo componente */}
+        <Route path="/terms" element={<LegalPage title="Términos de Uso" type="terms" />} />
+        <Route path="/privacy" element={<LegalPage title="Política de Privacidad" type="privacy" />} />
+        <Route path="/cookies" element={<LegalPage title="Política de Cookies" type="cookies" />} />
+        <Route path="/contact" element={<LegalPage title="Contacto" type="contact" />} />
+
+        {/* --- Ruta 404 (Opcional: Por si escriben mal la URL) --- */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   );
 }

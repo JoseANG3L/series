@@ -9,6 +9,8 @@ import MiLista from "../pages/MiLista";
 import SearchResults from "../pages/SearchResults";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 
 export default function AppRoutes() {
   return (
@@ -29,6 +31,8 @@ export default function AppRoutes() {
 
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* --- Ruta 404 (Opcional: Por si escriben mal la URL) --- */}
       <Route path="*" element={<div className="text-white text-center pt-40">Página no encontrada (404)</div>} />

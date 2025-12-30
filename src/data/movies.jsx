@@ -12,6 +12,7 @@ export const PELICULAS = [
     genero: "Ciencia Ficción, Thriller, Acción",
     sinopsis: "Dom Cobb es un ladrón con una extraña habilidad para entrar a los sueños...",
     trailer: "https://www.youtube.com/embed/YoHD9XEInc0",
+    type: "new",
     elenco: [
       { nombre: "Leonardo DiCaprio", personaje: "Cobb", foto: "https://image.tmdb.org/t/p/w200/wo2hJpn04vbtmh0B9utCFdsQhxM.jpg" },
       { nombre: "Joseph Gordon-Levitt", personaje: "Arthur", foto: "https://image.tmdb.org/t/p/w200/4X1WbT8685kL12M28J1uQWjQGj5.jpg" },
@@ -41,6 +42,7 @@ export const PELICULAS = [
     rating: 8.7,
     tagline: "El fin de la Tierra no será el fin de nosotros.",
     genero: "Aventura, Drama, Ciencia Ficción",
+    type: "updated",
     sinopsis: "Un equipo de exploradores viaja a través de un agujero de gusano en el espacio en un intento de asegurar la supervivencia de la humanidad.",
     trailer: "https://www.youtube.com/embed/zSWdZVtXT7E",
     elenco: [
@@ -68,6 +70,7 @@ export const PELICULAS = [
     rating: 9.0,
     tagline: "¿Por qué tan serio?",
     genero: "Drama, Acción, Crimen",
+    type: "updated",
     sinopsis: "Batman se enfrenta a su mayor amenaza, el Joker, quien busca sumir a Gotham en la anarquía y forzar al Caballero Oscuro a cruzar la línea entre héroe y vigilante.",
     trailer: "https://www.youtube.com/embed/EXeTwQWrcwY",
     elenco: [
@@ -94,6 +97,7 @@ export const PELICULAS = [
     rating: 7.6,
     tagline: "El agua conecta todas las cosas.",
     genero: "Ciencia Ficción, Aventura, Acción",
+    type: "popular",
     sinopsis: "Jake Sully vive con su nueva familia en Pandora. Una amenaza familiar regresa para acabar con lo que habían comenzado, y deben trabajar juntos para proteger su hogar.",
     trailer: "https://www.youtube.com/embed/d9MyqF3bPhI",
     elenco: [

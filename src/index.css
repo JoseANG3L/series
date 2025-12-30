@@ -34,6 +34,34 @@ html, body {
   background-color: #dc2626;
 }
 
+@layer utilities {
+  /* Scrollbar rojo fijo y delgado */
+  .scrollbar-red {
+    scrollbar-width: thin;          /* Firefox */
+    scrollbar-color: #ef4444 transparent;
+  }
+
+  /* Chrome, Edge, Safari */
+  .scrollbar-red::-webkit-scrollbar {
+    height: 6px;  /* Altura para scroll horizontal */
+    width: 6px;   /* Ancho para scroll vertical (por seguridad) */
+  }
+
+  .scrollbar-red::-webkit-scrollbar-track {
+    background: transparent; /* Fondo transparente */
+  }
+
+  .scrollbar-red::-webkit-scrollbar-thumb {
+    background-color: #ef4444; /* Rojo */
+    border-radius: 20px;       /* Bordes totalmente redondos */
+  }
+
+  /* Hover: Solo cambia el color, mantiene el tamaño */
+  .scrollbar-red::-webkit-scrollbar-thumb:hover {
+    background-color: #dc2626;
+  }
+}
+
 .cursor-grab {
   cursor: grab;
 }

@@ -27,7 +27,7 @@ const SearchResults = () => {
       
       {/* --- ENCABEZADO --- */}
       <div className="mb-8 border-b border-gray-800 pb-4">
-        <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
+        <h2 className="text-2xl font-bold flex items-center gap-3">
           <Search className="text-red-500 w-8 h-8" />
           Resultados para: <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500 italic">"{query}"</span>
         </h2>
@@ -38,7 +38,7 @@ const SearchResults = () => {
 
       {/* --- GRID DE RESULTADOS --- */}
       {filteredMovies.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 animate-fadeIn">
+        <div className="grid gap-6 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
           {filteredMovies.map((movie) => (
             // 2. Usamos tu componente MovieCard
             <MovieCard 

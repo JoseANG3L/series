@@ -33,7 +33,7 @@ const CookieConsent = () => {
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-8 md:right-auto md:max-w-md z-50 animate-slide-up">
       {/* Contenedor Glassmorphism */}
-      <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 p-6 rounded-2xl shadow-2xl shadow-black/50 relative overflow-hidden">
+      <div className="bg-slate-900 backdrop-blur-xl border border-white/10 p-6 rounded-2xl shadow-2xl shadow-black/50 relative overflow-hidden">
         
         {/* Decoración de fondo */}
         <div className="absolute top-0 right-0 w-20 h-20 bg-red-600/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>

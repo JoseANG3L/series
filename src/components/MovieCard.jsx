@@ -2,15 +2,28 @@ import { Play } from "lucide-react";
 import Badge from "./Badge";
 import { useNavigate } from "react-router-dom";
 
+const DEFAULT_IMAGE = "/default.jpg";
+
 const MovieCard = ({ movie, variant = "grid" }) => {
   const navigate = useNavigate();
 
+  // Función que se ejecuta si la imagen falla al cargar
+  const handleImageError = (e) => {
+    e.target.onerror = null; // Previene bucles infinitos
+    e.target.src = DEFAULT_IMAGE;
+  };
+
   return (
-    <div className={`relative cursor-pointer group ${variant === "carousel" ? "min-w-[150px] w-[150px]" : "w-full"}`} onClick={() => navigate(`/movie/${movie.id}`)}>
+    <div className={`relative cursor-pointer group ${variant === "carousel" ? "min-w-[150px] w-[150px] md:min-w-[180px] md:w-[180px] lg:min-w-[220px] lg:w-[220px]" : "w-full"}`} onClick={() => navigate(`/movie/${movie.id}`)}>
       {/* Contenedor */}
       <div className="relative overflow-hidden rounded-2xl aspect-[2/3]">
         {/* Imagen */}
-        <img src={movie.image} alt={movie.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <img 
+          src={movie.image || DEFAULT_IMAGE} // 1. Si viene vacía, usa default
+          alt={movie.title} 
+          onError={handleImageError}         // 2. Si da error 404, cambia a default
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+        />
 
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
@@ -42,9 +55,12 @@ const MovieCard = ({ movie, variant = "grid" }) => {
         </div> */}
         
         {/* --- ZONA DE BADGES --- */}
-        <div className="absolute top-3 left-3 z-20 flex flex-col gap-1">
-          <Badge type="new" />
-        </div>
+        {/** Si movie.type existe, mostramos el badge correspondiente **/}
+        {movie.type && (
+          <div className="absolute top-3 left-3 z-20 flex flex-col gap-1">
+            <Badge type={movie.type} />
+          </div>
+        )}
         {/* ---------------------- */}
         
       </div>

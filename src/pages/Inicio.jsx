@@ -6,7 +6,6 @@ import MovieSection from "../components/MovieSection";
 import useDragScroll from "../hooks/useDragScroll";
 import Hero from "../components/Hero";
 import { PELICULAS } from '../data/movies';
-import AdSenseBanner from '../components/AdSenseBanner';
 
 function Inicio() {
   return (
@@ -14,8 +13,6 @@ function Inicio() {
       <Hero />
       {/* <BrandRow /> */}
       <br />
-      {/* --- ANUNCIO 1 --- */}
-      <AdSenseBanner slot="1234567890" />
       <MovieSection title="Más Reciente" movies={PELICULAS} layout="carousel" />
       <MovieSection title="En Tendencia" movies={PELICULAS} layout="carousel" />
       <MovieSection title="Series 2000s" movies={PELICULAS} layout="carousel" />

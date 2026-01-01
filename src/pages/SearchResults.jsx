@@ -1,26 +1,79 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { PELICULAS } from '../data/movies';
-import { Search, Frown } from 'lucide-react';
-import MovieCard from '../components/MovieCard'; // <--- 1. Importamos tu componente
+import { Search, Frown, Loader2 } from 'lucide-react';
+import MovieCard from '../components/MovieCard';
+import { getMovies, getSeries } from '../services/api'; // <--- 1. Importamos servicios
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
-  const query = searchParams.get('q') || ''; 
+  const query = searchParams.get('q') || '';
+  
+  // --- ESTADOS ---
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // --- LÓGICA DE FILTRADO ---
-  const filteredMovies = PELICULAS.filter((movie) => {
-    const lowerQuery = query.toLowerCase();
-    return (
-      movie.titulo.toLowerCase().includes(lowerQuery) ||
-      movie.genero.toLowerCase().includes(lowerQuery) ||
-      movie.director.toLowerCase().includes(lowerQuery)
-    );
-  });
-
+  // --- EFECTO: BUSCAR CUANDO CAMBIA LA QUERY ---
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const fetchAndFilter = async () => {
+      setLoading(true);
+      window.scrollTo(0, 0);
+
+      try {
+        // 1. Obtenemos TODO el contenido (Películas + Series)
+        const [moviesData, seriesData] = await Promise.all([
+          getMovies(),
+          getSeries()
+        ]);
+        
+        const allContent = [...moviesData, ...seriesData];
+        const lowerQuery = query.toLowerCase();
+
+        // 2. Filtramos en el cliente
+        const filtered = allContent.filter((item) => {
+            // a) Buscar en Título
+            const matchTitle = item.titulo.toLowerCase().includes(lowerQuery);
+            
+            // b) Buscar en Director/Creador (puede ser null)
+            const matchDirector = item.director 
+                ? item.director.toLowerCase().includes(lowerQuery) 
+                : false;
+
+            // c) Buscar en Géneros (OJO: Ahora es un Array)
+            let matchGenre = false;
+            if (Array.isArray(item.genero)) {
+                matchGenre = item.genero.some(g => g.toLowerCase().includes(lowerQuery));
+            } else if (typeof item.genero === 'string') {
+                matchGenre = item.genero.toLowerCase().includes(lowerQuery);
+            }
+
+            return matchTitle || matchDirector || matchGenre;
+        });
+
+        setResults(filtered);
+
+      } catch (error) {
+        console.error("Error buscando:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (query) {
+        fetchAndFilter();
+    } else {
+        setResults([]);
+        setLoading(false);
+    }
   }, [query]);
+
+  // --- LOADING ---
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center pt-20">
+        <Loader2 className="w-10 h-10 text-red-600 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white pt-20 md:pt-24 px-4 md:px-8 lg:px-16 pb-12 font-sans">
@@ -32,22 +85,23 @@ const SearchResults = () => {
           Resultados para: <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500 italic">"{query}"</span>
         </h2>
         <p className="text-gray-400 mt-3 text-sm">
-          Se encontraron {filteredMovies.length} coincidencias
+          Se encontraron {results.length} coincidencias
         </p>
       </div>
 
       {/* --- GRID DE RESULTADOS --- */}
-      {filteredMovies.length > 0 ? (
-        <div className="grid gap-6 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
-          {filteredMovies.map((movie) => (
-            // 2. Usamos tu componente MovieCard
+      {results.length > 0 ? (
+        <div className="grid gap-6 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 animate-fadeIn">
+          {results.map((item) => (
             <MovieCard 
-              key={movie.id} 
-              // 3. ADAPTADOR: Pasamos los datos como tu card los espera
+              key={item.id} 
+              // ADAPTADOR: Mapeamos los datos de Supabase a lo que espera MovieCard
               movie={{
-                ...movie,
-                image: movie.poster, // Mapeamos poster -> image
-                title: movie.titulo  // Mapeamos titulo -> title
+                id: item.id,
+                title: item.titulo, 
+                image: item.poster, 
+                type: item.type,
+                rating: item.rating
               }}
               variant="grid" 
             />
@@ -57,17 +111,22 @@ const SearchResults = () => {
         
         /* --- ESTADO VACÍO (NO RESULTS) --- */
         <div className="flex flex-col items-center justify-center py-20 text-gray-500 animate-fadeIn">
-          <div className="bg-slate-800/50 p-6 rounded-full mb-4">
-             <Frown className="w-16 h-16 text-gray-600" />
+          <div className="bg-slate-800/50 p-6 rounded-full mb-4 border border-slate-700">
+             <Frown className="w-16 h-16 text-slate-600" />
           </div>
           <h3 className="text-2xl font-bold text-white mb-2">No encontramos nada</h3>
-          <p className="max-w-md text-center">
-            No hay películas que coincidan con "<span className="text-red-400">{query}</span>". 
-            Intenta buscar por el nombre del director o el género.
+          <p className="max-w-md text-center mb-8">
+            No hay contenido que coincida con "<span className="text-red-400">{query}</span>". 
+            <br/>Intenta buscar por título, director o género.
           </p>
-          <Link to="/peliculas" className="mt-8 px-6 py-3 bg-red-600 text-white rounded-full font-bold hover:bg-red-700 transition shadow-lg shadow-red-900/40">
-            Ver todas las películas
-          </Link>
+          <div className="flex gap-4">
+              <Link to="/peliculas" className="px-6 py-3 bg-red-600 text-white rounded-full font-bold hover:bg-red-700 transition shadow-lg shadow-red-900/40">
+                Ver Películas
+              </Link>
+              <Link to="/series" className="px-6 py-3 bg-slate-700 text-white rounded-full font-bold hover:bg-slate-600 transition border border-slate-500">
+                Ver Series
+              </Link>
+          </div>
         </div>
       )}
     </div>

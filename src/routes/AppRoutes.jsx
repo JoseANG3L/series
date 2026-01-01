@@ -10,10 +10,14 @@ import SearchResults from "../pages/SearchResults";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import ForgotPassword from "../pages/ForgotPassword";
-import ResetPassword from "../pages/ResetPassword";
+import UpdatePassword from "../pages/UpdatePassword";
 import NotFound from "../pages/NotFound";
 import LegalPage from "../pages/LegalPage";
 import ScrollToTop from "../components/ScrollToTop";
+import AdminPanel from "../pages/AdminPanel";
+
+// 1. IMPORTANTE: Importar el Guardián
+import ProtectedRoute from "./ProtectedRoute"; 
 
 export default function AppRoutes() {
   return (
@@ -25,7 +29,6 @@ export default function AppRoutes() {
         <Route path="/peliculas" element={<Peliculas />} />
 
         {/* --- Rutas Nuevas del Navbar --- */}
-        {/* Usamos elementos temporales hasta que crees las páginas reales */}
         <Route path="/series" element={<Series />} />
         <Route path="/novedades" element={<Novedades />} />
         <Route path="/mi-lista" element={<MiLista />} />
@@ -37,15 +40,25 @@ export default function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/update-password" element={<UpdatePassword />} />
 
-        {/* RUTAS LEGALES - Reutilizan el mismo componente */}
+        {/* RUTAS LEGALES */}
         <Route path="/terms" element={<LegalPage title="Términos de Uso" type="terms" />} />
         <Route path="/privacy" element={<LegalPage title="Política de Privacidad" type="privacy" />} />
         <Route path="/cookies" element={<LegalPage title="Política de Cookies" type="cookies" />} />
         <Route path="/contact" element={<LegalPage title="Contacto" type="contact" />} />
 
-        {/* --- Ruta 404 (Opcional: Por si escriben mal la URL) --- */}
+        {/* --- 2. AQUÍ ESTÁ LA PROTECCIÓN --- */}
+        {/* Creamos una "cápsula" que verifica si eres admin */}
+        <Route element={<ProtectedRoute requireAdmin={true} />}>
+            
+            {/* Si ProtectedRoute dice "OK", entonces muestra esto: */}
+            <Route path="/admin" element={<AdminPanel />} />
+
+        </Route>
+        {/* ---------------------------------- */}
+
+        {/* --- Ruta 404 --- */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

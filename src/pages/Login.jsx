@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ChevronLeft, Star } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ChevronLeft, Loader2 } from 'lucide-react';
+import { supabase } from '../supabase/client'; // <--- 1. IMPORTAR SUPABASE
 
 const Login = () => {
   const navigate = useNavigate();
@@ -9,29 +10,61 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // <--- 2. ESTADO DE CARGA
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError(''); // Limpiar error al escribir
+    setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     
-    // Simulación de validación simple
+    // Validación simple
     if (!formData.email || !formData.password) {
       setError('Por favor, completa todos los campos.');
       return;
     }
 
-    console.log('Login con:', formData);
-    // Aquí iría tu lógica de autenticación real (Firebase, API, etc.)
-    navigate('/'); 
+    setLoading(true);
+
+    try {
+      // --- 3. LOGICA SUPABASE ---
+      
+      // A. Intentar iniciar sesión
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (authError) throw authError;
+
+      // B. Si el login es exitoso, verificamos el ROL para redirigir
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+      // C. Redirección inteligente
+      if (profile?.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+
+    } catch (err) {
+      // Manejo de errores (Credenciales inválidas, etc)
+      setError('Correo o contraseña incorrectos.');
+      console.error(err.message);
+      setLoading(false); // Solo quitamos loading si hubo error
+    }
   };
 
   return (
     <div className="min-h-screen w-full relative flex">
-      {/* --- FONDO (Igual que Signup) --- */}
+      {/* --- FONDO --- */}
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/fondo.jpg')" }}></div>
       <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-[#1c0c2f] via-transparent to-black/30"></div>
 
@@ -48,7 +81,7 @@ const Login = () => {
           {/* Encabezado */}
           <div className="text-center mb-8">
             <h1 className="flex gap-2 justify-center items-center text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-600 tracking-tighter">
-               Iniciar sesión
+                Iniciar sesión
             </h1>
             <p className="text-gray-400 mt-2 text-sm">Bienvenido de nuevo</p>
           </div>
@@ -65,8 +98,9 @@ const Login = () => {
                   type="email" 
                   value={formData.email}
                   onChange={handleChange}
+                  disabled={loading} // Deshabilitar si carga
                   placeholder="ejemplo@correo.com"
-                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:border-red-500 transition"
+                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:border-red-500 transition disabled:opacity-50"
                 />
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
@@ -81,12 +115,12 @@ const Login = () => {
                   type={showPassword ? "text" : "password"} 
                   value={formData.password}
                   onChange={handleChange}
+                  disabled={loading} // Deshabilitar si carga
                   placeholder="Ingresa tu contraseña"
-                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:border-red-500 transition"
+                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:border-red-500 transition disabled:opacity-50"
                 />
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 
-                {/* Botón Ojo */}
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -97,7 +131,7 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Opciones Extra (Recuérdame / Olvidé contraseña) */}
+            {/* Opciones Extra */}
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 text-gray-400 cursor-pointer hover:text-gray-300">
                 <input type="checkbox" className="rounded bg-slate-700 border-slate-600 text-red-600 focus:ring-red-500/50 cursor-pointer" />
@@ -108,16 +142,26 @@ const Login = () => {
               </Link>
             </div>
 
-            {/* Mensaje de Error Visual */}
+            {/* Mensaje de Error */}
             {error && (
               <div className="text-red-500 text-sm text-center bg-red-500/10 p-2 rounded border border-red-500/50 animate-pulse">
                 {error}
               </div>
             )}
 
-            {/* Botón Submit */}
-            <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-red-900/30 transition duration-300 transform active:scale-95">
-              Iniciar Sesión
+            {/* Botón Submit con Loading */}
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-red-900/30 transition duration-300 transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" /> Conectando...
+                </>
+              ) : (
+                "Iniciar Sesión"
+              )}
             </button>
           </form>
 

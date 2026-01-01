@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle, AlertCircle, ChevronLeft, Star } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle, AlertCircle, ChevronLeft } from 'lucide-react';
+import { supabase } from '../supabase/client'; // <--- 1. Importar Supabase
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -8,28 +9,45 @@ const ForgotPassword = () => {
   // Estados de la interfaz
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'success' | 'error'
+  const [errorMsg, setErrorMsg] = useState(''); // Para mostrar errores específicos de Supabase
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email) {
       setStatus('error');
+      setErrorMsg('Por favor ingresa un correo.');
       return;
     }
 
     setStatus('loading');
+    setErrorMsg('');
 
-    // Simulamos una petición al servidor (2 segundos)
-    setTimeout(() => {
+    try {
+      // --- 2. LOGICA SUPABASE ---
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        // Esta URL es a donde el usuario será redirigido al hacer clic en el email.
+        // Normalmente es una página para poner la nueva contraseña.
+        // Usamos window.location.origin para que funcione en localhost y en producción.
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+
+      if (error) throw error;
+
+      // Si todo sale bien:
       setStatus('success');
-      // Aquí conectarías con tu backend (Firebase reset password, etc.)
-    }, 2000);
+
+    } catch (error) {
+      console.error(error);
+      setStatus('error');
+      setErrorMsg(error.message || 'Error al enviar el correo.');
+    }
   };
 
   return (
     <div className="min-h-screen w-full relative flex">
 
-      {/* --- FONDO (Consistente con Login/Signup) --- */}
+      {/* --- FONDO --- */}
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/fondo.jpg')" }}></div>
       <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-[#1c0c2f] via-transparent to-black/30"></div>
 
@@ -48,7 +66,7 @@ const ForgotPassword = () => {
             </h1>
           </div>
 
-          {/* --- VISTA 1: FORMULARIO (Si no ha habido éxito) --- */}
+          {/* --- VISTA 1: FORMULARIO --- */}
           {status !== 'success' ? (
             <>
               <div className="text-center mb-8 mt-4">
@@ -64,21 +82,22 @@ const ForgotPassword = () => {
                     <input
                       type="email"
                       value={email}
+                      disabled={status === 'loading'}
                       onChange={(e) => {
                         setEmail(e.target.value);
                         if (status === 'error') setStatus('idle');
                       }}
                       placeholder="ejemplo@correo.com"
                       className={`
-                        w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 rounded-lg focus:outline-none transition
+                        w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 rounded-lg focus:outline-none transition disabled:opacity-50
                         ${status === 'error' ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
                       `}
                     />
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   </div>
                   {status === 'error' && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> Por favor ingresa un correo válido.
+                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1 animate-pulse">
+                      <AlertCircle className="w-3 h-3" /> {errorMsg || 'Por favor ingresa un correo válido.'}
                     </p>
                   )}
                 </div>

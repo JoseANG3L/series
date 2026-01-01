@@ -1,6 +1,6 @@
 import MovieCard from "./MovieCard";
 import { useRef, useState, useMemo, useEffect } from "react";
-import { Filter, ChevronDown, Calendar, TrendingUp, SortAsc, Star, X, AArrowDown, AArrowUp } from "lucide-react"; // <--- ICONOS NUEVOS
+import { Filter, ChevronDown, Calendar, TrendingUp, SortAsc, Star, X, AArrowDown, AArrowUp } from "lucide-react";
 
 const MovieSection = ({ title, movies, layout = "carousel", enableFilters = false }) => {
 
@@ -10,28 +10,42 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
   const [showPopular, setShowPopular] = useState(false); // Toggle para populares
   const [openMenu, setOpenMenu] = useState(null); // 'category', 'sort', or null
 
-  // 1. Extraemos categorías únicas
+  // 1. Extraemos categorías únicas (CORREGIDO PARA ARRAYS)
   const categories = useMemo(() => {
-    if (!enableFilters) return [];
-    // Obtenemos géneros únicos y los ordenamos de la A a la Z
-    const genres = movies.map(movie => movie.genero).filter(Boolean);
-    const uniqueGenres = [...new Set(genres)].sort((a, b) => a.localeCompare(b));
+    if (!enableFilters || !movies) return [];
+    
+    // a) Obtenemos todos los géneros (que pueden ser arrays)
+    const allGenres = movies.map(movie => movie.genero);
+    
+    // b) Usamos .flat() para aplanar arrays ( ej: [['Accion'], ['Drama']] -> ['Accion', 'Drama'] )
+    const flattenedGenres = allGenres.flat().filter(Boolean);
+    
+    // c) Eliminamos duplicados y ordenamos
+    const uniqueGenres = [...new Set(flattenedGenres)].sort((a, b) => a.localeCompare(b));
+    
     return ["Todos", ...uniqueGenres];
   }, [movies, enableFilters]);
 
   // 2. Lógica Maestra: Filtrar y Ordenar
   const processedMovies = useMemo(() => {
-    let result = [...movies]; // Copia del array para no mutar el original
+    if (!movies) return [];
+    let result = [...movies]; 
 
-    // A. Filtro por Categoría
+    // A. Filtro por Categoría (CORREGIDO PARA ARRAYS)
     if (activeCategory !== "Todos") {
-      result = result.filter((movie) => movie.genero === activeCategory);
+      result = result.filter((movie) => {
+        // Si es un array, usamos .includes, si es string, usamos ===
+        if (Array.isArray(movie.genero)) {
+            return movie.genero.includes(activeCategory);
+        }
+        return movie.genero === activeCategory;
+      });
     }
 
-    // B. Filtro de Populares (Simulado: asumimos que tienen rating o son destacados)
+    // B. Filtro de Populares
     if (showPopular) {
-      // Si tienes un campo 'rating' úsalo. Si no, simulamos filtrando por type='new' o rating alto
-      result = result.filter(movie => movie.rating >= 8 || movie.type === 'new');
+      // Filtramos los que tengan rating alto (mayor a 7) o sean 'new'
+      result = result.filter(movie => (movie.rating && movie.rating >= 7) || movie.type === 'new');
     }
 
     // C. Ordenamiento
@@ -43,10 +57,10 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
         result.sort((a, b) => b.titulo.localeCompare(a.titulo));
         break;
       case "date_asc":
-        result.sort((a, b) => a.anio - b.anio);
+        result.sort((a, b) => (a.anio || 0) - (b.anio || 0));
         break;
       case "date_desc":
-        result.sort((a, b) => b.anio - a.anio);
+        result.sort((a, b) => (b.anio || 0) - (a.anio || 0));
         break;
       default:
         break;
@@ -55,7 +69,7 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
     return result;
   }, [movies, activeCategory, sortBy, showPopular]);
 
-  // --- LÓGICA DE ARRASTRE (DRAG) MANTENIDA IGUAL ---
+  // --- LÓGICA DE ARRASTRE (DRAG) ---
   const carouselRef = useRef(null);
   const [isDown, setIsDown] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -125,7 +139,7 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
               </button>
 
               {openMenu === 'category' && (
-                <div className="absolute top-full left-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50 animate-fadeIn max-h-60 overflow-y-auto scrollbar-thin-red">
+                <div className="absolute top-full left-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50 animate-fadeIn max-h-60 overflow-y-auto custom-scrollbar">
                   {categories.map((cat) => (
                     <button
                       key={cat}
@@ -152,25 +166,25 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
 
               {openMenu === 'sort' && (
                 <div className="absolute top-full left-0 mt-2 w-52 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50 animate-fadeIn">
-                   <button onClick={() => { setSortBy('default'); setOpenMenu(null); }} className="w-full text-left px-4 py-3 text-sm text-slate-400 hover:bg-slate-800 flex items-center gap-2 border-b border-slate-800">
+                    <button onClick={() => { setSortBy('default'); setOpenMenu(null); }} className="w-full text-left px-4 py-3 text-sm text-slate-400 hover:bg-slate-800 flex items-center gap-2 border-b border-slate-800">
                       <X className="w-3 h-3" /> Por defecto
-                   </button>
-                   
-                   <div className="p-2 text-xs text-slate-500 font-bold uppercase tracking-wider">Nombre</div>
-                   <button onClick={() => { setSortBy('name_asc'); setOpenMenu(null); }} className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-800 flex items-center gap-2 ${sortBy === 'name_asc' ? 'text-red-400' : 'text-slate-300'}`}>
+                    </button>
+                    
+                    <div className="p-2 text-xs text-slate-500 font-bold uppercase tracking-wider">Nombre</div>
+                    <button onClick={() => { setSortBy('name_asc'); setOpenMenu(null); }} className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-800 flex items-center gap-2 ${sortBy === 'name_asc' ? 'text-red-400' : 'text-slate-300'}`}>
                       <AArrowDown className="w-4 h-4" /> A - Z
-                   </button>
-                   <button onClick={() => { setSortBy('name_desc'); setOpenMenu(null); }} className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-800 flex items-center gap-2 border-b border-slate-800 ${sortBy === 'name_desc' ? 'text-red-400' : 'text-slate-300'}`}>
+                    </button>
+                    <button onClick={() => { setSortBy('name_desc'); setOpenMenu(null); }} className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-800 flex items-center gap-2 border-b border-slate-800 ${sortBy === 'name_desc' ? 'text-red-400' : 'text-slate-300'}`}>
                       <AArrowUp className="w-4 h-4" /> Z - A
-                   </button>
+                    </button>
 
-                   <div className="p-2 text-xs text-slate-500 font-bold uppercase tracking-wider">Fecha</div>
-                   <button onClick={() => { setSortBy('date_desc'); setOpenMenu(null); }} className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-800 flex items-center gap-2 ${sortBy === 'date_desc' ? 'text-red-400' : 'text-slate-300'}`}>
+                    <div className="p-2 text-xs text-slate-500 font-bold uppercase tracking-wider">Fecha</div>
+                    <button onClick={() => { setSortBy('date_desc'); setOpenMenu(null); }} className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-800 flex items-center gap-2 ${sortBy === 'date_desc' ? 'text-red-400' : 'text-slate-300'}`}>
                       <Calendar className="w-4 h-4" /> Más Recientes
-                   </button>
-                   <button onClick={() => { setSortBy('date_asc'); setOpenMenu(null); }} className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-800 flex items-center gap-2 ${sortBy === 'date_asc' ? 'text-red-400' : 'text-slate-300'}`}>
+                    </button>
+                    <button onClick={() => { setSortBy('date_asc'); setOpenMenu(null); }} className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-800 flex items-center gap-2 ${sortBy === 'date_asc' ? 'text-red-400' : 'text-slate-300'}`}>
                       <Calendar className="w-4 h-4 opacity-50" /> Más Antiguas
-                   </button>
+                    </button>
                 </div>
               )}
             </div>
@@ -208,14 +222,23 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
           onMouseMove={handleMouseMove}
           onDragStart={(e) => e.preventDefault()}
           className={`
-            flex gap-6 overflow-x-auto pb-8 scrollbar-red select-none
+            flex gap-6 overflow-x-auto pb-8 scrollbar-hide select-none
             ${isDown ? 'cursor-grabbing snap-none' : 'cursor-grab snap-x snap-mandatory'}
           `}
         >
           {processedMovies.length > 0 ? (
             processedMovies.map((movie) => (
-              <div key={movie.id} onClickCapture={handleCaptureClick} className="shrink-0">
-                <MovieCard movie={{ id: movie.id, title: movie.titulo, image: movie.poster, type: movie.type }} variant="carousel" />
+              <div key={movie.id} onClickCapture={handleCaptureClick} className="shrink-0 snap-center">
+                <MovieCard 
+                    movie={{ 
+                        id: movie.id, 
+                        title: movie.titulo, // Usamos 'titulo' (viene de Supabase)
+                        image: movie.poster, // Usamos 'poster'
+                        type: movie.type,
+                        rating: movie.rating 
+                    }} 
+                    variant="carousel" 
+                />
               </div>
             ))
           ) : (
@@ -226,10 +249,20 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
 
       {/* Grid */}
       {layout === "grid" && (
-        <div className="grid gap-6 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
+        <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
           {processedMovies.length > 0 ? (
             processedMovies.map((movie) => (
-              <MovieCard key={movie.id} movie={{ id: movie.id, title: movie.titulo, image: movie.poster, type: movie.type }} variant="grid" />
+              <MovieCard 
+                key={movie.id} 
+                movie={{ 
+                    id: movie.id, 
+                    title: movie.titulo, 
+                    image: movie.poster, 
+                    type: movie.type,
+                    rating: movie.rating 
+                }} 
+                variant="grid" 
+              />
             ))
           ) : (
             <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-500">

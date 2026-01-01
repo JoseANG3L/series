@@ -1,32 +1,41 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ChevronLeft, Eye, EyeOff } from 'lucide-react'; // Importamos Eye y EyeOff
+import { Mail, Lock, User, ChevronLeft, Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react';
+import { supabase } from '../supabase/client'; // <--- Importamos Supabase
 
 const Signup = () => {
   const navigate = useNavigate();
   
-  // Estados para controlar la visibilidad
+  // Estados
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState(''); // Estado para mensajes de error
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState(''); // Para avisar si se envió correo de confirmación
 
   const [formData, setFormData] = useState({ 
     name: '', 
     email: '', 
     password: '',
-    confirmPassword: '' // Nuevo campo
+    confirmPassword: ''
   });
 
-  // Manejador genérico para actualizar el formulario
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError(''); // Limpiamos el error cuando el usuario escribe
+    setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // 1. Validación básica
+    setError('');
+    setSuccessMsg('');
+
+    // 1. Validaciones Locales
+    if (!formData.name || !formData.email || !formData.password) {
+        setError('Todos los campos son obligatorios.');
+        return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden.');
       return;
@@ -37,10 +46,55 @@ const Signup = () => {
       return;
     }
 
-    // 2. Si todo está bien
-    console.log('Registro exitoso:', formData);
-    navigate('/');
+    setLoading(true);
+
+    try {
+        // 2. Registro en Supabase
+        const { data, error } = await supabase.auth.signUp({
+            email: formData.email,
+            password: formData.password,
+            options: {
+                // Guardamos el nombre en la metadata del usuario
+                data: {
+                    full_name: formData.name,
+                }
+            }
+        });
+
+        if (error) throw error;
+
+        // 3. Manejo post-registro
+        // Si Supabase requiere confirmación de email (configuración por defecto),
+        // data.session será null hasta que el usuario confirme.
+        if (!data.session) {
+            setSuccessMsg('¡Registro exitoso! Revisa tu correo electrónico para confirmar tu cuenta.');
+        } else {
+            // Si tienes desactivada la confirmación de email, entra directo
+            navigate('/');
+        }
+
+    } catch (err) {
+        setError(err.message || 'Ocurrió un error al registrarse.');
+    } finally {
+        setLoading(false);
+    }
   };
+
+  // Si el registro fue exitoso y requiere confirmación, mostramos vista de éxito
+  if (successMsg) {
+    return (
+        <div className="min-h-screen w-full relative flex items-center justify-center bg-[#0f172a]">
+             <div className="bg-slate-900 p-8 rounded-xl border border-slate-700 max-w-md text-center shadow-2xl animate-fade-in-up">
+                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-white mb-2">¡Cuenta Creada!</h2>
+                <p className="text-slate-300 mb-6">{successMsg}</p>
+                <Link to="/login" className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-2 rounded-full font-bold transition">
+                    Ir al Login
+                </Link>
+             </div>
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full relative flex">
@@ -71,10 +125,11 @@ const Signup = () => {
                 <input 
                   name="name"
                   type="text" 
+                  disabled={loading}
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Tu nombre" 
-                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:border-red-500 transition" 
+                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:border-red-500 transition disabled:opacity-50" 
                 />
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
@@ -87,10 +142,11 @@ const Signup = () => {
                 <input 
                   name="email"
                   type="email" 
+                  disabled={loading}
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="ejemplo@correo.com" 
-                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:border-red-500 transition" 
+                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:border-red-500 transition disabled:opacity-50" 
                 />
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
@@ -102,15 +158,15 @@ const Signup = () => {
               <div className="relative">
                 <input 
                   name="password"
-                  type={showPassword ? "text" : "password"} // Aquí cambia el tipo
+                  type={showPassword ? "text" : "password"} 
+                  disabled={loading}
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Crear contraseña" 
-                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:border-red-500 transition" 
+                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:border-red-500 transition disabled:opacity-50" 
                 />
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 
-                {/* Botón Ojo */}
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -121,21 +177,21 @@ const Signup = () => {
               </div>
             </div>
 
-            {/* Confirmar Contraseña (NUEVO) */}
+            {/* Confirmar Contraseña */}
             <div className="space-y-1">
               <label className="text-gray-300 text-sm font-medium ml-1">Confirmar Contraseña</label>
               <div className="relative">
                 <input 
                   name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"} 
+                  disabled={loading}
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="Repite tu contraseña" 
-                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:border-red-500 transition" 
+                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:border-red-500 transition disabled:opacity-50" 
                 />
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 
-                {/* Botón Ojo Confirmación */}
                 <button 
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -148,13 +204,23 @@ const Signup = () => {
 
             {/* Mensaje de Error */}
             {error && (
-              <div className="text-red-500 text-sm text-center bg-red-500/10 p-2 rounded border border-red-500/50">
+              <div className="text-red-500 text-sm text-center bg-red-500/10 p-2 rounded border border-red-500/50 animate-pulse">
                 {error}
               </div>
             )}
 
-            <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-red-900/30 transition duration-300 transform active:scale-95">
-              Registrarse
+            <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-red-900/30 transition duration-300 transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" /> Registrando...
+                </>
+              ) : (
+                "Crear Cuenta"
+              )}
             </button>
           </form>
 

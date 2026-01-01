@@ -163,31 +163,6 @@ export const PELICULAS = [
     ],
   },
   {
-    id: 7,
-    titulo: "Oppenheimer",
-    poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykIGj7ei855eZ.jpg",
-    backdrop: "https://image.tmdb.org/t/p/original/fm6KqXpk3M2HVveHwCrBSSBaB0.jpg",
-    anio: 2023,
-    director: "Christopher Nolan",
-    duracion: "3h 0m",
-    rating: 8.1,
-    tagline: "El mundo cambiará para siempre.",
-    genero: "Drama, Historia",
-    sinopsis: "La historia del científico estadounidense J. Robert Oppenheimer y su papel en el desarrollo de la bomba atómica durante la Segunda Guerra Mundial.",
-    trailer: "https://www.youtube.com/embed/uYPbbksJxIg",
-    elenco: [
-      { nombre: "Cillian Murphy", personaje: "Oppenheimer", foto: "https://image.tmdb.org/t/p/w200/2L.jpg" },
-      { nombre: "Robert Downey Jr.", personaje: "Lewis Strauss", foto: "https://image.tmdb.org/t/p/w200/im9.jpg" }
-    ],
-    galeria: [
-        "https://image.tmdb.org/t/p/w500/rLb2cs785pePbAKgQ8B77cTHyBx.jpg",
-        "https://image.tmdb.org/t/p/w500/nb3xI8XI3w4pMVZ38VijItwbFyP.jpg"
-    ],
-    resenas: [
-        { usuario: "HistoryBuff", rating: 9, comentario: "Intensa y aterradora.", fecha: "2023-07-21" }
-    ],
-  },
-  {
     id: 8,
     titulo: "Dune: Part Two",
     poster: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
@@ -485,31 +460,6 @@ export const PELICULAS = [
     ],
     resenas: [
       { usuario: "Andy", rating: 10, comentario: "Mi infancia en una película.", fecha: "2010-05-30" }
-    ]
-  },
-  {
-    id: 20,
-    titulo: "Jurassic Park",
-    poster: "https://image.tmdb.org/t/p/w500/9i3plLl89DMIz0uaHFwfoYS3MJ.jpg",
-    backdrop: "https://image.tmdb.org/t/p/original/j29ekbcLpBvxnGk6LbkLs24GOGP.jpg",
-    anio: 1993,
-    director: "Steven Spielberg",
-    duracion: "2h 7m",
-    rating: 8.2,
-    tagline: "Una aventura de hace 65 millones de años.",
-    genero: "Aventura, Ciencia Ficción",
-    sinopsis: "Un empresario adinerado invita en secreto a un grupo de expertos a recorrer su parque temático de dinosaurios clonados antes de su apertura.",
-    trailer: "https://www.youtube.com/embed/lc0UehYemQA",
-    elenco: [
-      { nombre: "Sam Neill", personaje: "Dr. Alan Grant", foto: "https://image.tmdb.org/t/p/w200/bO.jpg" },
-      { nombre: "Laura Dern", personaje: "Dr. Ellie Sattler", foto: "https://image.tmdb.org/t/p/w200/gB.jpg" }
-    ],
-    galeria: [
-      "https://image.tmdb.org/t/p/w500/da.jpg",
-      "https://image.tmdb.org/t/p/w500/fJ.jpg"
-    ],
-    resenas: [
-      { usuario: "DinoFan", rating: 10, comentario: "Sigue viéndose increíble hoy en día.", fecha: "2023-06-11" }
     ]
   }
 ];

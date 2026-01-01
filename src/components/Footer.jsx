@@ -172,15 +172,15 @@ const Footer = () => {
       </div>
 
       {/* Barra inferior */}
-      <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-center items-center gap-4">
         <p className="text-slate-500 text-sm text-center md:text-left">
           © 2025 LuisFSeries. Todos los derechos reservados.
         </p>
-        <div className="flex items-center gap-2 text-slate-500 text-sm">
+        {/* <div className="flex items-center gap-2 text-slate-500 text-sm">
           <span>Hecho con</span>
           <Heart className="w-4 h-4 text-red-600 fill-current" />
           <span>por JoseAngel</span>
-        </div>
+        </div> */}
       </div>
     </footer>
   );

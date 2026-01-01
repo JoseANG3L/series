@@ -1,22 +1,26 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, Star, Menu, X, ChevronDown } from 'lucide-react';
+import { Search, Star, Menu, X, ChevronDown, LogOut, Settings } from 'lucide-react';
 import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from '../context/AuthContext'; 
 
 const Navbar = () => {
+  const { user, role, signOut } = useAuth(); 
+  const navigate = useNavigate();
+
   // --- ESTADOS ---
   const [isOpen, setIsOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [isDesktopSearchOpen, setIsDesktopSearchOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(4); 
-
   const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
   
   // --- REFS ---
-  const inputRef = useRef(null);      // Para el focus del input
-  const moreMenuRef = useRef(null);   // Para detectar click fuera del menú "Más"
-  const searchFormRef = useRef(null); // NUEVO: Para detectar click fuera de la búsqueda
+  const inputRef = useRef(null);      
+  const moreMenuRef = useRef(null);   
+  const searchFormRef = useRef(null); 
+  const userMenuRef = useRef(null);
 
   // --- LÓGICA DE NAVEGACIÓN ---
   const NAV_LINKS = [
@@ -24,31 +28,20 @@ const Navbar = () => {
     { name: "Películas", path: "/peliculas" },
     { name: "Series", path: "/series" },
     { name: "Novedades", path: "/novedades" },
-    { name: "Mi Lista", path: "/mi-lista" },
-    { name: "Infantil", path: "/kids" },
-    { name: "Originales", path: "/originals" },
   ];
 
-  // --- EFECTO: CERRAR MENÚS AL DAR CLICK AFUERA ---
+  // --- EFECTOS ---
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // 1. Cerrar menú "Más"
-      if (isMoreMenuOpen && moreMenuRef.current && !moreMenuRef.current.contains(event.target)) {
-        setIsMoreMenuOpen(false);
-      }
-      // 2. Cerrar Búsqueda de Escritorio (NUEVO)
-      // Si está abierta, y el clic NO fue dentro del formulario de búsqueda
-      if (isDesktopSearchOpen && searchFormRef.current && !searchFormRef.current.contains(event.target)) {
-        // Opcional: Si quieres que SOLO se cierre si está vacío, agrega: && !searchTerm
-        setIsDesktopSearchOpen(false);
-      }
+      if (isMoreMenuOpen && moreMenuRef.current && !moreMenuRef.current.contains(event.target)) setIsMoreMenuOpen(false);
+      if (isDesktopSearchOpen && searchFormRef.current && !searchFormRef.current.contains(event.target)) setIsDesktopSearchOpen(false);
+      if (isUserMenuOpen && userMenuRef.current && !userMenuRef.current.contains(event.target)) setIsUserMenuOpen(false);
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMoreMenuOpen, isDesktopSearchOpen, searchTerm]); // Agregamos isDesktopSearchOpen y searchTerm a las dependencias
+  }, [isMoreMenuOpen, isDesktopSearchOpen, isUserMenuOpen]);
 
-  // --- EFECTO: RESPONSIVE LINKS ---
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
@@ -68,37 +61,43 @@ const Navbar = () => {
   const closeMenu = () => {
     setIsOpen(false);
     setIsMoreMenuOpen(false);
+    setIsUserMenuOpen(false);
+    setShowMobileSearch(false);
+  };
+
+  // 1. NUEVA FUNCIÓN PARA IR AL ADMIN Y CERRAR MENÚ
+  const handleAdminClick = () => {
+    navigate('/admin');
+    closeMenu(); // Fuerza el cierre
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
       navigate(`/buscar?q=${searchTerm}`);
-      setIsOpen(false);
-      setShowMobileSearch(false);
+      closeMenu();
       setIsDesktopSearchOpen(false);
     }
   };
 
-  // Lógica corregida para el botón de la lupa en escritorio
+  const handleLogout = async () => {
+    await signOut();
+    closeMenu();
+    navigate('/login');
+  };
+
   const handleSearchIconClick = (e) => {
-    // Caso 1: Si está cerrado, LO ABRIMOS (y prevenimos submit)
     if (!isDesktopSearchOpen) {
       e.preventDefault();
       setIsDesktopSearchOpen(true);
       setTimeout(() => inputRef.current?.focus(), 100);
       return;
     }
-
-    // Caso 2: Si está abierto pero VACÍO, LO CERRAMOS (y prevenimos submit)
     if (isDesktopSearchOpen && !searchTerm.trim()) {
       e.preventDefault();
       setIsDesktopSearchOpen(false);
       return;
     }
-
-    // Caso 3: Si está abierto y TIENE TEXTO, NO hacemos preventDefault.
-    // Dejamos que el botón type="submit" dispare el evento onSubmit del formulario (handleSearch).
   };
 
   return (
@@ -106,9 +105,8 @@ const Navbar = () => {
       
       <div className="px-4 md:px-8 lg:px-16 py-4 flex justify-between items-center relative">
         
-        {/* --- 1. IZQUIERDA: LOGO Y NAVEGACIÓN --- */}
+        {/* --- IZQUIERDA: LOGO --- */}
         <div className="flex items-center gap-6 lg:gap-12 z-20 flex-1">
-          
           <NavLink to="/" onClick={closeMenu} className="shrink-0 relative z-30">
             <h1 className="flex gap-1 md:gap-2 justify-center items-center text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-600 tracking-tighter cursor-pointer">
               LUIS<Star className="w-5 h-5 md:w-8 md:h-8" color="gold" fill="gold" />FSERIES
@@ -123,7 +121,6 @@ const Navbar = () => {
               </NavLink>
             ))}
 
-            {/* Botón "Más" */}
             {HIDDEN_LINKS.length > 0 && (
               <li className="relative" ref={moreMenuRef}>
                 <button onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)} className={`flex items-center gap-1 transition whitespace-nowrap ${isMoreMenuOpen ? 'text-white' : 'text-gray-300 hover:text-red-500'}`}>
@@ -144,19 +141,15 @@ const Navbar = () => {
           </ul>
         </div>
 
-        {/* --- 2. DERECHA: BÚSQUEDA + AUTH --- */}
+        {/* --- DERECHA: BÚSQUEDA + AUTH --- */}
         <div className="flex items-center justify-end gap-3 md:gap-4 relative shrink-0">
           
-          {/* A. BÚSQUEDA ESCRITORIO */}
+          {/* BÚSQUEDA ESCRITORIO */}
           <div className="hidden md:flex items-center justify-end relative z-30">
             <form 
-              ref={searchFormRef} // <--- REFERENCIA AGREGADA AQUÍ
+              ref={searchFormRef} 
               onSubmit={handleSearch}
-              className={`
-                flex items-center justify-between bg-slate-800 border transition-all duration-500 ease-out origin-right absolute right-0 top-1/2 -translate-y-1/2
-                ${isDesktopSearchOpen ? 'w-[280px] px-4 border-slate-600 shadow-2xl' : 'w-10 border-transparent bg-transparent'}
-                h-10 rounded-full
-              `}
+              className={`flex items-center justify-between bg-slate-800 border transition-all duration-500 ease-out origin-right absolute right-0 top-1/2 -translate-y-1/2 ${isDesktopSearchOpen ? 'w-[280px] px-4 border-slate-600 shadow-2xl' : 'w-10 border-transparent bg-transparent'} h-10 rounded-full`}
             >
               <input 
                 ref={inputRef}
@@ -164,30 +157,58 @@ const Navbar = () => {
                 placeholder="Buscar..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                // Quitamos el onBlur aquí para que lo maneje el handleClickOutside
-                className={`
-                  bg-transparent text-white text-sm outline-none transition-all duration-300 
-                  ${isDesktopSearchOpen ? 'w-full opacity-100 pl-1' : 'w-0 opacity-0'}
-                `}
+                className={`bg-transparent text-white text-sm outline-none transition-all duration-300 ${isDesktopSearchOpen ? 'w-full opacity-100 pl-1' : 'w-0 opacity-0'}`}
               />
-              <button 
-                type="submit" 
-                onClick={handleSearchIconClick}
-                className={`shrink-0 text-gray-300 hover:text-white transition ${!isDesktopSearchOpen && 'hover:text-red-500'}`}
-              >
+              <button type="submit" onClick={handleSearchIconClick} className={`shrink-0 text-gray-300 hover:text-white transition ${!isDesktopSearchOpen && 'hover:text-red-500'}`}>
                  <Search className="w-5 h-5" />
               </button>
             </form>
             <div className="w-10 h-10"></div>
           </div>
 
-          {/* B. BOTONES AUTH */}
-          <div className="hidden md:flex gap-3 relative z-40 bg-transparent">
-              <button onClick={() => { navigate('/signup'); closeMenu(); }} className="px-5 py-2 border border-gray-500 text-white rounded-full text-sm font-semibold hover:border-white transition whitespace-nowrap">Sign up</button>
-              <button onClick={() => { navigate('/login'); closeMenu(); }} className="px-5 py-2 bg-green-600 text-white rounded-full text-sm font-semibold hover:bg-green-500 shadow-lg shadow-green-900/50 transition whitespace-nowrap">Login</button>
+          {/* AUTH DESKTOP */}
+          <div className="hidden md:flex gap-3 relative z-40 bg-transparent items-center">
+              {!user ? (
+                <>
+                  <button onClick={() => { navigate('/signup'); closeMenu(); }} className="px-5 py-2 border border-gray-500 text-white rounded-full text-sm font-semibold hover:border-white transition whitespace-nowrap">Registrarse</button>
+                  <button onClick={() => { navigate('/login'); closeMenu(); }} className="px-5 py-2 bg-green-600 text-white rounded-full text-sm font-semibold hover:bg-green-500 shadow-lg shadow-green-900/50 transition whitespace-nowrap">Iniciar sesión</button>
+                </>
+              ) : (
+                <div className="relative" ref={userMenuRef}>
+                    <button 
+                        onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                        className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white py-1.5 px-3 pr-4 rounded-full border border-slate-600 transition"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-pink-600 flex items-center justify-center text-xs font-bold shadow-lg">
+                            {user.email.charAt(0).toUpperCase()}
+                        </div>
+                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isUserMenuOpen && (
+                        <div className="absolute top-full right-0 mt-3 w-56 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden animate-fadeIn flex flex-col">
+                            <div className="px-4 py-3 border-b border-slate-800">
+                                <p className="text-sm text-white font-bold truncate">{user.user_metadata?.full_name || 'Usuario'}</p>
+                                <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                            </div>
+                            
+                            {/* 2. ENLACE ADMIN ESCRITORIO (Usamos la nueva función) */}
+                            {role === 'admin' && (
+                                <button onClick={handleAdminClick} className="text-left px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition w-full">
+                                    <Settings className="w-4 h-4" /> Panel Admin
+                                </button>
+                            )}
+                            
+                            <button onClick={handleLogout} className="text-left px-4 py-3 text-sm text-red-400 hover:bg-slate-800 hover:text-red-300 flex items-center gap-2 transition border-t border-slate-800 w-full">
+                                <LogOut className="w-4 h-4" /> Cerrar sesión
+                            </button>
+                        </div>
+                    )}
+                </div>
+              )}
           </div>
 
-          {/* C. ELEMENTOS MÓVILES */}
+          {/* ELEMENTOS MÓVILES */}
           <button onClick={() => setShowMobileSearch(!showMobileSearch)} className={`md:hidden transition ${showMobileSearch ? 'text-red-500' : 'text-white'}`}>
              <Search className="w-6 h-6" />
           </button>
@@ -212,10 +233,37 @@ const Navbar = () => {
           {NAV_LINKS.map((link) => (
             <NavLink key={link.name} to={link.path} onClick={closeMenu} className={({ isActive }) => isActive ? "text-red-500" : "text-white hover:text-red-500 transition"}>{link.name}</NavLink>
           ))}
+          
+          {/* 3. ENLACE ADMIN MÓVIL (Cambio crítico: Usar button + handleAdminClick) */}
+          {user && role === 'admin' && (
+             <button onClick={handleAdminClick} className="text-yellow-500 hover:text-yellow-400 font-bold transition">
+               Panel Admin
+             </button>
+          )}
         </ul>
+
         <div className="flex flex-col gap-4 mt-4 w-64">
-          <button onClick={() => { navigate('/login'); closeMenu(); }} className="px-5 py-3 bg-green-600 text-white rounded-full font-semibold hover:bg-green-500 shadow-lg">Login</button>
-          <button onClick={() => { navigate('/signup'); closeMenu(); }} className="px-5 py-3 border border-gray-500 text-white rounded-full font-semibold hover:border-white">Sign up</button>
+          {!user ? (
+            <>
+                <button onClick={() => { navigate('/login'); closeMenu(); }} className="px-5 py-3 bg-green-600 text-white rounded-full font-semibold hover:bg-green-500 shadow-lg">Iniciar sesión</button>
+                <button onClick={() => { navigate('/signup'); closeMenu(); }} className="px-5 py-3 border border-gray-500 text-white rounded-full font-semibold hover:border-white">Registrarse</button>
+            </>
+          ) : (
+            <>
+                <div className="flex items-center gap-3 justify-center mb-2 bg-slate-900/50 p-2 rounded-lg border border-slate-800">
+                    <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center font-bold text-white">
+                        {user.email.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="text-left">
+                        <p className="text-sm text-white font-bold">{user.user_metadata?.full_name}</p>
+                        <p className="text-xs text-slate-400 truncate max-w-[150px]">{user.email}</p>
+                    </div>
+                </div>
+                <button onClick={handleLogout} className="px-5 py-3 bg-red-600/20 text-red-500 border border-red-600/50 rounded-full font-semibold hover:bg-red-600 hover:text-white transition flex items-center justify-center gap-2">
+                    <LogOut className="w-5 h-5" /> Cerrar sesión
+                </button>
+            </>
+          )}
         </div>
       </div>
     </nav>

@@ -1,73 +1,65 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Search, Frown, Loader2 } from 'lucide-react';
+import useSWR from 'swr'; // <--- 1. Importamos SWR
+import { Search, Frown, Loader2, WifiOff } from 'lucide-react';
 import MovieCard from '../components/MovieCard';
-import { getMovies, getSeries } from '../services/api'; // <--- 1. Importamos servicios
+import { getMovies, getSeries } from '../services/api'; 
+
+// --- 2. FETCHER UNIFICADO ---
+// Esta función baja todo el contenido de golpe para poder buscar en él
+const fetchFullCatalog = async () => {
+    const [movies, series] = await Promise.all([
+        getMovies(),
+        getSeries()
+    ]);
+    // Unimos los dos arrays en uno solo
+    return [...movies, ...series];
+};
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
-  
-  // --- ESTADOS ---
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  // --- EFECTO: BUSCAR CUANDO CAMBIA LA QUERY ---
-  useEffect(() => {
-    const fetchAndFilter = async () => {
-      setLoading(true);
-      window.scrollTo(0, 0);
+  // --- 3. SWR (Carga de datos) ---
+  // Usamos una clave 'full-catalog' para que si ya cargaste datos en Inicio,
+  // aquí estén disponibles casi de inmediato.
+  const { data: allContent, isLoading, error } = useSWR('full-catalog', fetchFullCatalog, {
+    revalidateOnFocus: false, // No necesitamos revalidar tanto en búsqueda
+    dedupingInterval: 120000, // Caché de 2 minutos
+  });
 
-      try {
-        // 1. Obtenemos TODO el contenido (Películas + Series)
-        const [moviesData, seriesData] = await Promise.all([
-          getMovies(),
-          getSeries()
-        ]);
+  // --- 4. FILTRADO (Lógica local) ---
+  // Usamos useMemo para que el filtrado sea eficiente y solo ocurra 
+  // si cambian los datos (allContent) o la búsqueda (query).
+  const results = useMemo(() => {
+    if (!allContent || !query) return [];
+
+    const lowerQuery = query.toLowerCase();
+
+    return allContent.filter((item) => {
+        // a) Buscar en Título
+        const matchTitle = item.titulo.toLowerCase().includes(lowerQuery);
         
-        const allContent = [...moviesData, ...seriesData];
-        const lowerQuery = query.toLowerCase();
+        // b) Buscar en Director
+        const matchDirector = item.director 
+            ? item.director.toLowerCase().includes(lowerQuery) 
+            : false;
 
-        // 2. Filtramos en el cliente
-        const filtered = allContent.filter((item) => {
-            // a) Buscar en Título
-            const matchTitle = item.titulo.toLowerCase().includes(lowerQuery);
-            
-            // b) Buscar en Director/Creador (puede ser null)
-            const matchDirector = item.director 
-                ? item.director.toLowerCase().includes(lowerQuery) 
-                : false;
+        // c) Buscar en Géneros
+        let matchGenre = false;
+        if (Array.isArray(item.genero)) {
+            matchGenre = item.genero.some(g => g.toLowerCase().includes(lowerQuery));
+        } else if (typeof item.genero === 'string') {
+            matchGenre = item.genero.toLowerCase().includes(lowerQuery);
+        }
 
-            // c) Buscar en Géneros (OJO: Ahora es un Array)
-            let matchGenre = false;
-            if (Array.isArray(item.genero)) {
-                matchGenre = item.genero.some(g => g.toLowerCase().includes(lowerQuery));
-            } else if (typeof item.genero === 'string') {
-                matchGenre = item.genero.toLowerCase().includes(lowerQuery);
-            }
+        return matchTitle || matchDirector || matchGenre;
+    });
+  }, [allContent, query]);
 
-            return matchTitle || matchDirector || matchGenre;
-        });
-
-        setResults(filtered);
-
-      } catch (error) {
-        console.error("Error buscando:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (query) {
-        fetchAndFilter();
-    } else {
-        setResults([]);
-        setLoading(false);
-    }
-  }, [query]);
 
   // --- LOADING ---
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0f172a] flex items-center justify-center pt-20">
         <Loader2 className="w-10 h-10 text-red-600 animate-spin" />
@@ -75,6 +67,17 @@ const SearchResults = () => {
     );
   }
 
+  // --- ERROR ---
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center pt-20 text-slate-500">
+        <WifiOff className="w-10 h-10 mb-2" />
+        <p>No se pudo realizar la búsqueda.</p>
+      </div>
+    );
+  }
+
+  // --- RENDER ---
   return (
     <div className="min-h-screen bg-[#0f172a] text-white pt-20 md:pt-24 px-4 md:px-8 lg:px-16 pb-12 font-sans">
       
@@ -95,7 +98,6 @@ const SearchResults = () => {
           {results.map((item) => (
             <MovieCard 
               key={item.id} 
-              // ADAPTADOR: Mapeamos los datos de Supabase a lo que espera MovieCard
               movie={{
                 id: item.id,
                 title: item.titulo, 

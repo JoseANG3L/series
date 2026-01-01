@@ -1,32 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import useSWR from 'swr'; // <--- 1. Importamos SWR
 import MovieSection from "../components/MovieSection";
-import { getNovedades } from '../services/api'; // <--- 1. Usamos la función de novedades
-import { Loader2 } from 'lucide-react';
+import { getNovedades } from '../services/api'; 
+import { Loader2, WifiOff } from 'lucide-react';
 
 function Novedades() {
-  // --- ESTADOS ---
-  const [content, setContent] = useState([]); 
-  const [loading, setLoading] = useState(true);
-
-  // --- EFECTO ---
-  useEffect(() => {
-    const fetchNovedades = async () => {
-      try {
-        // Esto traerá tanto Películas como Series que tengan "is_premiere = true"
-        const data = await getNovedades(); 
-        setContent(data);
-      } catch (error) {
-        console.error("Error al cargar novedades:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNovedades();
-  }, []);
+  // --- LÓGICA AUTOMÁTICA CON SWR ---
+  // Clave única: 'all-novedades'
+  const { data: content, error, isLoading } = useSWR('all-novedades', getNovedades, {
+    revalidateOnFocus: true, // Recarga si vuelves de otra pestaña
+    dedupingInterval: 60000, // Caché de 1 minuto
+  });
 
   // --- LOADING ---
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0f172a] flex items-center justify-center pt-20">
         <div className="flex flex-col items-center gap-4">
@@ -37,19 +24,31 @@ function Novedades() {
     );
   }
 
+  // --- ERROR ---
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center pt-20">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <WifiOff className="w-12 h-12 text-slate-600" />
+          <p className="text-slate-400">No se pudieron cargar las novedades.</p>
+        </div>
+      </div>
+    );
+  }
+
   // --- RENDER ---
   return (
     <div className="pt-20 md:pt-24 min-h-screen bg-[#0f172a]">
       <MovieSection 
         title="Últimos Estrenos" 
-        movies={content} 
+        // Pasamos array vacío si 'content' es undefined para evitar errores
+        movies={content || []} 
         layout="grid" 
-        // enableFilters={false} // Quizás aquí no quieras filtros, o sí. Tú decides.
       />
       
-      {/* Mensaje opcional si no hay novedades */}
-      {!loading && content.length === 0 && (
-        <div className="text-center text-slate-500 mt-10">
+      {/* Mensaje si no hay resultados (array vacío pero sin error) */}
+      {content && content.length === 0 && (
+        <div className="text-center text-slate-500 mt-20 animate-fadeIn">
           <p>No hay novedades destacadas en este momento.</p>
         </div>
       )}

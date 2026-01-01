@@ -1,29 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, ChevronLeft } from 'lucide-react';
-import { supabase } from '../supabase/client'; // <--- 1. Importar Supabase
+import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, ChevronLeft, Loader2 } from 'lucide-react';
+import { supabase } from '../supabase/client';
+import useSWRMutation from 'swr/mutation'; // <--- 1. Importar el hook
+
+// --- 2. FUNCIÓN FETCHER ---
+// Esta función recibe la nueva contraseña y llama a Supabase
+async function updateUserPassword(key, { arg: newPassword }) {
+  // Como el usuario entró por el link del correo, ya tiene una sesión activa temporal.
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword
+  });
+
+  if (error) throw error;
+  return true; // Éxito
+}
 
 const UpdatePassword = () => {
   const navigate = useNavigate();
 
-  // Estados de campos
+  // Estados de UI
   const [passwords, setPasswords] = useState({ new: '', confirm: '' });
-
-  // Estados de visibilidad
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [validationError, setValidationError] = useState(''); // Errores locales (validación)
 
-  // Estados de UI
-  const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'success' | 'error'
-  const [errorMsg, setErrorMsg] = useState('');
+  // --- 3. CONFIGURAR HOOK ---
+  const { trigger, isMutating, data, error: apiError, reset } = useSWRMutation(
+    'update-password-action',
+    updateUserPassword
+  );
 
   // Efecto de seguridad: Verificar si hay sesión
   useEffect(() => {
-    // Si el usuario entra directamente a esta URL sin el link del correo,
-    // Supabase no habrá creado la sesión, así que lo mandamos al login.
     const checkSession = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
+            // Si no hay sesión (el link expiró o entraron directo), al login
             navigate('/login');
         }
     };
@@ -32,48 +45,38 @@ const UpdatePassword = () => {
 
   const handleChange = (e) => {
     setPasswords({ ...passwords, [e.target.name]: e.target.value });
-    if (status === 'error') {
-      setStatus('idle');
-      setErrorMsg('');
-    }
+    setValidationError(''); // Limpiar error local
+    if (apiError) reset();  // Limpiar error de API
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setValidationError('');
 
     // 1. Validaciones Locales
     if (passwords.new.length < 6) {
-      setStatus('error');
-      setErrorMsg('La contraseña debe tener al menos 6 caracteres.');
+      setValidationError('La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
     if (passwords.new !== passwords.confirm) {
-      setStatus('error');
-      setErrorMsg('Las contraseñas no coinciden.');
+      setValidationError('Las contraseñas no coinciden.');
       return;
     }
 
-    setStatus('loading');
-
     try {
-        // --- 2. LOGICA SUPABASE ---
-        // Como el usuario entró por el link del correo, ya tiene una sesión activa temporal.
-        // Solo actualizamos sus datos.
-        const { error } = await supabase.auth.updateUser({
-            password: passwords.new
-        });
-
-        if (error) throw error;
-
-        setStatus('success');
-
-    } catch (error) {
-        console.error(error);
-        setStatus('error');
-        setErrorMsg(error.message || 'Error al actualizar la contraseña.');
+        // 2. Disparar actualización
+        await trigger(passwords.new);
+    } catch (err) {
+        console.error(err);
     }
   };
+
+  // Determinar si hubo éxito
+  const isSuccess = data === true;
+
+  // Determinar mensaje de error actual
+  const currentError = validationError || apiError?.message;
 
   return (
     <div className="min-h-screen w-full relative flex">
@@ -84,8 +87,7 @@ const UpdatePassword = () => {
 
       <div className="relative z-30 flex flex-col min-h-screen w-full pt-16 pb-16 md:pt-20 px-4 md:px-8 lg:px-16 pb-8 gap-4">
         
-        {/* En esta pantalla, volver suele llevar al login porque el token es de un solo uso */}
-        <button onClick={() => navigate('/login')} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full text-white hover:bg-white hover:text-black transition w-fit">
+        <button onClick={() => navigate('/login')} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full text-white hover:bg-white hover:text-black transition w-fit border border-white/10">
           <ChevronLeft className="w-5 h-5" /> Cancelar
         </button>
 
@@ -100,7 +102,7 @@ const UpdatePassword = () => {
           </div>
 
           {/* VISTA 1: FORMULARIO */}
-          {status !== 'success' ? (
+          {!isSuccess ? (
             <>
               <div className="text-center mb-8 mt-4">
                 <p className="text-gray-400 text-sm">
@@ -119,11 +121,11 @@ const UpdatePassword = () => {
                       type={showPass ? "text" : "password"}
                       value={passwords.new}
                       onChange={handleChange}
-                      disabled={status === 'loading'}
+                      disabled={isMutating}
                       placeholder="Mínimo 6 caracteres"
                       className={`
                         w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none transition disabled:opacity-50
-                        ${status === 'error' ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
+                        ${currentError ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
                       `}
                     />
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -142,11 +144,11 @@ const UpdatePassword = () => {
                       type={showConfirm ? "text" : "password"}
                       value={passwords.confirm}
                       onChange={handleChange}
-                      disabled={status === 'loading'}
+                      disabled={isMutating}
                       placeholder="Repite la contraseña"
                       className={`
                         w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none transition disabled:opacity-50
-                        ${status === 'error' ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
+                        ${currentError ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
                       `}
                     />
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -157,21 +159,21 @@ const UpdatePassword = () => {
                 </div>
 
                 {/* Mensaje de Error */}
-                {status === 'error' && (
+                {currentError && (
                   <div className="bg-red-500/10 border border-red-500/50 rounded p-3 flex items-start gap-2 animate-pulse">
                     <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                    <p className="text-red-500 text-sm">{errorMsg}</p>
+                    <p className="text-red-500 text-sm">{currentError}</p>
                   </div>
                 )}
 
                 <button
                   type="submit"
-                  disabled={status === 'loading'}
+                  disabled={isMutating}
                   className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-900 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg shadow-lg shadow-red-900/30 transition duration-300 flex justify-center items-center"
                 >
-                  {status === 'loading' ? (
+                  {isMutating ? (
                     <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                      <Loader2 className="w-4 h-4 animate-spin" />
                       Actualizando...
                     </span>
                   ) : (

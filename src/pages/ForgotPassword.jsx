@@ -1,48 +1,57 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle, AlertCircle, ChevronLeft } from 'lucide-react';
-import { supabase } from '../supabase/client'; // <--- 1. Importar Supabase
+import { Mail, ArrowLeft, CheckCircle, AlertCircle, ChevronLeft, Loader2 } from 'lucide-react';
+import { supabase } from '../supabase/client';
+import useSWRMutation from 'swr/mutation'; // <--- 1. Importamos el hook de mutación
+
+// --- 2. DEFINIR LA FUNCIÓN DE ENVÍO (FETCHER) ---
+// key: la clave (no se usa aquí pero es requerida por la firma)
+// { arg }: el argumento que pasamos al llamar a trigger (el email)
+async function sendRecoveryEmail(key, { arg: email }) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+    });
+
+    if (error) throw error;
+    return true; // Retornamos true para indicar éxito
+}
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
-
-  // Estados de la interfaz
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'success' | 'error'
-  const [errorMsg, setErrorMsg] = useState(''); // Para mostrar errores específicos de Supabase
+  const [validationError, setValidationError] = useState('');
+
+  // --- 3. USAR EL HOOK ---
+  // trigger: función para disparar el envío
+  // isMutating: equivalente a tu 'loading'
+  // data: si existe, es que fue 'success'
+  // error: si existe, contiene el error de Supabase
+  const { trigger, isMutating, data, error, reset } = useSWRMutation(
+    'reset-password-action', // Clave identificadora
+    sendRecoveryEmail        // La función de arriba
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setValidationError('');
 
     if (!email) {
-      setStatus('error');
-      setErrorMsg('Por favor ingresa un correo.');
+      setValidationError('Por favor ingresa un correo.');
       return;
     }
 
-    setStatus('loading');
-    setErrorMsg('');
-
     try {
-      // --- 2. LOGICA SUPABASE ---
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        // Esta URL es a donde el usuario será redirigido al hacer clic en el email.
-        // Normalmente es una página para poner la nueva contraseña.
-        // Usamos window.location.origin para que funcione en localhost y en producción.
-        redirectTo: `${window.location.origin}/update-password`,
-      });
-
-      if (error) throw error;
-
-      // Si todo sale bien:
-      setStatus('success');
-
-    } catch (error) {
-      console.error(error);
-      setStatus('error');
-      setErrorMsg(error.message || 'Error al enviar el correo.');
+      // Llamamos a trigger pasando el email como argumento
+      await trigger(email);
+    } catch (e) {
+      // SWR ya captura el error en la variable 'error', 
+      // pero el catch aquí evita que la app crashee si no lo manejas.
+      console.error(e);
     }
   };
+
+  // Variable auxiliar para saber si tuvimos éxito
+  const isSuccess = data === true;
 
   return (
     <div className="min-h-screen w-full relative flex">
@@ -52,7 +61,7 @@ const ForgotPassword = () => {
       <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-[#1c0c2f] via-transparent to-black/30"></div>
 
       <div className="relative z-30 flex flex-col min-h-screen w-full pt-16 pb-16 md:pt-20 px-4 md:px-8 lg:px-16 pb-8 gap-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full text-white hover:bg-white hover:text-black transition w-fit">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full text-white hover:bg-white hover:text-black transition w-fit border border-white/10">
           <ChevronLeft className="w-5 h-5" /> Volver
         </button>
 
@@ -67,7 +76,7 @@ const ForgotPassword = () => {
           </div>
 
           {/* --- VISTA 1: FORMULARIO --- */}
-          {status !== 'success' ? (
+          {!isSuccess ? (
             <>
               <div className="text-center mb-8 mt-4">
                 <p className="text-gray-400 text-sm leading-relaxed">
@@ -82,34 +91,37 @@ const ForgotPassword = () => {
                     <input
                       type="email"
                       value={email}
-                      disabled={status === 'loading'}
+                      disabled={isMutating}
                       onChange={(e) => {
                         setEmail(e.target.value);
-                        if (status === 'error') setStatus('idle');
+                        if (error) reset(); // Limpiar error al escribir
                       }}
                       placeholder="ejemplo@correo.com"
                       className={`
                         w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 rounded-lg focus:outline-none transition disabled:opacity-50
-                        ${status === 'error' ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
+                        ${(error || validationError) ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
                       `}
                     />
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   </div>
-                  {status === 'error' && (
+                  
+                  {/* Manejo de errores combinados (Validación local + Error de SWR) */}
+                  {(error || validationError) && (
                     <p className="text-red-500 text-xs mt-1 flex items-center gap-1 animate-pulse">
-                      <AlertCircle className="w-3 h-3" /> {errorMsg || 'Por favor ingresa un correo válido.'}
+                      <AlertCircle className="w-3 h-3" /> 
+                      {validationError || error?.message || 'Error al enviar el correo.'}
                     </p>
                   )}
                 </div>
 
                 <button
                   type="submit"
-                  disabled={status === 'loading'}
+                  disabled={isMutating}
                   className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-900 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg shadow-lg shadow-red-900/30 transition duration-300 flex justify-center items-center"
                 >
-                  {status === 'loading' ? (
+                  {isMutating ? (
                     <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                      <Loader2 className="w-4 h-4 animate-spin" />
                       Enviando...
                     </span>
                   ) : (
@@ -140,7 +152,7 @@ const ForgotPassword = () => {
           )}
 
           {/* Footer Link */}
-          {status !== 'success' && (
+          {!isSuccess && (
             <div className="mt-6 text-center">
               <Link to="/login" className="text-gray-400 hover:text-white text-sm flex items-center justify-center gap-1 transition">
                 <ArrowLeft className="w-4 h-4" /> Regresar al Login

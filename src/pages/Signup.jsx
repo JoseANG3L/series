@@ -1,18 +1,35 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ChevronLeft, Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react';
-import { supabase } from '../supabase/client'; // <--- Importamos Supabase
+import { Mail, Lock, User, ChevronLeft, Eye, EyeOff, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { supabase } from '../supabase/client';
+import useSWRMutation from 'swr/mutation'; // <--- 1. Importamos el hook
+
+// --- 2. FUNCIÓN DE REGISTRO (FETCHER) ---
+async function registerUser(key, { arg }) {
+  const { name, email, password } = arg;
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: name, // Guardamos el nombre en metadata
+      }
+    }
+  });
+
+  if (error) throw error;
+  return data;
+}
 
 const Signup = () => {
   const navigate = useNavigate();
   
-  // Estados
+  // Estados de UI (Formulario y visualización)
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState(''); // Para avisar si se envió correo de confirmación
-
+  const [validationError, setValidationError] = useState(''); // Errores locales (contraseñas no coinciden, etc)
+  
   const [formData, setFormData] = useState({ 
     name: '', 
     email: '', 
@@ -20,74 +37,64 @@ const Signup = () => {
     confirmPassword: ''
   });
 
+  // --- 3. CONFIGURAR SWR MUTATION ---
+  const { trigger, isMutating, data, error: apiError, reset } = useSWRMutation(
+    'signup-action', 
+    registerUser
+  );
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
+    setValidationError(''); // Limpiar error local
+    if (apiError) reset();  // Limpiar error de API
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccessMsg('');
-
+    setValidationError('');
+    
     // 1. Validaciones Locales
     if (!formData.name || !formData.email || !formData.password) {
-        setError('Todos los campos son obligatorios.');
+        setValidationError('Todos los campos son obligatorios.');
         return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden.');
-      return;
+        setValidationError('Las contraseñas no coinciden.');
+        return;
     }
     
     if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.');
-      return;
+        setValidationError('La contraseña debe tener al menos 6 caracteres.');
+        return;
     }
 
-    setLoading(true);
-
     try {
-        // 2. Registro en Supabase
-        const { data, error } = await supabase.auth.signUp({
-            email: formData.email,
-            password: formData.password,
-            options: {
-                // Guardamos el nombre en la metadata del usuario
-                data: {
-                    full_name: formData.name,
-                }
-            }
-        });
+        // 2. Disparar el registro
+        const result = await trigger(formData);
 
-        if (error) throw error;
-
-        // 3. Manejo post-registro
-        // Si Supabase requiere confirmación de email (configuración por defecto),
-        // data.session será null hasta que el usuario confirme.
-        if (!data.session) {
-            setSuccessMsg('¡Registro exitoso! Revisa tu correo electrónico para confirmar tu cuenta.');
-        } else {
-            // Si tienes desactivada la confirmación de email, entra directo
+        // 3. Manejo post-registro (Redirección)
+        // Si ya existe sesión (auto-confirmación activada en Supabase), entramos.
+        // Si no (requiere email), mostramos la pantalla de éxito.
+        if (result?.session) {
             navigate('/');
         }
-
     } catch (err) {
-        setError(err.message || 'Ocurrió un error al registrarse.');
-    } finally {
-        setLoading(false);
+        console.error(err);
     }
   };
 
-  // Si el registro fue exitoso y requiere confirmación, mostramos vista de éxito
-  if (successMsg) {
+  // --- VISTA DE ÉXITO (Correo de confirmación enviado) ---
+  // Si tenemos data, no hay error, y NO hay sesión, significa que se envió el correo.
+  if (data && !data.session && !apiError) {
     return (
         <div className="min-h-screen w-full relative flex items-center justify-center bg-[#0f172a]">
              <div className="bg-slate-900 p-8 rounded-xl border border-slate-700 max-w-md text-center shadow-2xl animate-fade-in-up">
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
                 <h2 className="text-2xl font-bold text-white mb-2">¡Cuenta Creada!</h2>
-                <p className="text-slate-300 mb-6">{successMsg}</p>
+                <p className="text-slate-300 mb-6">
+                    Registro exitoso. Revisa tu correo electrónico <strong>({formData.email})</strong> para confirmar tu cuenta.
+                </p>
                 <Link to="/login" className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-2 rounded-full font-bold transition">
                     Ir al Login
                 </Link>
@@ -96,14 +103,17 @@ const Signup = () => {
     );
   }
 
+  // Helper para mostrar errores
+  const currentError = validationError || apiError?.message;
+
   return (
     <div className="min-h-screen w-full relative flex">
       {/* Fondo */}
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/fondo.jpg')" }}></div>
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://assets.nflxext.com/ffe/siteui/vlv3/c38a2d52-138e-48a3-ab68-36787ece46b3/eeb03fc9-99bf-4734-8f09-2b0f49495b52/MX-es-20240101-popsignuptwoweeks-perspective_alpha_website_large.jpg')" }}></div>
       <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-[#1c0c2f] via-transparent to-black/30"></div>
 
       <div className="relative z-30 flex flex-col min-h-screen w-full pt-16 pb-16 md:pt-20 px-4 md:px-8 lg:px-16 pb-8 gap-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full text-white hover:bg-white hover:text-black transition w-fit">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full text-white hover:bg-white hover:text-black transition w-fit border border-white/10">
           <ChevronLeft className="w-5 h-5" /> Volver
         </button>
 
@@ -125,7 +135,7 @@ const Signup = () => {
                 <input 
                   name="name"
                   type="text" 
-                  disabled={loading}
+                  disabled={isMutating}
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Tu nombre" 
@@ -142,7 +152,7 @@ const Signup = () => {
                 <input 
                   name="email"
                   type="email" 
-                  disabled={loading}
+                  disabled={isMutating}
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="ejemplo@correo.com" 
@@ -159,7 +169,7 @@ const Signup = () => {
                 <input 
                   name="password"
                   type={showPassword ? "text" : "password"} 
-                  disabled={loading}
+                  disabled={isMutating}
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Crear contraseña" 
@@ -184,7 +194,7 @@ const Signup = () => {
                 <input 
                   name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"} 
-                  disabled={loading}
+                  disabled={isMutating}
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="Repite tu contraseña" 
@@ -202,19 +212,19 @@ const Signup = () => {
               </div>
             </div>
 
-            {/* Mensaje de Error */}
-            {error && (
-              <div className="text-red-500 text-sm text-center bg-red-500/10 p-2 rounded border border-red-500/50 animate-pulse">
-                {error}
+            {/* Mensaje de Error (Local o API) */}
+            {currentError && (
+              <div className="text-red-500 text-xs flex items-center gap-2 justify-center bg-red-500/10 p-2 rounded border border-red-500/50 animate-pulse">
+                <AlertCircle className="w-4 h-4" /> {currentError}
               </div>
             )}
 
             <button 
                 type="submit" 
-                disabled={loading}
+                disabled={isMutating}
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-red-900/30 transition duration-300 transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-2"
             >
-              {loading ? (
+              {isMutating ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" /> Registrando...
                 </>

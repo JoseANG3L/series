@@ -1,84 +1,111 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ChevronLeft, Loader2 } from 'lucide-react';
-import { supabase } from '../supabase/client'; // <--- 1. IMPORTAR SUPABASE
+import { Mail, Lock, Eye, EyeOff, ChevronLeft, Loader2, AlertCircle } from 'lucide-react';
+import { supabase } from '../supabase/client';
+import useSWRMutation from 'swr/mutation'; // <--- 1. Importamos el hook
+
+// --- 2. FUNCIÓN DE LOGIN (FETCHER) ---
+// Esta función maneja TODA la lógica asíncrona: Login y buscar el Rol.
+async function loginUser(key, { arg }) {
+  const { email, password } = arg;
+
+  // A. Iniciar Sesión en Supabase
+  const { data, error: authError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (authError) throw authError;
+
+  // B. Buscar el Rol en la tabla profiles
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .single();
+
+  // Retornamos el rol (o 'user' por defecto) para usarlo en el componente
+  return { role: profile?.role || 'user' };
+}
 
 const Login = () => {
   const navigate = useNavigate();
   
-  // Estados
+  // Estados Locales (Solo para UI)
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // <--- 2. ESTADO DE CARGA
+  const [validationError, setValidationError] = useState('');
+
+  // --- 3. CONFIGURAR EL HOOK ---
+  // trigger: dispara el login
+  // isMutating: reemplaza a tu 'loading'
+  // error: captura los errores de Supabase automáticamente
+  const { trigger, isMutating, error: apiError, reset } = useSWRMutation(
+    'login-action', 
+    loginUser
+  );
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
+    setValidationError('');
+    if (apiError) reset(); // Limpiar error de API al escribir
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setValidationError('');
     
-    // Validación simple
+    // Validación local simple
     if (!formData.email || !formData.password) {
-      setError('Por favor, completa todos los campos.');
+      setValidationError('Por favor, completa todos los campos.');
       return;
     }
 
-    setLoading(true);
-
     try {
-      // --- 3. LOGICA SUPABASE ---
-      
-      // A. Intentar iniciar sesión
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
+      // Llamamos al trigger. Si falla, salta al catch.
+      // Si tiene éxito, nos devuelve lo que retornó 'loginUser' (el rol).
+      const result = await trigger(formData);
 
-      if (authError) throw authError;
-
-      // B. Si el login es exitoso, verificamos el ROL para redirigir
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      // C. Redirección inteligente
-      if (profile?.role === 'admin') {
+      // C. Redirección basada en el resultado
+      if (result?.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/');
       }
 
     } catch (err) {
-      // Manejo de errores (Credenciales inválidas, etc)
-      setError('Correo o contraseña incorrectos.');
-      console.error(err.message);
-      setLoading(false); // Solo quitamos loading si hubo error
+      // El error ya está en 'apiError', aquí solo evitamos que explote la app
+      console.error("Error en login:", err);
     }
   };
+
+  // Helper para mensaje de error legible
+  const getErrorMessage = () => {
+    if (validationError) return validationError;
+    if (apiError) {
+      if (apiError.message === "Invalid login credentials") return "Correo o contraseña incorrectos.";
+      return apiError.message;
+    }
+    return null;
+  };
+
+  const currentError = getErrorMessage();
 
   return (
     <div className="min-h-screen w-full relative flex">
       {/* --- FONDO --- */}
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/fondo.jpg')" }}></div>
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://assets.nflxext.com/ffe/siteui/vlv3/c38a2d52-138e-48a3-ab68-36787ece46b3/eeb03fc9-99bf-4734-8f09-2b0f49495b52/MX-es-20240101-popsignuptwoweeks-perspective_alpha_website_large.jpg')" }}></div>
       <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-[#1c0c2f] via-transparent to-black/30"></div>
 
       <div className="relative z-30 flex flex-col min-h-screen w-full pt-16 pb-16 md:pt-20 px-4 md:px-8 lg:px-16 pb-8 gap-4">
         
-        {/* Botón Volver */}
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full text-white hover:bg-white hover:text-black transition w-fit">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full text-white hover:bg-white hover:text-black transition w-fit border border-white/10">
           <ChevronLeft className="w-5 h-5" /> Volver
         </button>
 
         {/* --- TARJETA DE LOGIN --- */}
         <div className="relative z-10 w-full max-w-md m-auto bg-black/60 backdrop-blur-md p-8 rounded-xl shadow-2xl border border-white/10 animate-fade-in-up">
           
-          {/* Encabezado */}
           <div className="text-center mb-8">
             <h1 className="flex gap-2 justify-center items-center text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-600 tracking-tighter">
                 Iniciar sesión
@@ -86,7 +113,6 @@ const Login = () => {
             <p className="text-gray-400 mt-2 text-sm">Bienvenido de nuevo</p>
           </div>
 
-          {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-6">
             
             {/* Email */}
@@ -98,9 +124,9 @@ const Login = () => {
                   type="email" 
                   value={formData.email}
                   onChange={handleChange}
-                  disabled={loading} // Deshabilitar si carga
+                  disabled={isMutating}
                   placeholder="ejemplo@correo.com"
-                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:border-red-500 transition disabled:opacity-50"
+                  className={`w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 rounded-lg focus:outline-none transition disabled:opacity-50 ${currentError ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}`}
                 />
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
@@ -115,9 +141,9 @@ const Login = () => {
                   type={showPassword ? "text" : "password"} 
                   value={formData.password}
                   onChange={handleChange}
-                  disabled={loading} // Deshabilitar si carga
+                  disabled={isMutating}
                   placeholder="Ingresa tu contraseña"
-                  className="w-full bg-slate-800/50 border border-slate-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:border-red-500 transition disabled:opacity-50"
+                  className={`w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none transition disabled:opacity-50 ${currentError ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}`}
                 />
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 
@@ -131,7 +157,6 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Opciones Extra */}
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 text-gray-400 cursor-pointer hover:text-gray-300">
                 <input type="checkbox" className="rounded bg-slate-700 border-slate-600 text-red-600 focus:ring-red-500/50 cursor-pointer" />
@@ -142,20 +167,19 @@ const Login = () => {
               </Link>
             </div>
 
-            {/* Mensaje de Error */}
-            {error && (
-              <div className="text-red-500 text-sm text-center bg-red-500/10 p-2 rounded border border-red-500/50 animate-pulse">
-                {error}
+            {/* Mensaje de Error Unificado */}
+            {currentError && (
+              <div className="text-red-500 text-xs flex items-center gap-2 justify-center bg-red-500/10 p-2 rounded border border-red-500/50 animate-pulse">
+                <AlertCircle className="w-4 h-4" /> {currentError}
               </div>
             )}
 
-            {/* Botón Submit con Loading */}
             <button 
               type="submit" 
-              disabled={loading}
+              disabled={isMutating}
               className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-red-900/30 transition duration-300 transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-2"
             >
-              {loading ? (
+              {isMutating ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" /> Conectando...
                 </>
@@ -165,7 +189,6 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Footer */}
           <div className="mt-8 text-center text-gray-400 text-sm">
             ¿Primera vez en LuisFSeries?{' '}
             <Link to="/signup" className="text-white font-bold hover:underline">Registrate ahora.</Link>

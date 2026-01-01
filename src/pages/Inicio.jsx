@@ -1,45 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import React from 'react';
+import useSWR from 'swr'; // <--- 1. Importamos SWR
+import { Loader2, WifiOff } from 'lucide-react';
 import MovieSection from "../components/MovieSection";
 import Hero from "../components/Hero";
-import { getMovies, getSeries, getNovedades } from '../services/api'; // <--- Importamos los servicios
+import { getMovies, getSeries, getNovedades } from '../services/api'; 
 
 function Inicio() {
-  // --- ESTADOS PARA CADA SECCIÓN ---
-  const [novedades, setNovedades] = useState([]);
-  const [peliculas, setPeliculas] = useState([]);
-  const [series, setSeries] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // --- CONFIGURACIÓN SWR ---
+  const config = {
+    revalidateOnFocus: true, // Recarga al volver a la pestaña
+    dedupingInterval: 60000, // Caché de 1 minuto
+  };
 
-  // --- CARGA DE DATOS ---
-  useEffect(() => {
-    const fetchHomeData = async () => {
-      try {
-        setLoading(true);
-        
-        // Ejecutamos las 3 peticiones en paralelo para que sea más rápido
-        const [dataNovedades, dataPeliculas, dataSeries] = await Promise.all([
-          getNovedades(),
-          getMovies(),
-          getSeries()
-        ]);
+  // --- PETICIONES EN PARALELO ---
+  // SWR lanza las 3 peticiones al mismo tiempo automáticamente
+  const { data: novedades, isLoading: loadNov } = useSWR('home-novedades', getNovedades, config);
+  const { data: peliculas, isLoading: loadMov } = useSWR('home-movies', getMovies, config);
+  const { data: series, isLoading: loadSer } = useSWR('home-series', getSeries, config);
 
-        setNovedades(dataNovedades);
-        setPeliculas(dataPeliculas);
-        setSeries(dataSeries);
+  // Calculamos si todo está cargando (solo para la primera vez)
+  const isLoading = loadNov || loadMov || loadSer;
 
-      } catch (error) {
-        console.error("Error cargando home:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHomeData();
-  }, []);
-
-  // --- VISTA DE CARGA (Pantalla completa negra con spinner) ---
-  if (loading) {
+  // --- VISTA DE CARGA ---
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
         <Loader2 className="w-12 h-12 text-red-600 animate-spin" />
@@ -47,40 +30,51 @@ function Inicio() {
     );
   }
 
+  // --- RENDERIZADO ---
   return (
     <div className="min-h-screen bg-[#0f172a] font-sans selection:bg-red-500 selection:text-white pb-20">
       
-      {/* El Hero ya se encarga de cargar sus propios datos internamente */}
+      {/* El Hero carga su propia data internamente */}
       <Hero />
       
-      <br />
+      {/* Contenedor con margen negativo para solapar el Hero (Estilo Netflix) */}
+      <div className="relative space-y-8 md:space-y-12">
         
-      {/* SECCIÓN 1: ESTRENOS (Prioridad Alta) */}
-      {novedades.length > 0 && (
-          <MovieSection 
-              title="Nuevos Estrenos" 
-              movies={novedades} 
-              layout="carousel" 
-          />
-      )}
+        {/* SECCIÓN 1: ESTRENOS */}
+        {novedades && novedades.length > 0 && (
+            <MovieSection 
+                title="Nuevos Estrenos" 
+                movies={novedades} 
+                layout="carousel" 
+            />
+        )}
 
-      {/* SECCIÓN 2: PELÍCULAS */}
-      {peliculas.length > 0 && (
-          <MovieSection 
-              title="Películas Populares" 
-              movies={peliculas} 
-              layout="carousel" 
-          />
-      )}
+        {/* SECCIÓN 2: PELÍCULAS */}
+        {peliculas && peliculas.length > 0 && (
+            <MovieSection 
+                title="Películas Populares" 
+                movies={peliculas} 
+                layout="carousel" 
+            />
+        )}
 
-      {/* SECCIÓN 3: SERIES */}
-      {series.length > 0 && (
-          <MovieSection 
-              title="Últimas Series" 
-              movies={series} 
-              layout="carousel" 
-          />
-      )}
+        {/* SECCIÓN 3: SERIES */}
+        {series && series.length > 0 && (
+            <MovieSection 
+                title="Últimas Series" 
+                movies={series} 
+                layout="carousel" 
+            />
+        )}
+
+        {/* Mensaje si falló todo (Opcional) */}
+        {(!novedades && !peliculas && !series) && (
+             <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+                <WifiOff className="w-12 h-12 mb-2" />
+                <p>No se pudo cargar el contenido</p>
+             </div>
+        )}
+      </div>
 
     </div>
   );

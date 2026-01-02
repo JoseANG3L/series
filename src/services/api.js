@@ -1,130 +1,137 @@
-import { supabase } from '../supabase/client';
+import { act } from 'react';
+import { db } from '../firebase/client';
+import { 
+  collection, 
+  getDocs, 
+  getDoc, 
+  doc, 
+  query, 
+  where, 
+  orderBy, 
+  limit 
+} from "firebase/firestore";
 
-// --- HELPER: TIMEOUT DE SEGURIDAD ---
-// Si la petición tarda más de 10 segundos (10000ms), la cancelamos.
-// Esto evita que la app se quede en "Cargando..." infinito si se perdió la conexión.
+// --- HELPER: TIMEOUT (Seguridad) ---
 const fetchWithTimeout = async (promise, ms = 10000) => {
   let timer;
   const timeoutPromise = new Promise((_, reject) => {
-    timer = setTimeout(() => reject(new Error("Tiempo de espera agotado (Timeout)")), ms);
+    timer = setTimeout(() => reject(new Error("Timeout: La petición tardó demasiado")), ms);
   });
-
   try {
-    // Competencia: ¿Quién termina primero? ¿Supabase o el Temporizador?
     const result = await Promise.race([promise, timeoutPromise]);
-    clearTimeout(timer); // Si Supabase ganó, cancelamos el temporizador
+    clearTimeout(timer);
     return result;
   } catch (error) {
-    clearTimeout(timer); // Limpiamos siempre
+    clearTimeout(timer);
     throw error;
   }
 };
 
-// --- FUNCIÓN AUXILIAR PARA MAPEAR DATOS ---
-const mapDatabaseToModel = (dbItem) => ({
-  id: dbItem.id,
-  titulo: dbItem.title,
-  poster: dbItem.poster_url,   
-  backdrop: dbItem.backdrop_url,
-  anio: dbItem.release_date ? new Date(dbItem.release_date).getFullYear() : 'N/A', 
-  director: dbItem.director, 
-  rating: dbItem.rating,
-  genero: dbItem.genres || [],
-  type: dbItem.is_premiere ? 'new' : (dbItem.qualities?.includes('4K') ? '4k' : 'hd'),
-  sinopsis: dbItem.overview,
-  tagline: dbItem.tagline,
-  trailer: dbItem.trailer_url,
-  
-  // Específicos de Series
-  temporadas: dbItem.seasons_data || [], 
-  
-  // Otros
-  elenco: dbItem.cast_members || [],
-  galeria: dbItem.gallery_urls || [],
-  categoria: dbItem.categories || [],
-  
-  // Flags originales
-  is_original: dbItem.is_original,
-  is_premiere: dbItem.is_premiere,
-  calidades: dbItem.qualities || []
-});
+// --- MAPPING (EL CORAZÓN DEL CAMBIO) ---
+// Transforma tu NUEVA estructura de Firebase a lo que React necesita
+const mapDatabaseToModel = (dbItem) => {
+  const info = dbItem.informacion || {}; // Protegemos si viene vacío
 
-// 1. OBTENER TODAS LAS PELÍCULAS
+  return {
+    // 1. Campos Directos (Tu nueva lista)
+    id: dbItem.id,
+    titulo: dbItem.titulo,
+    tipo: dbItem.tipo, // 'movie' o 'serie'
+    slug: dbItem.slug,
+    sinopsis: dbItem.sinopsis,
+    tagline: dbItem.tagline || "",
+    poster: dbItem.poster,
+    backdrop: dbItem.backdrop,
+    trailer: dbItem.trailer,
+    temporadas: dbItem.temporadas || [],
+    creado: dbItem.creado || null,
+    actualizado: dbItem.actualizado || null,
+
+    // 2. Campos desde 'informacion' (Tu nuevo subobjeto)
+    calidad: info.calidad || 'HD',
+    resolucion: info.resolucion || '1080p',
+  };
+};
+
+// --- HELPER PARA LIMPIAR SNAPSHOTS ---
+const parseSnapshot = (snapshot) => {
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+};
+
+// ==========================================
+//          FUNCIONES DE LA API
+// ==========================================
+
+// 1. OBTENER PELÍCULAS
 export const getMovies = async () => {
   try {
-    const { data, error } = await fetchWithTimeout(
-      supabase
-        .from('content')
-        .select('*')
-        .eq('content_type', 'movie')
-        .order('created_at', { ascending: false })
+    const contentRef = collection(db, 'content');
+    const q = query(
+      contentRef, 
+      where('tipo', '==', 'movie'), // Usamos tu campo 'tipo'
+      orderBy('creado', 'desc')     // Usamos tu campo 'creado'
     );
 
-    if (error) throw error;
-    return data.map(mapDatabaseToModel);
-
+    const snapshot = await fetchWithTimeout(getDocs(q));
+    return parseSnapshot(snapshot).map(mapDatabaseToModel);
   } catch (error) {
-    console.error("Error cargando películas:", error);
-    return []; // Retornamos vacío para quitar el spinner
+    console.error("Error en getMovies:", error);
+    return []; 
   }
 };
 
-// 2. OBTENER TODAS LAS SERIES
+// 2. OBTENER SERIES
 export const getSeries = async () => {
   try {
-    const { data, error } = await fetchWithTimeout(
-      supabase
-        .from('content')
-        .select('*')
-        .eq('content_type', 'series')
-        .order('created_at', { ascending: false })
+    const contentRef = collection(db, 'content');
+    const q = query(
+      contentRef, 
+      where('tipo', '==', 'serie'),
+      orderBy('creado', 'desc')
     );
 
-    if (error) throw error;
-    return data.map(mapDatabaseToModel);
-
+    const snapshot = await fetchWithTimeout(getDocs(q));
+    return parseSnapshot(snapshot).map(mapDatabaseToModel);
   } catch (error) {
-    console.error("Error cargando series:", error);
+    console.error("Error en getSeries:", error);
     return [];
   }
 };
 
 // 3. OBTENER NOVEDADES
+// Como ya no tienes 'is_premiere' en la raíz, traemos los últimos 10 creados
 export const getNovedades = async () => {
   try {
-    const { data, error } = await fetchWithTimeout(
-      supabase
-        .from('content')
-        .select('*')
-        .eq('is_premiere', true)
-        .limit(10)
+    const contentRef = collection(db, 'content');
+    const q = query(
+      contentRef, 
+      orderBy('creado', 'desc'),
+      limit(10)
     );
 
-    if (error) throw error;
-    return data.map(mapDatabaseToModel);
-
+    const snapshot = await fetchWithTimeout(getDocs(q));
+    return parseSnapshot(snapshot).map(mapDatabaseToModel);
   } catch (error) {
-    console.error("Error cargando novedades:", error);
+    console.error("Error en getNovedades:", error);
     return [];
   }
 };
 
-// 4. OBTENER DETALLE POR ID
+// 4. OBTENER POR ID
 export const getContentById = async (id) => {
   try {
-    const { data, error } = await fetchWithTimeout(
-      supabase
-        .from('content')
-        .select('*')
-        .eq('id', id)
-        .single()
-    );
+    const docRef = doc(db, 'content', id);
+    const docSnap = await fetchWithTimeout(getDoc(docRef));
 
-    if (error) throw error;
-    return mapDatabaseToModel(data);
-
+    if (docSnap.exists()) {
+      return mapDatabaseToModel({ id: docSnap.id, ...docSnap.data() });
+    }
+    return null;
   } catch (error) {
-    console.error("Error cargando detalle:", error);
+    console.error("Error en getContentById:", error);
     return null;
   }
 };

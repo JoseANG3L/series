@@ -58,7 +58,7 @@ const MovieDetail = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] via-[#0f172a]/60 to-transparent"></div>
         </div>
         
-        <div className="relative z-30 flex flex-col justify-between min-h-screen pt-16 md:pt-20 px-4 md:px-8 lg:px-16 pb-8 gap-5">
+        <div className="relative z-30 flex flex-col justify-between pt-16 md:pt-20 px-4 md:px-8 lg:px-16 pb-8 gap-8">
 
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full hover:bg-white hover:text-black transition w-fit border border-white/10">
             <ChevronLeft className="w-5 h-5" /> Volver
@@ -66,14 +66,7 @@ const MovieDetail = () => {
 
           <div className="max-w-3xl animate-fade-in-up">
             
-            {movie.is_original && (
-                <p className="text-red-500 font-bold tracking-widest text-sm mb-2 uppercase flex items-center gap-2">
-                <span className="w-1 h-4 bg-red-600 inline-block"></span> 
-                CONTENIDO EXCLUSIVO
-                </p>
-            )}
-
-            <h1 className="text-3xl md:text-5xl font-extrabold mb-3 drop-shadow-2xl leading-tight">{movie.titulo}</h1>
+            <h1 className="text-3xl md:text-4xl font-extrabold mb-3 drop-shadow-2xl leading-tight">{movie.titulo}</h1>
             
             {movie.tagline ? (
               <p className="text-gray-300 italic text-lg mb-6 font-light border-l-2 border-gray-500 pl-3 line-clamp-2 md:line-clamp-none">
@@ -87,40 +80,7 @@ const MovieDetail = () => {
               )
             )}
 
-            <div className="flex flex-wrap items-center gap-4 text-gray-200 text-sm md:text-base mb-6 md:mb-8 font-medium">
-              <span className="flex items-center gap-1 text-green-400 font-bold"><Star className="w-4 h-4 fill-current"/> {movie.rating?.toFixed(1) || "N/A"}</span>
-              <span className="flex items-center gap-1"><Calendar className="w-4 h-4"/> {movie.anio}</span>
-              <span className="flex items-center gap-1">
-                  <Clock className="w-4 h-4"/> 
-                  {movie.type === 'series' ? `${movie.temporadas?.length || 0} Temps` : (movie.duracion || "N/A")}
-              </span>
-              
-              <span className="h-4 w-[1px] bg-gray-600 mx-2"></span>
-
-              <div className="flex gap-2 text-[10px] font-bold text-gray-400">
-                {movie.calidades && movie.calidades.length > 0 ? (
-                    movie.calidades.map((cal, i) => (
-                        <span key={i} className="border border-gray-500 px-1.5 py-0.5 rounded uppercase">{cal}</span>
-                    ))
-                ) : (
-                    <span className="border border-gray-500 px-1.5 py-0.5 rounded uppercase">HD</span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2 mb-6 md:mb-8">
-              {movie.genero && Array.isArray(movie.genero) ? (
-                 movie.genero.map((g, i) => (
-                    <span key={i} className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full text-white cursor-pointer transition">
-                      {g}
-                    </span>
-                 ))
-              ) : (
-                 <span className="text-xs bg-white/10 px-3 py-1 rounded-full text-white">{movie.genero}</span>
-              )}
-            </div>
-
-            <div className="flex gap-4">
+            <div className="flex gap-4 mt-6">
               <button className="flex items-center gap-2 px-8 py-3 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition">
                 <Play className="w-5 h-5 fill-black" /> Reproducir
               </button>

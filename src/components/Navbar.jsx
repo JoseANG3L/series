@@ -54,6 +54,19 @@ const Navbar = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // --- NUEVO: EFECTO PARA BLOQUEAR SCROLL DEL BODY ---
+  useEffect(() => {
+    if (isOpen) {
+      // Si el menú está abierto, quitamos el scroll a la página
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Si se cierra, lo devolvemos
+      document.body.style.overflow = 'unset';
+    }
+    // Cleanup por si el componente se desmonta con el menú abierto
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isOpen]);
+
   const VISIBLE_LINKS = NAV_LINKS.slice(0, visibleCount);
   const HIDDEN_LINKS = NAV_LINKS.slice(visibleCount);
 
@@ -65,10 +78,9 @@ const Navbar = () => {
     setShowMobileSearch(false);
   };
 
-  // 1. NUEVA FUNCIÓN PARA IR AL ADMIN Y CERRAR MENÚ
   const handleAdminClick = () => {
     navigate('/admin');
-    closeMenu(); // Fuerza el cierre
+    closeMenu(); 
   };
 
   const handleSearch = (e) => {
@@ -101,9 +113,10 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="absolute top-0 left-0 w-full z-50 bg-gradient-to-b from-black/70 to-transparent">
+    <nav className="absolute top-0 left-0 w-full z-50">
       
-      <div className="px-4 md:px-8 lg:px-16 py-4 flex justify-between items-center relative">
+      <div className="absolute top-0 left-0 w-full h-full bg-[#0f172a]/60 backdrop-blur-md"></div>
+      <div className="px-4 md:px-8 lg:px-16 py-3 flex justify-between items-center relative">
         
         {/* --- IZQUIERDA: LOGO --- */}
         <div className="flex items-center gap-6 lg:gap-12 z-20 flex-1">
@@ -159,7 +172,7 @@ const Navbar = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`bg-transparent text-white text-sm outline-none transition-all duration-300 ${isDesktopSearchOpen ? 'w-full opacity-100 pl-1' : 'w-0 opacity-0'}`}
               />
-              <button type="submit" onClick={handleSearchIconClick} className={`shrink-0 text-gray-300 hover:text-white transition ${!isDesktopSearchOpen && 'hover:text-red-500'}`}>
+              <button type="submit" onClick={handleSearchIconClick} className={`shrink-0 text-gray-200 hover:text-white transition ${!isDesktopSearchOpen && 'hover:text-red-500'}`}>
                  <Search className="w-5 h-5" />
               </button>
             </form>
@@ -170,7 +183,7 @@ const Navbar = () => {
           <div className="hidden md:flex gap-3 relative z-40 bg-transparent items-center">
               {!user ? (
                 <>
-                  <button onClick={() => { navigate('/signup'); closeMenu(); }} className="px-5 py-2 border border-gray-500 text-white rounded-full text-sm font-semibold hover:border-white transition whitespace-nowrap">Registrarse</button>
+                  <button onClick={() => { navigate('/signup'); closeMenu(); }} className="px-5 py-2 bg-black/30 border border-gray-500 text-white rounded-full text-sm font-semibold hover:border-white transition whitespace-nowrap">Registrarse</button>
                   <button onClick={() => { navigate('/login'); closeMenu(); }} className="px-5 py-2 bg-green-600 text-white rounded-full text-sm font-semibold hover:bg-green-500 shadow-lg shadow-green-900/50 transition whitespace-nowrap">Iniciar sesión</button>
                 </>
               ) : (
@@ -192,7 +205,6 @@ const Navbar = () => {
                                 <p className="text-xs text-slate-400 truncate">{user.email}</p>
                             </div>
                             
-                            {/* 2. ENLACE ADMIN ESCRITORIO (Usamos la nueva función) */}
                             {role === 'admin' && (
                                 <button onClick={handleAdminClick} className="text-left px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition w-full">
                                     <Settings className="w-4 h-4" /> Panel Admin
@@ -220,50 +232,59 @@ const Navbar = () => {
 
       {/* --- PANELES MÓVILES --- */}
       {showMobileSearch && (
-        <div className="md:hidden absolute top-full left-0 w-full px-4 animate-fadeIn z-40">
+        <div className="md:hidden absolute top-full left-0 w-full animate-fadeIn z-40">
            <form onSubmit={handleSearch} className="relative w-full shadow-2xl">
-              <input autoFocus type="text" placeholder="Buscar..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-black/50 border border-gray-600 text-white px-4 py-3 pl-10 rounded-lg outline-none focus:border-red-500 backdrop-blur-md" />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+             <input autoFocus type="text" placeholder="Buscar..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-black/50 border border-gray-600 text-white px-4 py-3 pl-10 outline-none focus:border-red-500 backdrop-blur-md" />
+             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
            </form>
         </div>
       )}
 
-      <div className={`fixed inset-0 bg-slate-950/95 backdrop-blur-lg z-40 flex flex-col items-center justify-center gap-8 transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"} md:hidden`}>
-        <ul className="flex flex-col items-center gap-6 text-xl font-bold">
-          {NAV_LINKS.map((link) => (
-            <NavLink key={link.name} to={link.path} onClick={closeMenu} className={({ isActive }) => isActive ? "text-red-500" : "text-white hover:text-red-500 transition"}>{link.name}</NavLink>
-          ))}
-          
-          {/* 3. ENLACE ADMIN MÓVIL (Cambio crítico: Usar button + handleAdminClick) */}
-          {user && role === 'admin' && (
-             <button onClick={handleAdminClick} className="text-yellow-500 hover:text-yellow-400 font-bold transition">
-               Panel Admin
-             </button>
-          )}
-        </ul>
-
-        <div className="flex flex-col gap-4 mt-4 w-64">
-          {!user ? (
-            <>
-                <button onClick={() => { navigate('/login'); closeMenu(); }} className="px-5 py-3 bg-green-600 text-white rounded-full font-semibold hover:bg-green-500 shadow-lg">Iniciar sesión</button>
-                <button onClick={() => { navigate('/signup'); closeMenu(); }} className="px-5 py-3 border border-gray-500 text-white rounded-full font-semibold hover:border-white">Registrarse</button>
-            </>
-          ) : (
-            <>
-                <div className="flex items-center gap-3 justify-center mb-2 bg-slate-900/50 p-2 rounded-lg border border-slate-800">
-                    <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center font-bold text-white">
-                        {user.email.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="text-left">
-                        <p className="text-sm text-white font-bold">{user.user_metadata?.full_name}</p>
-                        <p className="text-xs text-slate-400 truncate max-w-[150px]">{user.email}</p>
-                    </div>
-                </div>
-                <button onClick={handleLogout} className="px-5 py-3 bg-red-600/20 text-red-500 border border-red-600/50 rounded-full font-semibold hover:bg-red-600 hover:text-white transition flex items-center justify-center gap-2">
-                    <LogOut className="w-5 h-5" /> Cerrar sesión
+      {/* MODIFICACIÓN AQUÍ: 
+         1. Se agrega 'overflow-y-auto' para permitir scroll interno.
+         2. Se elimina 'flex flex-col items-center justify-center' del contenedor principal fixed.
+         3. Se crea un div interno con 'min-h-full flex flex-col items-center justify-center py-20' 
+            para asegurar centrado si el contenido es poco, o scroll si es mucho.
+      */}
+      <div 
+        className={`fixed inset-0 bg-slate-950/95 backdrop-blur-lg z-40 transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"} md:hidden overflow-y-auto`}
+      >
+        <div className="min-h-full flex flex-col items-center justify-center py-20">
+            <ul className="flex flex-col items-center gap-6 text-xl font-bold">
+            {NAV_LINKS.map((link) => (
+                <NavLink key={link.name} to={link.path} onClick={closeMenu} className={({ isActive }) => isActive ? "text-red-500" : "text-white hover:text-red-500 transition"}>{link.name}</NavLink>
+            ))}
+            
+            {user && role === 'admin' && (
+                <button onClick={handleAdminClick} className="text-yellow-500 hover:text-yellow-400 font-bold transition">
+                Panel Admin
                 </button>
-            </>
-          )}
+            )}
+            </ul>
+
+            <div className="flex flex-col gap-4 mt-8 w-64 shrink-0">
+            {!user ? (
+                <>
+                    <button onClick={() => { navigate('/login'); closeMenu(); }} className="px-5 py-3 bg-green-600 text-white rounded-full font-semibold hover:bg-green-500 shadow-lg">Iniciar sesión</button>
+                    <button onClick={() => { navigate('/signup'); closeMenu(); }} className="px-5 py-3 border border-gray-500 text-white rounded-full font-semibold hover:border-white">Registrarse</button>
+                </>
+            ) : (
+                <>
+                    <div className="flex items-center gap-3 justify-center mb-2 bg-slate-900/50 p-2 rounded-lg border border-slate-800">
+                        <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center font-bold text-white shrink-0">
+                            {user.email.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="text-left overflow-hidden">
+                            <p className="text-sm text-white font-bold truncate">{user.user_metadata?.full_name}</p>
+                            <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                        </div>
+                    </div>
+                    <button onClick={handleLogout} className="px-5 py-3 bg-red-600/20 text-red-500 border border-red-600/50 rounded-full font-semibold hover:bg-red-600 hover:text-white transition flex items-center justify-center gap-2">
+                        <LogOut className="w-5 h-5" /> Cerrar sesión
+                    </button>
+                </>
+            )}
+            </div>
         </div>
       </div>
     </nav>

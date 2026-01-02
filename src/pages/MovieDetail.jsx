@@ -17,12 +17,16 @@ const MovieDetail = () => {
   const { data: movie, error: errorMovie, isLoading: loadingMovie } = useSWR(
     id ? `movie-${id}` : null, 
     () => getContentById(id),
-    { revalidateOnFocus: false } // No necesitamos revalidar el detalle constantemente
+    {
+      revalidateOnFocus: false, // No recargar si cambio de pestaña (ahorra recursos)
+      revalidateOnReconnect: false, 
+      dedupingInterval: 600000, // 10 minutos de caché (el Hero cambia poco)
+    }
   );
 
   // --- 2. CARGAR RECOMENDACIONES (SWR) ---
   const { data: allMovies } = useSWR('all-movies', getMovies);
-  
+
   // Filtramos las recomendaciones (si ya cargaron las pelis)
   const recommendations = allMovies 
     ? allMovies.filter(m => m.id !== parseInt(id)).slice(0, 4) 
@@ -47,6 +51,8 @@ const MovieDetail = () => {
         </div>
     );
   }
+  
+  const isSeries = movie.type === 'serie' || (movie.temporadas && movie.temporadas.length > 0);
 
   return (
     <div className="min-h-screen h-full bg-[#0f172a] text-white font-sans">
@@ -54,27 +60,32 @@ const MovieDetail = () => {
       {/* --- HERO SECTION --- */}
       <div className="relative ">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${movie.backdrop || movie.poster}')` }}>
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/40 to-black/60"></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] via-[#0f172a]/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] from-0% via-[#0f172a]/50 via-40% to-transparent to-80%"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/80 from-0% via-[#0f172a]/30 via-30% to-transparent to-60%"></div>
         </div>
         
-        <div className="relative z-30 flex flex-col justify-between pt-16 md:pt-20 px-4 md:px-8 lg:px-16 pb-8 gap-8">
+        <div className="relative z-30 flex flex-col justify-between pt-20 md:pt-24 px-4 md:px-8 lg:px-16 pb-8 gap-8">
 
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full hover:bg-white hover:text-black transition w-fit border border-white/10">
             <ChevronLeft className="w-5 h-5" /> Volver
           </button>
 
-          <div className="max-w-3xl animate-fade-in-up">
+          <div className="flex flex-col space-y-4 md:space-y-6 max-w-3xl animate-fade-in-up">
             
-            <h1 className="text-3xl md:text-4xl font-extrabold mb-3 drop-shadow-2xl leading-tight">{movie.titulo}</h1>
+            {/* Badge Tipo */}
+            <span className="bg-slate-800/80 w-fit px-3 py-1 rounded-full text-xs font-bold text-gray-300 uppercase tracking-widest backdrop-blur-sm border border-white/20 animate-fade-in-up">
+              {isSeries ? "Serie" : "Película"}
+            </span>
+        
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-4 leading-tight drop-shadow-xl [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">{movie.titulo}</h1>
             
             {movie.tagline ? (
-              <p className="text-gray-300 italic text-lg mb-6 font-light border-l-2 border-gray-500 pl-3 line-clamp-2 md:line-clamp-none">
+              <p className="text-gray-300 italic text-lg mb-6 font-light border-l-2 border-red-500 pl-3 line-clamp-2 md:line-clamp-none drop-shadow-md [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">
                 "{movie.tagline}"
               </p>
             ) : (
               movie.sinopsis && (
-                <p className="text-gray-300 italic text-lg mb-6 font-light border-l-2 border-gray-500 pl-3 line-clamp-2 md:line-clamp-none">
+                <p className="text-gray-300 italic text-lg mb-6 font-light border-l-2 border-red-500 pl-3 line-clamp-2 md:line-clamp-none drop-shadow-md [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">
                   "{movie.sinopsis.split('.')[0]}..." 
                 </p>
               )

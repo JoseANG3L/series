@@ -36,9 +36,9 @@ function Inicio() {
       
       {/* El Hero carga su propia data internamente */}
       <Hero />
-      
+      <br />
       {/* Contenedor con margen negativo para solapar el Hero (Estilo Netflix) */}
-      <div className="relative space-y-8 md:space-y-12">
+      <div className="relative space-y-6 md:space-y-8">
         
         {/* SECCIÓN 1: ESTRENOS */}
         {novedades && novedades.length > 0 && (

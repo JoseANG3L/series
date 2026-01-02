@@ -8,7 +8,7 @@ function Peliculas() {
   // --- LÓGICA AUTOMÁTICA ---
   // useSWR( 'clave-unica', funcion-fetcher )
   // 1. 'all-movies': Es el nombre de la caché.
-  // 2. getMovies: Tu función de la API.
+  // 2. getMovies: Tu función de la API.   
   const { data: movies, error, isLoading } = useSWR('all-movies', getMovies, {
     revalidateOnFocus: true, // Esto arregla lo de volver de YouTube automáticamente
     dedupingInterval: 60000, // No vuelve a pedir datos en 1 min si ya los tiene (ahorra peticiones)

@@ -17,12 +17,10 @@ const MovieCard = ({ movie, variant = "grid" }) => {
   // Formatear el rating (ej: 8 -> 8.0)
   const formattedRating = movie.rating ? Number(movie.rating).toFixed(1) : null;
 
-  const isSeries = movie.tipo === 'series' || (movie.temporadas && movie.temporadas.length > 0);
-
   return (
     <div 
       className={`relative cursor-pointer group ${variant === "carousel" ? "min-w-[150px] w-[150px] md:min-w-[180px] md:w-[180px] lg:min-w-[220px] lg:w-[220px]" : "w-full"}`} 
-      onClick={() => isSeries ? navigate(`/series/${movie.id}`) : navigate(`/peliculas/${movie.id}`)}
+      onClick={() => navigate(`/movie/${movie.id}`)}
     >
       {/* Contenedor Principal con Aspect Ratio 2:3 (Estándar Posters) */}
       <div className="relative overflow-hidden rounded-xl aspect-[2/3] bg-slate-800 shadow-lg border border-white/5">

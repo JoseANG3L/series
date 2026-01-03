@@ -1,12 +1,41 @@
-import { Play, Star } from "lucide-react"; // Agregamos Star
+import { Play, Star, Plus } from "lucide-react"; // Agregamos Star
 import Badge from "./Badge";
 import { useNavigate } from "react-router-dom";
 
 // Una imagen placeholder elegante por si falla la original
 const DEFAULT_IMAGE = "https://via.placeholder.com/500x750/1e293b/ef4444?text=No+Image";
 
-const MovieCard = ({ movie, variant = "grid" }) => {
+const MovieCard = ({ movie, variant = "grid", isAddCard = false, onAddClick }) => {
   const navigate = useNavigate();
+
+  const sizeClasses = variant === "carousel" 
+    ? "min-w-[150px] w-[150px] md:min-w-[180px] md:w-[180px] lg:min-w-[220px] lg:w-[220px]" 
+    : "w-full";
+
+  if (isAddCard) {
+    return (
+      <div 
+        onClick={onAddClick}
+        className={`relative cursor-pointer group ${sizeClasses}`}
+      >
+        {/* Contenedor Aspect Ratio 2:3 con borde dashed */}
+        <div className="relative overflow-hidden rounded-xl aspect-[2/3] bg-slate-900/50 border-2 border-dashed border-slate-700 hover:border-red-500 hover:bg-slate-800 transition-all duration-300 flex flex-col items-center justify-center">
+          
+          <div className="w-16 h-16 rounded-full bg-slate-800 group-hover:bg-red-600/20 flex items-center justify-center transition-colors duration-300">
+             <Plus className="w-8 h-8 text-slate-500 group-hover:text-red-500 transition-colors" />
+          </div>
+          
+          <span className="mt-3 text-sm font-bold text-slate-500 group-hover:text-white transition-colors uppercase tracking-wider">
+            Agregar
+          </span>
+
+        </div>
+        
+        {/* Espacio para alinear con los títulos de las otras cards */}
+        <div className="mt-3 px-1 h-5"></div>
+      </div>
+    );
+  }
 
   // Función que se ejecuta si la imagen falla al cargar
   const handleImageError = (e) => {
@@ -14,14 +43,11 @@ const MovieCard = ({ movie, variant = "grid" }) => {
     e.target.src = DEFAULT_IMAGE;
   };
 
-  // Formatear el rating (ej: 8 -> 8.0)
-  const formattedRating = movie.rating ? Number(movie.rating).toFixed(1) : null;
-
   const isSeries = movie.tipo === 'series' || (movie.temporadas && movie.temporadas.length > 0);
 
   return (
     <div 
-      className={`relative cursor-pointer group ${variant === "carousel" ? "min-w-[150px] w-[150px] md:min-w-[180px] md:w-[180px] lg:min-w-[220px] lg:w-[220px]" : "w-full"}`} 
+      className={`relative cursor-pointer group ${sizeClasses}`}
       onClick={() => isSeries ? navigate(`/series/${movie.id}`) : navigate(`/peliculas/${movie.id}`)}
     >
       {/* Contenedor Principal con Aspect Ratio 2:3 (Estándar Posters) */}
@@ -58,14 +84,6 @@ const MovieCard = ({ movie, variant = "grid" }) => {
           </div>
         )}
         
-        {/* --- RATING (Esquina Superior Derecha) - NUEVO --- */}
-        {formattedRating && formattedRating > 0 && (
-            <div className="absolute top-2 right-2 z-20 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded flex items-center gap-1 border border-white/10 shadow-sm">
-                <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                <span className="text-[10px] font-bold text-white">{formattedRating}</span>
-            </div>
-        )}
-        
       </div>
 
       {/* Título (Fuera de la imagen para limpieza visual) */}
@@ -73,10 +91,6 @@ const MovieCard = ({ movie, variant = "grid" }) => {
         <h4 className="text-sm font-medium text-slate-200 truncate group-hover:text-red-500 transition-colors">
             {movie.title}
         </h4>
-        {/* Subtítulo opcional (Año o Género si lo tuvieras en el objeto movie) */}
-        {movie.anio && (
-            <p className="text-xs text-slate-500 mt-0.5">{movie.anio}</p>
-        )}
       </div>
     </div>
   );

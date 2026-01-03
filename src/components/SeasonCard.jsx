@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play } from "lucide-react";
+import { Ban, Download } from "lucide-react";
 
 const DEFAULT_IMAGE = "https://via.placeholder.com/500x750/1e293b/ef4444?text=No+Image";
 
@@ -12,7 +12,7 @@ const SeasonCard = ({ season, onClick }) => {
 
   return (
     <div 
-      onClick={onClick}
+      onClick={() => {season.descarga && window.open(season.descarga, "_blank");}}
       // Ancho fijo recomendado para carruseles de temporadas
       className="relative cursor-pointer group w-full" 
     >
@@ -25,7 +25,7 @@ const SeasonCard = ({ season, onClick }) => {
           alt={`Temporada ${season.numero}`} 
           onError={handleImageError}
           loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+          className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${!season.descarga && "grayscale"} `}
         />
 
         {/* Overlay con efecto "Aparecer desde abajo" */}
@@ -36,11 +36,11 @@ const SeasonCard = ({ season, onClick }) => {
             
             {/* Botón Play */}
             <div className="bg-red-600 text-white p-3 rounded-full w-fit mb-2 shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:bg-red-500 hover:scale-105 transition flex items-center justify-center">
-               <Play className="w-5 h-5 fill-current pl-0.5" />
+              {season.descarga ? <Download className="w-5 h-5 stroke-[2.5]" /> : <Ban className="w-5 h-5 stroke-[2.5]" />}
             </div>
             
             <p className="text-white text-sm font-bold tracking-wide">
-               Descargar
+               {season.descarga ? "Descargar" : "No disponible"}
             </p>
           </div>
         </div>

@@ -39,7 +39,7 @@ const mapDatabaseToModel = (dbItem) => {
     tipo: dbItem.tipo, // 'movie' o 'serie'
     slug: dbItem.slug,
     sinopsis: dbItem.sinopsis,
-    tagline: dbItem.tagline || "",
+    tagline: dbItem.tagline,
     poster: dbItem.poster,
     backdrop: dbItem.backdrop,
     trailer: dbItem.trailer,
@@ -49,8 +49,19 @@ const mapDatabaseToModel = (dbItem) => {
     actualizado: dbItem.actualizado || null,
 
     // 2. Campos desde 'informacion' (Tu nuevo subobjeto)
-    calidad: info.calidad || 'HD',
-    resolucion: info.resolucion || '1080p',
+    peso: info.peso,
+    formato: info.formato,
+    calidad: info.calidad,
+    codec: info.codec,
+    bitrate: info.bitrate,
+    audio: info.audio,
+    resolucion: info.resolucion,
+    subtitulos: info.subtitulos,
+    duracion: info.duracion,
+    temporadassize: dbItem.temporadas ? dbItem.temporadas.length : 0,
+    episodios: info.episodios,
+    aporte: info.aporte,
+    nota: info.nota,
   };
 };
 

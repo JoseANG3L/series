@@ -44,7 +44,7 @@ function Series() {
         // Si aún no hay datos, pasamos array vacío para evitar errores
         movies={series || []} 
         layout="grid" 
-        enableFilters={true} 
+        enableFilters={true}
       />
     </div>
   );

@@ -40,19 +40,19 @@ const Hero = () => {
     : movie.genero;
 
   return (
-    <header className="relative w-full h-screen">
+    <header className="relative">
       
       {/* --- Imagen de Fondo --- */}
       <div className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 animate-fadeIn"
         style={{ backgroundImage: `url('${movie.backdrop || movie.poster}')` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] from-0% via-[#0f172a]/50 via-40% to-transparent to-80%"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/80 from-0% via-[#0f172a]/30 via-30% to-transparent to-60%"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] from-0% via-[#0f172a]/70 via-40% to-transparent to-80%"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/80 from-0% via-[#0f172a]/60 via-30% to-transparent to-60%"></div>
 
       </div>
 
       {/* --- Contenido Hero --- */}
-      <div className="relative z-10 flex flex-col justify-end min-h-screen max-h-fit px-4 md:px-8 lg:px-16 max-w-4xl space-y-4 md:space-y-6 pt-24 pb-16">
+      <div className="relative z-10 flex flex-col justify-end min-h-screen max-h-fit px-4 md:px-8 lg:px-16 max-w-4xl space-y-4 md:space-y-6 pt-24 pb-12 md:pb-16">
         
         {/* Badge Tipo */}
         <span className="bg-slate-800/80 w-fit px-3 py-1 rounded-full text-xs font-bold text-gray-300 uppercase tracking-widest backdrop-blur-sm border border-white/20 animate-fade-in-up">
@@ -75,15 +75,6 @@ const Hero = () => {
             </p>
           )
         )}
-
-        {/* Metadatos */}
-        <div className="flex items-center gap-4 text-gray-200 text-sm font-medium animate-fade-in-up delay-200 drop-shadow-md [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">
-          <span>{durationText}</span>
-          <span>•</span>
-          <span>{movie.anio}</span>
-          <span>•</span>
-          <span className="uppercase">{genresText}</span>
-        </div>
 
         {/* Sinopsis */}
         <p className="text-gray-300 text-base md:text-lg leading-relaxed line-clamp-3 max-w-2xl animate-fade-in-up delay-300 drop-shadow-md [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">

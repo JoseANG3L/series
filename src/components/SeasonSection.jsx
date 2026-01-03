@@ -57,7 +57,8 @@ const SeasonSection = ({ title, poster, temporadas = [] }) => {
                   id: season.id || `s-${season.numero}`,
                   numero: season.numero,
                   poster: season.poster || poster,
-                  episodios: season.episodios ? season.episodios.length : 0
+                  episodios: season.episodios ? season.episodios.length : 0,
+                  descarga: season.descarga || null,
               }}
             />
           ))}

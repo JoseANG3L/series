@@ -1,8 +1,12 @@
 import MovieCard from "./MovieCard";
 import { useRef, useState, useMemo, useEffect } from "react";
 import { Filter, ChevronDown, Calendar, TrendingUp, SortAsc, Star, X, AArrowDown, AArrowUp } from "lucide-react";
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from "react-router-dom";
 
 const MovieSection = ({ title, movies, layout = "carousel", enableFilters = false }) => {
+  const { user, role, signOut } = useAuth(); 
+  const navigate = useNavigate();
 
   // --- ESTADOS DE FILTROS ---
   const [activeCategory, setActiveCategory] = useState("Todos");
@@ -226,6 +230,17 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
             ${isDown ? 'cursor-grabbing snap-none' : 'cursor-grab snap-x snap-mandatory'}
           `}
         >
+
+          {role === 'admin' && (
+            <div className="shrink-0 snap-center">
+              <MovieCard
+                isAddCard={true}
+                onAddClick={() => navigate('/admin/nuevo')}
+                variant="carousel"
+              />
+            </div>
+          )}
+          
           {processedMovies.length > 0 ? (
             processedMovies.map((movie) => (
               <div key={movie.id} onClickCapture={handleCaptureClick} className="shrink-0 snap-center">
@@ -250,6 +265,15 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
       {/* Grid */}
       {layout === "grid" && (
         <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+          
+          {role === 'admin' && (
+            <MovieCard
+              isAddCard={true}
+              onAddClick={() => navigate('/admin/nuevo')}
+              variant="grid"
+            />
+          )}
+          
           {processedMovies.length > 0 ? (
             processedMovies.map((movie) => (
               <MovieCard 

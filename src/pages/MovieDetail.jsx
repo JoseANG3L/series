@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 const MovieDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('resumen');
+  const [activeTab, setActiveTab] = useState('sinopsis');
   const { user } = useAuth(); // Obtenemos el usuario actual
   // Necesitamos mutate para decirle a SWR que recargue los datos
   const { mutate } = useSWRConfig();
@@ -166,13 +166,13 @@ const MovieDetail = () => {
     <div className="min-h-screen h-full bg-[#0f172a] text-white font-sans">
 
       {/* --- HERO SECTION --- */}
-      <div className="relative ">
+      <div className="relative">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${movie.backdrop || movie.poster}')` }}>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] from-0% via-[#0f172a]/50 via-40% to-transparent to-80%"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/80 from-0% via-[#0f172a]/30 via-30% to-transparent to-60%"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] from-0% via-[#0f172a]/70 via-40% to-transparent to-80%"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/80 from-0% via-[#0f172a]/60 via-30% to-transparent to-60%"></div>
         </div>
 
-        <div className="relative z-30 flex flex-col justify-between pt-16 md:pt-20 px-4 md:px-8 lg:px-16 pb-8 gap-10">
+        <div className="relative z-30 flex flex-col justify-between pt-16 md:pt-20 px-4 md:px-8 lg:px-16 gap-10">
 
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full hover:bg-white hover:text-black transition w-fit border border-white/10">
             <ChevronLeft className="w-5 h-5" /> Volver
@@ -213,7 +213,7 @@ const MovieDetail = () => {
       <br />
 
       {/* --- CONTENT SECTION --- */}
-      <div className="px-4 md:px-8 lg:px-16 max-w-7xl mx-auto mt-4 md:mt-8">
+      <div className="px-4 md:px-8 lg:px-16 max-w-7xl mx-auto mt-6 md:mt-8">
         <div className="mb-14">
           <SeasonSection seriesId={movie.id} poster={movie.poster} temporadas={movie.temporadas} />
         </div>
@@ -222,56 +222,110 @@ const MovieDetail = () => {
 
 
           {/* COLUMNA IZQUIERDA (Principal) */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6">
 
-            <div className="flex gap-8 border-b border-gray-700 pb-2 mb-6 overflow-x-auto">
-              <button onClick={() => setActiveTab('resumen')} className={`pb-2 text-lg font-bold transition ${activeTab === 'resumen' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}>Resumen</button>
-              <button onClick={() => setActiveTab('reparto')} className={`pb-2 text-lg font-bold transition ${activeTab === 'reparto' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}>Reparto</button>
+            <div className="flex gap-8 border-b border-gray-700 pb-2 overflow-x-auto">
+              <button onClick={() => setActiveTab('sinopsis')} className={`pb-2 text-lg font-bold transition ${activeTab === 'sinopsis' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}>Sinopsis</button>
+              <button onClick={() => setActiveTab('informacion')} className={`pb-2 text-lg font-bold transition ${activeTab === 'informacion' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}>Información</button>
               <button onClick={() => setActiveTab('trailer')} className={`pb-2 text-lg font-bold transition ${activeTab === 'trailer' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}>Trailer</button>
               <button onClick={() => setActiveTab('galeria')} className={`pb-2 text-lg font-bold transition flex items-center gap-2 ${activeTab === 'galeria' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}>Galería</button>
             </div>
 
-            {/* TAB: RESUMEN */}
-            {activeTab === 'resumen' && (
+            {/* TAB: SINOPSIS */}
+            {activeTab === 'sinopsis' && (
               <div className="animate-fadeIn">
                 <p className="text-gray-300 leading-relaxed text-md mb-8">
                   {movie.sinopsis || "No hay descripción disponible."}
                 </p>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 p-6 bg-slate-800/50 rounded-xl border border-slate-700">
-                  <div><span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Director</span><span className="font-medium text-white">{movie.director || "N/A"}</span></div>
-                  <div><span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Guion</span><span className="font-medium text-white">{movie.director || "N/A"}</span></div>
-                  <div>
-                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Género</span>
-                    <span className="font-medium text-white truncate">{Array.isArray(movie.genero) ? movie.genero.join(', ') : movie.genero}</span>
-                  </div>
-                  <div><span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Estreno</span><span className="font-medium text-white">{movie.anio}</span></div>
-                  <div><span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">País</span><span className="font-medium text-white">EE.UU.</span></div>
-                  <div><span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Clasificación</span><span className="inline-block bg-gray-700 px-2 py-0.5 rounded text-xs font-bold text-white border border-gray-600">PG-13</span></div>
-                  <div><span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Estudio</span><span className="font-medium text-white">Studio</span></div>
-                  <div className="col-span-2 md:col-span-1"><span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Audio Original</span><span className="font-medium text-white">Inglés</span></div>
-                </div>
               </div>
             )}
 
-            {/* TAB: REPARTO */}
-            {activeTab === 'reparto' && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 animate-fadeIn">
-                {movie.elenco && movie.elenco.length > 0 ? (
-                  movie.elenco.map((actor, idx) => (
-                    <div key={idx} className="bg-slate-800 rounded-lg overflow-hidden group">
-                      <div className="h-40 overflow-hidden bg-slate-700">
-                        <img src={actor.foto || `https://ui-avatars.com/api/?name=${actor.nombre}&background=random`} alt={actor.nombre} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
-                      </div>
-                      <div className="p-3">
-                        <p className="font-bold text-white text-sm truncate">{actor.nombre}</p>
-                        <p className="text-xs text-gray-400 truncate">{actor.personaje || "Actor"}</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500 col-span-full text-center py-8">Información del reparto no disponible aún.</p>
+            {/* TAB: INFORMACION */}
+            {activeTab === 'informacion' && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 p-6 bg-slate-800/50 rounded-xl border border-slate-700 animate-fadeIn">
+                
+                {/* 1. Tamaño */}
+                <div>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Tamaño por episodio</span>
+                    <span className={`font-medium ${movie.peso ? "text-white" : "text-gray-600 italic"}`}>{movie.peso || "N/A"}</span>
+                </div>
+
+                {/* 2. Formato */}
+                <div>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Formato</span>
+                    <span className={`font-medium ${movie.formato ? "text-white" : "text-gray-600 italic"}`}>{movie.formato || "N/A"}</span>
+                </div>
+
+                {/* 3. Calidad */}
+                <div>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Calidad</span>
+                    <span className={`font-medium ${movie.calidad ? "text-white" : "text-gray-600 italic"}`}>{movie.calidad || "N/A"}</span>
+                </div>
+
+                {/* 4. Codec */}
+                <div>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Codec</span>
+                    <span className={`font-medium ${movie.codec ? "text-white" : "text-gray-600 italic"}`}>{movie.codec || "N/A"}</span>
+                </div>
+
+                {/* 5. Bit Rate */}
+                <div>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Video Bit Rate</span>
+                    <span className={`font-medium ${movie.bitrate ? "text-white" : "text-gray-600 italic"}`}>{movie.bitrate || "N/A"}</span>
+                </div>
+
+                {/* 6. Audio Principal */}
+                <div>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Audio Principal</span>
+                    <span className={`font-medium ${movie.audio ? "text-white" : "text-gray-600 italic"}`}>{movie.audio || "N/A"}</span>
+                </div>
+
+                {/* 7. Resolución */}
+                <div>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Resolución</span>
+                    <span className={`font-medium ${movie.resolucion ? "text-white" : "text-gray-600 italic"}`}>{movie.resolucion || "N/A"}</span>
+                </div>
+
+                {/* 8. Subtítulos */}
+                <div>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Subtítulos</span>
+                    <span className={`font-medium ${movie.subtitulos ? "text-white" : "text-gray-600 italic"}`}>{movie.subtitulos || "N/A"}</span>
+                </div>
+
+                {/* 9. Duración */}
+                <div>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Duración</span>
+                    <span className={`font-medium ${movie.duracion ? "text-white" : "text-gray-600 italic"}`}>{movie.duracion || "N/A"}</span>
+                </div>
+
+                {/* 10. Temporadas */}
+                <div>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Temporadas</span>
+                    <span className={`font-medium ${movie.temporadassize ? "text-white" : "text-gray-600 italic"}`}>{movie.temporadassize || "N/A"}</span>
+                </div>
+
+                {/* 11. Episodios */}
+                <div>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Episodios</span>
+                    <span className={`font-medium ${movie.episodios ? "text-white" : "text-gray-600 italic"}`}>{movie.episodios || "N/A"}</span>
+                </div>
+
+                {/* 12. Aporte */}
+                <div>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Aporte</span>
+                    <span className={`font-medium ${movie.aporte ? "text-white" : "text-gray-600 italic"}`}>{movie.aporte || "N/A"}</span>
+                </div>
+
+                {/* 13. Nota (Ocupa todo el ancho abajo) */}
+                {movie.nota && (
+                  <div className="col-span-2 md:col-span-3 border-t border-slate-700 pt-4 mt-2">
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Nota</span>
+                    <p className="text-slate-300 text-sm leading-relaxed">
+                        {movie.nota || "Sin notas adicionales."}
+                    </p>
+                  </div>
                 )}
+
               </div>
             )}
 

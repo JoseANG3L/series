@@ -28,10 +28,6 @@ const Hero = () => {
     return <div className="w-full h-screen bg-[#0f172a] animate-pulse"></div>;
   }
 
-  console.log("Movie Detail Data:", movie);
-
-  console.log("Movie Detail TIPO:", movie.tipo);
-
   // --- LÓGICA DE TEXTOS (Igual que antes) ---
   const isSeries = movie.tipo === 'series' || (movie.temporadas && movie.temporadas.length > 0);
   
@@ -69,19 +65,19 @@ const Hero = () => {
         </h2>
 
         {movie.tagline ? (
-          <p className="text-gray-300 italic text-lg font-light border-l-2 border-red-500 pl-3 line-clamp-2 md:line-clamp-none drop-shadow-md [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">
+          <p className="text-gray-100 italic text-lg font-light border-l-2 border-red-500 pl-3 line-clamp-2 md:line-clamp-none drop-shadow-md [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">
             "{movie.tagline}"
           </p>
         ) : (
           movie.sinopsis && (
-            <p className="text-gray-300 italic text-lg font-light border-l-2 border-red-500 pl-3 line-clamp-2 md:line-clamp-none drop-shadow-md [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">
+            <p className="text-gray-100 italic text-lg font-light border-l-2 border-red-500 pl-3 line-clamp-2 md:line-clamp-none drop-shadow-md [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">
               "{movie.sinopsis.split('.')[0]}..." 
             </p>
           )
         )}
 
         {/* Metadatos */}
-        <div className="flex items-center gap-4 text-gray-300 text-sm font-medium animate-fade-in-up delay-200 drop-shadow-md [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">
+        <div className="flex items-center gap-4 text-gray-200 text-sm font-medium animate-fade-in-up delay-200 drop-shadow-md [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">
           <span>{durationText}</span>
           <span>•</span>
           <span>{movie.anio}</span>

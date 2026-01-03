@@ -1,105 +1,73 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ChevronLeft, Loader2, AlertCircle } from 'lucide-react';
-import { supabase } from '../supabase/client';
-import useSWRMutation from 'swr/mutation'; // <--- 1. Importamos el hook
-
-// --- 2. FUNCIÓN DE LOGIN (FETCHER) ---
-// Esta función maneja TODA la lógica asíncrona: Login y buscar el Rol.
-async function loginUser(key, { arg }) {
-  const { email, password } = arg;
-
-  // A. Iniciar Sesión en Supabase
-  const { data, error: authError } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (authError) throw authError;
-
-  // B. Buscar el Rol en la tabla profiles
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', data.user.id)
-    .single();
-
-  // Retornamos el rol (o 'user' por defecto) para usarlo en el componente
-  return { role: profile?.role || 'user' };
-}
+import { useAuth } from '../context/AuthContext'; // <--- 1. NUEVO IMPORT
 
 const Login = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth(); // <--- 2. USAMOS EL CONTEXTO
   
-  // Estados Locales (Solo para UI)
+  // Estados Locales
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [validationError, setValidationError] = useState('');
-
-  // --- 3. CONFIGURAR EL HOOK ---
-  // trigger: dispara el login
-  // isMutating: reemplaza a tu 'loading'
-  // error: captura los errores de Supabase automáticamente
-  const { trigger, isMutating, error: apiError, reset } = useSWRMutation(
-    'login-action', 
-    loginUser
-  );
+  
+  // Estados de UI (reemplazan a useSWRMutation)
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setValidationError('');
-    if (apiError) reset(); // Limpiar error de API al escribir
+    setError(''); // Limpiar error al escribir
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setValidationError('');
+    setError('');
     
     // Validación local simple
     if (!formData.email || !formData.password) {
-      setValidationError('Por favor, completa todos los campos.');
+      setError('Por favor, completa todos los campos.');
       return;
     }
 
-    try {
-      // Llamamos al trigger. Si falla, salta al catch.
-      // Si tiene éxito, nos devuelve lo que retornó 'loginUser' (el rol).
-      const result = await trigger(formData);
+    setLoading(true);
 
-      // C. Redirección basada en el resultado
-      if (result?.role === 'admin') {
+    try {
+      // 3. LLAMADA A FIREBASE
+      await signIn(formData.email, formData.password);
+
+      // 4. REDIRECCIÓN (Lógica simple basada en el email admin que definimos en el Contexto)
+      // Nota: Idealmente esto se maneja con rutas protegidas, pero para mantener tu UX:
+      if (formData.email === 'admin@luisflix.com') { // O tu email de admin
         navigate('/admin');
       } else {
         navigate('/');
       }
 
     } catch (err) {
-      // El error ya está en 'apiError', aquí solo evitamos que explote la app
-      console.error("Error en login:", err);
+      console.error("Error en login:", err.code);
+      // Mapeo de errores de Firebase a español
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError("Correo o contraseña incorrectos.");
+      } else if (err.code === 'auth/too-many-requests') {
+        setError("Demasiados intentos fallidos. Intenta más tarde.");
+      } else {
+        setError("Ocurrió un error al iniciar sesión.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
-
-  // Helper para mensaje de error legible
-  const getErrorMessage = () => {
-    if (validationError) return validationError;
-    if (apiError) {
-      if (apiError.message === "Invalid login credentials") return "Correo o contraseña incorrectos.";
-      return apiError.message;
-    }
-    return null;
-  };
-
-  const currentError = getErrorMessage();
 
   return (
     <div className="min-h-screen w-full relative flex">
       {/* --- FONDO --- */}
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://assets.nflxext.com/ffe/siteui/vlv3/c38a2d52-138e-48a3-ab68-36787ece46b3/eeb03fc9-99bf-4734-8f09-2b0f49495b52/MX-es-20240101-popsignuptwoweeks-perspective_alpha_website_large.jpg')" }}></div>
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/fondo.jpg')" }}></div>
       <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-[#1c0c2f] via-transparent to-black/30"></div>
 
       <div className="relative z-30 flex flex-col min-h-screen w-full pt-16 pb-16 md:pt-20 px-4 md:px-8 lg:px-16 pb-8 gap-4">
         
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full text-white hover:bg-white hover:text-black transition w-fit border border-white/10">
+        <button onClick={() => navigate('/')} className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full text-white hover:bg-white hover:text-black transition w-fit border border-white/10">
           <ChevronLeft className="w-5 h-5" /> Volver
         </button>
 
@@ -110,7 +78,7 @@ const Login = () => {
             <h1 className="flex gap-2 justify-center items-center text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-600 tracking-tighter">
                 Iniciar sesión
             </h1>
-            <p className="text-gray-400 mt-2 text-sm">Bienvenido de nuevo</p>
+            <p className="text-gray-400 mt-2 text-sm">Bienvenido de nuevo a LuisFSeries</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -124,9 +92,9 @@ const Login = () => {
                   type="email" 
                   value={formData.email}
                   onChange={handleChange}
-                  disabled={isMutating}
+                  disabled={loading}
                   placeholder="ejemplo@correo.com"
-                  className={`w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 rounded-lg focus:outline-none transition disabled:opacity-50 ${currentError ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}`}
+                  className={`w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 rounded-lg focus:outline-none transition disabled:opacity-50 ${error ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}`}
                 />
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
@@ -141,9 +109,9 @@ const Login = () => {
                   type={showPassword ? "text" : "password"} 
                   value={formData.password}
                   onChange={handleChange}
-                  disabled={isMutating}
+                  disabled={loading}
                   placeholder="Ingresa tu contraseña"
-                  className={`w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none transition disabled:opacity-50 ${currentError ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}`}
+                  className={`w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none transition disabled:opacity-50 ${error ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}`}
                 />
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 
@@ -167,19 +135,19 @@ const Login = () => {
               </Link>
             </div>
 
-            {/* Mensaje de Error Unificado */}
-            {currentError && (
+            {/* Mensaje de Error */}
+            {error && (
               <div className="text-red-500 text-xs flex items-center gap-2 justify-center bg-red-500/10 p-2 rounded border border-red-500/50 animate-pulse">
-                <AlertCircle className="w-4 h-4" /> {currentError}
+                <AlertCircle className="w-4 h-4" /> {error}
               </div>
             )}
 
             <button 
               type="submit" 
-              disabled={isMutating}
+              disabled={loading}
               className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-red-900/30 transition duration-300 transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-2"
             >
-              {isMutating ? (
+              {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" /> Conectando...
                 </>

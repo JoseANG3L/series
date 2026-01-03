@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, Star, Menu, X, ChevronDown, LogOut, Settings } from 'lucide-react';
+import { Search, Star, Menu, X, ChevronDown, LogOut, Settings, User as UserIcon } from 'lucide-react';
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from '../context/AuthContext'; 
+import { useAuth } from '../context/AuthContext';
+import Avatar from './Avatar';
 
 const Navbar = () => {
   const { user, role, signOut } = useAuth(); 
@@ -54,16 +55,13 @@ const Navbar = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // --- NUEVO: EFECTO PARA BLOQUEAR SCROLL DEL BODY ---
+  // --- EFECTO PARA BLOQUEAR SCROLL DEL BODY ---
   useEffect(() => {
     if (isOpen) {
-      // Si el menú está abierto, quitamos el scroll a la página
       document.body.style.overflow = 'hidden';
     } else {
-      // Si se cierra, lo devolvemos
       document.body.style.overflow = 'unset';
     }
-    // Cleanup por si el componente se desmonta con el menú abierto
     return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
@@ -81,6 +79,11 @@ const Navbar = () => {
   const handleAdminClick = () => {
     navigate('/admin');
     closeMenu(); 
+  };
+
+  const handleProfileClick = () => {
+    navigate('/perfil'); // <--- NUEVO HANDLER
+    closeMenu();
   };
 
   const handleSearch = (e) => {
@@ -115,7 +118,8 @@ const Navbar = () => {
   return (
     <nav className="absolute top-0 left-0 w-full z-50">
       
-      <div className="absolute top-0 left-0 w-full h-full bg-[#0f172a]/60 backdrop-blur-md"></div>
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#0f172a]/80 via-[#0f172a]/40 to-transparent"></div>
+      
       <div className="px-4 md:px-8 lg:px-16 py-3 flex justify-between items-center relative">
         
         {/* --- IZQUIERDA: LOGO --- */}
@@ -129,21 +133,21 @@ const Navbar = () => {
           {/* MENÚ ESCRITORIO */}
           <ul className="hidden md:flex gap-4 lg:gap-7 font-medium lg:text-base items-center">
             {VISIBLE_LINKS.map((link) => (
-              <NavLink key={link.name} to={link.path} className={({ isActive }) => `whitespace-nowrap transition ${isActive ? "text-red-500 font-bold" : "text-gray-300 hover:text-red-500"}`}>
+              <NavLink key={link.name} to={link.path} className={({ isActive }) => `whitespace-nowrap transition drop-shadow-xl [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.4)] ${isActive ? "text-[#FF4848] font-bold" : "text-gray-300 hover:text-[#FF4848]"}`}>
                 {link.name}
               </NavLink>
             ))}
 
             {HIDDEN_LINKS.length > 0 && (
               <li className="relative" ref={moreMenuRef}>
-                <button onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)} className={`flex items-center gap-1 transition whitespace-nowrap ${isMoreMenuOpen ? 'text-white' : 'text-gray-300 hover:text-red-500'}`}>
+                <button onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)} className={`flex items-center gap-1 transition whitespace-nowrap ${isMoreMenuOpen ? 'text-white' : 'text-gray-300 hover:text-[#FF4848]'}`}>
                   Más <ChevronDown className={`w-4 h-4 transition-transform ${isMoreMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isMoreMenuOpen && (
                   <div className="absolute top-full left-0 mt-4 w-48 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-lg shadow-2xl overflow-hidden animate-fadeIn flex flex-col z-50">
                     {HIDDEN_LINKS.map((link) => (
-                      <NavLink key={link.name} to={link.path} onClick={closeMenu} className={({ isActive }) => `block px-4 py-3 hover:bg-slate-800 transition ${isActive ? "text-red-500 font-bold" : "text-gray-300"}`}>
+                      <NavLink key={link.name} to={link.path} onClick={closeMenu} className={({ isActive }) => `block px-4 py-3 hover:bg-slate-800 transition ${isActive ? "text-[#FF4848] font-bold" : "text-gray-300"}`}>
                         {link.name}
                       </NavLink>
                     ))}
@@ -172,7 +176,7 @@ const Navbar = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`bg-transparent text-white text-sm outline-none transition-all duration-300 ${isDesktopSearchOpen ? 'w-full opacity-100 pl-1' : 'w-0 opacity-0'}`}
               />
-              <button type="submit" onClick={handleSearchIconClick} className={`shrink-0 text-gray-200 hover:text-white transition ${!isDesktopSearchOpen && 'hover:text-red-500'}`}>
+              <button type="submit" onClick={handleSearchIconClick} className={`shrink-0 text-gray-200 hover:text-white transition drop-shadow-xl [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.4)] ${!isDesktopSearchOpen && 'hover:text-red-500'}`}>
                  <Search className="w-5 h-5" />
               </button>
             </form>
@@ -190,21 +194,27 @@ const Navbar = () => {
                 <div className="relative" ref={userMenuRef}>
                     <button 
                         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                        className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white py-1.5 px-3 pr-4 rounded-full border border-slate-600 transition"
+                        className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white py-1.5 px-3 pr-4 rounded-full border border-slate-600 transition group"
                     >
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-pink-600 flex items-center justify-center text-xs font-bold shadow-lg">
-                            {user.email.charAt(0).toUpperCase()}
-                        </div>
+                        <Avatar user={user} size="sm" />
                         <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     {isUserMenuOpen && (
-                        <div className="absolute top-full right-0 mt-3 w-56 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden animate-fadeIn flex flex-col">
+                        <div className="absolute top-full right-0 mt-3 w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden animate-fadeIn flex flex-col">
                             <div className="px-4 py-3 border-b border-slate-800">
-                                <p className="text-sm text-white font-bold truncate">{user.user_metadata?.full_name || 'Usuario'}</p>
+                                <div className="flex items-center justify-between mb-1">
+                                    <p className="text-sm text-white font-bold truncate max-w-[150px]">{user.displayName || 'Usuario'}</p>
+                                    {role === 'admin' && <span className="text-[10px] bg-red-600 text-white px-1.5 py-0.5 rounded font-bold uppercase">ADMIN</span>}
+                                </div>
                                 <p className="text-xs text-slate-400 truncate">{user.email}</p>
                             </div>
                             
+                            {/* --- BOTÓN MI PERFIL (NUEVO) --- */}
+                            <button onClick={handleProfileClick} className="text-left px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition w-full">
+                                <UserIcon className="w-4 h-4" /> Mi Perfil
+                            </button>
+
                             {role === 'admin' && (
                                 <button onClick={handleAdminClick} className="text-left px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition w-full">
                                     <Settings className="w-4 h-4" /> Panel Admin
@@ -240,12 +250,6 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* MODIFICACIÓN AQUÍ: 
-         1. Se agrega 'overflow-y-auto' para permitir scroll interno.
-         2. Se elimina 'flex flex-col items-center justify-center' del contenedor principal fixed.
-         3. Se crea un div interno con 'min-h-full flex flex-col items-center justify-center py-20' 
-            para asegurar centrado si el contenido es poco, o scroll si es mucho.
-      */}
       <div 
         className={`fixed inset-0 bg-slate-950/95 backdrop-blur-lg z-40 transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"} md:hidden overflow-y-auto`}
       >
@@ -257,7 +261,7 @@ const Navbar = () => {
             
             {user && role === 'admin' && (
                 <button onClick={handleAdminClick} className="text-yellow-500 hover:text-yellow-400 font-bold transition">
-                Panel Admin
+                   Panel Admin
                 </button>
             )}
             </ul>
@@ -270,15 +274,21 @@ const Navbar = () => {
                 </>
             ) : (
                 <>
-                    <div className="flex items-center gap-3 justify-center mb-2 bg-slate-900/50 p-2 rounded-lg border border-slate-800">
-                        <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center font-bold text-white shrink-0">
-                            {user.email.charAt(0).toUpperCase()}
-                        </div>
+                    {/* INFO USUARIO MÓVIL (Click para ir a perfil) */}
+                    <div 
+                        onClick={handleProfileClick} // <--- AHORA ES CLICKEABLE
+                        className="flex items-center gap-3 justify-center mb-2 bg-slate-900/50 p-2 rounded-lg border border-slate-800 cursor-pointer hover:bg-slate-800 transition"
+                    >
+                        <Avatar user={user} size="sm" />
                         <div className="text-left overflow-hidden">
-                            <p className="text-sm text-white font-bold truncate">{user.user_metadata?.full_name}</p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm text-white font-bold truncate max-w-[120px]">{user.displayName || 'Usuario'}</p>
+                                {role === 'admin' && <span className="text-[10px] bg-red-600 text-white px-1 rounded font-bold">ADMIN</span>}
+                            </div>
                             <p className="text-xs text-slate-400 truncate">{user.email}</p>
                         </div>
                     </div>
+
                     <button onClick={handleLogout} className="px-5 py-3 bg-red-600/20 text-red-500 border border-red-600/50 rounded-full font-semibold hover:bg-red-600 hover:text-white transition flex items-center justify-center gap-2">
                         <LogOut className="w-5 h-5" /> Cerrar sesión
                     </button>

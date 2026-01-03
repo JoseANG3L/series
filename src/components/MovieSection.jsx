@@ -115,7 +115,7 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
   };
 
   return (
-    <section className="px-4 md:px-8 lg:px-16 pb-8 md:pb-12 relative z-10">
+    <section className="px-4 md:px-8 lg:px-16 relative z-10">
 
       <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-8 gap-6">
         {/* Título */}

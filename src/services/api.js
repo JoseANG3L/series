@@ -44,6 +44,7 @@ const mapDatabaseToModel = (dbItem) => {
     backdrop: dbItem.backdrop,
     trailer: dbItem.trailer,
     temporadas: dbItem.temporadas || [],
+    resenas: dbItem.resenas || [],
     creado: dbItem.creado || null,
     actualizado: dbItem.actualizado || null,
 

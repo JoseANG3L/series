@@ -41,11 +41,11 @@ const MovieCard = ({ movie, variant = "grid" }) => {
           
           {/* Botón Play con efecto glow */}
           <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-            <button className="bg-red-600 text-white p-3 rounded-full w-fit mb-2 shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:bg-red-500 hover:scale-105 transition flex items-center gap-2">
-               <Play className="w-5 h-5 fill-current pl-0.5" />
+            <button className="bg-red-600 text-white p-3 rounded-full w-fit mb-3 shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:bg-red-500 hover:scale-105 transition flex items-center gap-2">
+               <Play className="w-4 h-4 fill-current pl-0.5" />
             </button>
             
-            <p className="text-white text-xs font-bold tracking-wider uppercase">
+            <p className="text-white text-sm font-bold tracking-wide">
                Ver detalles
             </p>
           </div>

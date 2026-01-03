@@ -1,57 +1,50 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle, AlertCircle, ChevronLeft, Loader2 } from 'lucide-react';
-import { supabase } from '../supabase/client';
-import useSWRMutation from 'swr/mutation'; // <--- 1. Importamos el hook de mutación
-
-// --- 2. DEFINIR LA FUNCIÓN DE ENVÍO (FETCHER) ---
-// key: la clave (no se usa aquí pero es requerida por la firma)
-// { arg }: el argumento que pasamos al llamar a trigger (el email)
-async function sendRecoveryEmail(key, { arg: email }) {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/update-password`,
-    });
-
-    if (error) throw error;
-    return true; // Retornamos true para indicar éxito
-}
+import { sendPasswordResetEmail } from 'firebase/auth'; // <--- 1. FUNCIÓN FIREBASE
+import { auth } from '../firebase/client'; // <--- 2. INSTANCIA AUTH
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
+  
+  // Estados Locales
   const [email, setEmail] = useState('');
-  const [validationError, setValidationError] = useState('');
-
-  // --- 3. USAR EL HOOK ---
-  // trigger: función para disparar el envío
-  // isMutating: equivalente a tu 'loading'
-  // data: si existe, es que fue 'success'
-  // error: si existe, contiene el error de Supabase
-  const { trigger, isMutating, data, error, reset } = useSWRMutation(
-    'reset-password-action', // Clave identificadora
-    sendRecoveryEmail        // La función de arriba
-  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setValidationError('');
+    setError('');
 
     if (!email) {
-      setValidationError('Por favor ingresa un correo.');
+      setError('Por favor ingresa un correo.');
       return;
     }
 
+    setLoading(true);
+
     try {
-      // Llamamos a trigger pasando el email como argumento
-      await trigger(email);
-    } catch (e) {
-      // SWR ya captura el error en la variable 'error', 
-      // pero el catch aquí evita que la app crashee si no lo manejas.
-      console.error(e);
+      // 3. LLAMADA A FIREBASE
+      // Esto envía un link mágico al correo del usuario
+      await sendPasswordResetEmail(auth, email);
+      setIsSuccess(true); // Cambiamos a la vista de éxito
+
+    } catch (err) {
+      console.error("Error reset pass:", err.code);
+      
+      // 4. MAPEO DE ERRORES
+      if (err.code === 'auth/user-not-found') {
+        setError("No existe una cuenta registrada con este correo.");
+      } else if (err.code === 'auth/invalid-email') {
+        setError("El formato del correo no es válido.");
+      } else {
+        setError("No se pudo enviar el correo. Intenta de nuevo más tarde.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
-
-  // Variable auxiliar para saber si tuvimos éxito
-  const isSuccess = data === true;
 
   return (
     <div className="min-h-screen w-full relative flex">
@@ -91,35 +84,35 @@ const ForgotPassword = () => {
                     <input
                       type="email"
                       value={email}
-                      disabled={isMutating}
+                      disabled={loading}
                       onChange={(e) => {
                         setEmail(e.target.value);
-                        if (error) reset(); // Limpiar error al escribir
+                        if (error) setError('');
                       }}
                       placeholder="ejemplo@correo.com"
                       className={`
                         w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 rounded-lg focus:outline-none transition disabled:opacity-50
-                        ${(error || validationError) ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
+                        ${error ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
                       `}
                     />
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   </div>
                   
-                  {/* Manejo de errores combinados (Validación local + Error de SWR) */}
-                  {(error || validationError) && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1 animate-pulse">
-                      <AlertCircle className="w-3 h-3" /> 
-                      {validationError || error?.message || 'Error al enviar el correo.'}
-                    </p>
+                  {/* Mensaje de Error */}
+                  {error && (
+                    <div className="text-red-500 text-xs mt-2 flex items-center gap-2 bg-red-500/10 p-2 rounded border border-red-500/50 animate-pulse">
+                      <AlertCircle className="w-4 h-4" /> 
+                      {error}
+                    </div>
                   )}
                 </div>
 
                 <button
                   type="submit"
-                  disabled={isMutating}
+                  disabled={loading}
                   className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-900 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg shadow-lg shadow-red-900/30 transition duration-300 flex justify-center items-center"
                 >
-                  {isMutating ? (
+                  {loading ? (
                     <span className="flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" />
                       Enviando...

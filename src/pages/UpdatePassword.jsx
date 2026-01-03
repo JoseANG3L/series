@@ -1,88 +1,90 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom'; // <--- 1. Agregamos useSearchParams
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, ChevronLeft, Loader2 } from 'lucide-react';
-import { supabase } from '../supabase/client';
-import useSWRMutation from 'swr/mutation'; // <--- 1. Importar el hook
-
-// --- 2. FUNCIÓN FETCHER ---
-// Esta función recibe la nueva contraseña y llama a Supabase
-async function updateUserPassword(key, { arg: newPassword }) {
-  // Como el usuario entró por el link del correo, ya tiene una sesión activa temporal.
-  const { error } = await supabase.auth.updateUser({
-    password: newPassword
-  });
-
-  if (error) throw error;
-  return true; // Éxito
-}
+import { confirmPasswordReset } from 'firebase/auth'; // <--- 2. Función de Firebase
+import { auth } from '../firebase/client';
 
 const UpdatePassword = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Obtenemos el código de restablecimiento de la URL (Firebase lo llama 'oobCode')
+  const oobCode = searchParams.get('oobCode');
 
   // Estados de UI
   const [passwords, setPasswords] = useState({ new: '', confirm: '' });
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [validationError, setValidationError] = useState(''); // Errores locales (validación)
+  
+  // Estados de Carga y Error
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  // --- 3. CONFIGURAR HOOK ---
-  const { trigger, isMutating, data, error: apiError, reset } = useSWRMutation(
-    'update-password-action',
-    updateUserPassword
-  );
-
-  // Efecto de seguridad: Verificar si hay sesión
+  // Efecto de seguridad: Verificar si hay código en la URL
   useEffect(() => {
-    const checkSession = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            // Si no hay sesión (el link expiró o entraron directo), al login
-            navigate('/login');
-        }
-    };
-    checkSession();
-  }, [navigate]);
+    if (!oobCode) {
+       // Si no hay código, es un acceso inválido. Redirigir al login.
+       navigate('/login');
+    }
+  }, [oobCode, navigate]);
 
   const handleChange = (e) => {
     setPasswords({ ...passwords, [e.target.name]: e.target.value });
-    setValidationError(''); // Limpiar error local
-    if (apiError) reset();  // Limpiar error de API
+    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setValidationError('');
+    setError('');
 
     // 1. Validaciones Locales
     if (passwords.new.length < 6) {
-      setValidationError('La contraseña debe tener al menos 6 caracteres.');
+      setError('La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
     if (passwords.new !== passwords.confirm) {
-      setValidationError('Las contraseñas no coinciden.');
+      setError('Las contraseñas no coinciden.');
       return;
     }
 
+    if (!oobCode) {
+      setError('Código de restablecimiento inválido o expirado.');
+      return;
+    }
+
+    setLoading(true);
+
     try {
-        // 2. Disparar actualización
-        await trigger(passwords.new);
+        // 2. Disparar actualización en Firebase
+        // Usamos el código de la URL + la nueva contraseña
+        await confirmPasswordReset(auth, oobCode, passwords.new);
+        setIsSuccess(true);
+
     } catch (err) {
-        console.error(err);
+        console.error("Error update pass:", err.code);
+        
+        // Mapeo de errores comunes
+        if (err.code === 'auth/expired-action-code') {
+            setError("El enlace ha expirado. Solicita uno nuevo.");
+        } else if (err.code === 'auth/invalid-action-code') {
+            setError("El enlace es inválido o ya fue usado.");
+        } else if (err.code === 'auth/weak-password') {
+            setError("La contraseña es muy débil.");
+        } else {
+            setError("Ocurrió un error al actualizar. Intenta de nuevo.");
+        }
+    } finally {
+        setLoading(false);
     }
   };
-
-  // Determinar si hubo éxito
-  const isSuccess = data === true;
-
-  // Determinar mensaje de error actual
-  const currentError = validationError || apiError?.message;
 
   return (
     <div className="min-h-screen w-full relative flex">
 
       {/* --- FONDO --- */}
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/fondo.jpg')" }}></div>
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://assets.nflxext.com/ffe/siteui/vlv3/c38a2d52-138e-48a3-ab68-36787ece46b3/eeb03fc9-99bf-4734-8f09-2b0f49495b52/MX-es-20240101-popsignuptwoweeks-perspective_alpha_website_large.jpg')" }}></div>
       <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-[#1c0c2f] via-transparent to-black/30"></div>
 
       <div className="relative z-30 flex flex-col min-h-screen w-full pt-16 pb-16 md:pt-20 px-4 md:px-8 lg:px-16 pb-8 gap-4">
@@ -121,11 +123,11 @@ const UpdatePassword = () => {
                       type={showPass ? "text" : "password"}
                       value={passwords.new}
                       onChange={handleChange}
-                      disabled={isMutating}
+                      disabled={loading}
                       placeholder="Mínimo 6 caracteres"
                       className={`
                         w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none transition disabled:opacity-50
-                        ${currentError ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
+                        ${error ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
                       `}
                     />
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -144,11 +146,11 @@ const UpdatePassword = () => {
                       type={showConfirm ? "text" : "password"}
                       value={passwords.confirm}
                       onChange={handleChange}
-                      disabled={isMutating}
+                      disabled={loading}
                       placeholder="Repite la contraseña"
                       className={`
                         w-full bg-slate-800/50 border text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none transition disabled:opacity-50
-                        ${currentError ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
+                        ${error ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-red-500'}
                       `}
                     />
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -159,19 +161,19 @@ const UpdatePassword = () => {
                 </div>
 
                 {/* Mensaje de Error */}
-                {currentError && (
+                {error && (
                   <div className="bg-red-500/10 border border-red-500/50 rounded p-3 flex items-start gap-2 animate-pulse">
                     <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                    <p className="text-red-500 text-sm">{currentError}</p>
+                    <p className="text-red-500 text-sm">{error}</p>
                   </div>
                 )}
 
                 <button
                   type="submit"
-                  disabled={isMutating}
+                  disabled={loading}
                   className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-900 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg shadow-lg shadow-red-900/30 transition duration-300 flex justify-center items-center"
                 >
-                  {isMutating ? (
+                  {loading ? (
                     <span className="flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" />
                       Actualizando...

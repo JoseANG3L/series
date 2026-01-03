@@ -15,6 +15,7 @@ import NotFound from "../pages/NotFound";
 import LegalPage from "../pages/LegalPage";
 import ScrollToTop from "../components/ScrollToTop";
 import AdminPanel from "../pages/AdminPanel";
+import Profile from "../pages/Profile";
 
 // 1. IMPORTANTE: Importar el Guardián
 import ProtectedRoute from "./ProtectedRoute"; 
@@ -57,6 +58,8 @@ export default function AppRoutes() {
             <Route path="/admin" element={<AdminPanel />} />
 
         </Route>
+
+        <Route path="/perfil" element={<Profile />} />
         {/* ---------------------------------- */}
 
         {/* --- Ruta 404 --- */}

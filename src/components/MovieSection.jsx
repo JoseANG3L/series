@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from "react-router-dom";
 
 const MovieSection = ({ title, movies, layout = "carousel", enableFilters = false }) => {
-  const { user, role, signOut } = useAuth(); 
+  const { user, role, signOut } = useAuth();
   const navigate = useNavigate();
 
   // --- ESTADOS DE FILTROS ---

@@ -1,8 +1,10 @@
 import SeasonCard from "./SeasonCard";
 import { useRef, useState, useMemo } from "react";
+import { useAuth } from '../context/AuthContext';
 
 // Ahora recibimos 'temporadas' y 'seriesPoster' (por si la temporada no tiene foto propia)
-const SeasonSection = ({ title, poster, temporadas = [] }) => {
+const SeasonSection = ({ poster, temporadas = [], isSeries = true, isEditing = false, onAddClick }) => {
+  const { user, role, signOut } = useAuth();
 
   // --- LÓGICA DE ORDENAMIENTO (Simple: 1, 2, 3...) ---
   const sortedSeasons = useMemo(() => {
@@ -46,10 +48,17 @@ const SeasonSection = ({ title, poster, temporadas = [] }) => {
       
       {/* Título de la sección (Ej: "Temporadas") */}
       <h3 className="text-2xl font-bold text-white border-l-4 border-red-500 pl-4 mb-6">
-        {title || "Temporadas"}
+        {isSeries ? "Temporadas" : "Peliculas"}
       </h3>
 
       <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {isEditing && (
+            <SeasonCard
+              isAddCard={true}
+              onAddClick={onAddClick}
+            />
+          )}
+
           {sortedSeasons.map((season) => (
             <SeasonCard 
               key={season.numero}
@@ -57,7 +66,7 @@ const SeasonSection = ({ title, poster, temporadas = [] }) => {
                   id: season.id || `s-${season.numero}`,
                   numero: season.numero,
                   poster: season.poster || poster,
-                  episodios: season.episodios ? season.episodios.length : 0,
+                  episodios: season.episodios || "N/A",
                   descarga: season.descarga || null,
               }}
             />

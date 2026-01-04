@@ -43,8 +43,11 @@ const mapDatabaseToModel = (dbItem) => {
     poster: dbItem.poster,
     backdrop: dbItem.backdrop,
     trailer: dbItem.trailer,
+    preview: dbItem.preview,
     temporadas: dbItem.temporadas || [],
+    peliculas: dbItem.peliculas || [],
     resenas: dbItem.resenas || [],
+    galeria: dbItem.galeria || [],
     creado: dbItem.creado || null,
     actualizado: dbItem.actualizado || null,
 

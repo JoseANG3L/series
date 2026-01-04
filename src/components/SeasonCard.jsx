@@ -1,10 +1,30 @@
 import React from 'react';
-import { Ban, Download } from "lucide-react";
+import { Ban, Download, Plus } from "lucide-react";
 
 const DEFAULT_IMAGE = "https://via.placeholder.com/500x750/1e293b/ef4444?text=No+Image";
 
-const SeasonCard = ({ season, onClick }) => {
+const SeasonCard = ({ season, isAddCard = false, onAddClick }) => {
   
+  if (isAddCard) {
+    return (
+      <div 
+        onClick={onAddClick}
+        className={`relative cursor-pointer group w-full`}
+      >
+        {/* Contenedor Aspect Ratio 2:3 con borde dashed */}
+        <div className="relative overflow-hidden rounded-xl aspect-[2/3] bg-slate-900/50 border-2 border-dashed border-slate-700 hover:border-red-500 hover:bg-slate-800 transition-all duration-300 flex flex-col items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-slate-800 group-hover:bg-red-600/20 flex items-center justify-center transition-colors duration-300">
+             <Plus className="w-8 h-8 text-slate-500 group-hover:text-red-500 transition-colors" />
+          </div>
+          <span className="mt-3 text-sm font-bold text-slate-500 group-hover:text-white transition-colors uppercase tracking-wider">
+            Agregar
+          </span>
+        </div>
+        <div className="mt-3 px-1 h-5"></div>
+      </div>
+    );
+  }
+
   const handleImageError = (e) => {
     e.target.onerror = null;
     e.target.src = DEFAULT_IMAGE;

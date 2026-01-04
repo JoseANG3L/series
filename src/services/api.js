@@ -50,6 +50,7 @@ const mapDatabaseToModel = (dbItem) => {
     galeria: dbItem.galeria || [],
     creado: dbItem.creado || null,
     actualizado: dbItem.actualizado || null,
+    activo: dbItem.activo !== undefined ? dbItem.activo : true,
 
     // 2. Campos desde 'informacion' (Tu nuevo subobjeto)
     peso: info.peso,

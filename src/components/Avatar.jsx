@@ -39,6 +39,8 @@ const Avatar = ({ user, size = "md", className = "" }) => {
         <img 
             src={user.photoURL} 
             alt={user.displayName} 
+            referrerPolicy="no-referrer"
+            loading="lazy"
             className={`rounded-full object-cover border border-slate-600 ${sizeClasses[size]} ${className}`} 
         />
      );

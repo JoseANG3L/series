@@ -58,6 +58,7 @@ const MovieCard = ({ movie, variant = "grid", isAddCard = false, onAddClick }) =
           src={movie.image || DEFAULT_IMAGE} 
           alt={movie.title} 
           onError={handleImageError}        
+          referrerPolicy="no-referrer"
           loading="lazy" // Optimización de rendimiento
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
         />

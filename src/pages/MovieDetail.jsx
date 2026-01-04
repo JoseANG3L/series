@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Play, Plus, ThumbsUp, ChevronLeft, Calendar, Clock, Star, Users,
-  Film, Info, MessageSquare, Image as ImageIcon, Loader2, WifiOff,
+  Play, CheckCircle, AlertCircle, ChevronLeft, Trash2, PlusCircle, Star, Users,
+  AlertTriangle, Power, MessageSquare, Image as ImageIcon, Loader2, WifiOff,
   Edit3, X, Save, Eye, EyeOff
 } from 'lucide-react';
 import { getContentById, getMovies } from '../services/api';
@@ -11,7 +11,7 @@ import CommentsSection from '../components/CommentsSection';
 import { useAuth } from '../context/AuthContext';
 import useSWR, { useSWRConfig } from "swr";
 import { db } from "../firebase/client";
-import { doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion, addDoc, collection } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
 
 const INITIAL_STATE = {
@@ -30,6 +30,7 @@ const INITIAL_STATE = {
   galeria: [],
   creado: null,
   actualizado: null,
+  activo: true,
 
   // Info técnica
   peso: "", formato: "", calidad: "", codec: "", bitrate: "",
@@ -59,8 +60,103 @@ const MovieDetail = () => {
   
   const [showPlayer, setShowPlayer] = useState(false);
 
+  // --- ESTADO UNIFICADO DEL MODAL ---
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    type: 'update', // valores: 'create', 'update', 'delete', 'error'
+    message: ''     // Mensaje personalizado opcional
+  });
+
+  // --- CONFIGURACIÓN VISUAL (Diccionario de estilos) ---
+  const MODAL_CONFIG = {
+    sesionrequired: {
+      color: "text-yellow-500",
+      bg: "bg-yellow-500/20",
+      border: "border-yellow-500/50",
+      icon: AlertCircle,
+      title: "¡Sesión Requerida!",
+      defaultMessage: "Por favor, inicia sesión para continuar."
+    },
+    create: {
+      color: "text-green-500",
+      bg: "bg-green-500/20",
+      border: "border-green-500/50",
+      icon: PlusCircle,
+      title: "¡Contenido Creado!",
+      defaultMessage: "La ficha se ha creado correctamente."
+    },
+    update: {
+      color: "text-blue-500", // Azul para diferenciar de crear
+      bg: "bg-blue-500/20",
+      border: "border-blue-500/50",
+      icon: CheckCircle,
+      title: "¡Actualizado!",
+      defaultMessage: "Tus cambios se han guardado correctamente."
+    },
+    delete: {
+      color: "text-red-500",
+      bg: "bg-red-500/20",
+      border: "border-red-500/50",
+      icon: Trash2,
+      title: "¡Eliminado!",
+      defaultMessage: "El contenido ha sido eliminado permanentemente."
+    },
+    error: {
+      color: "text-orange-500",
+      bg: "bg-orange-500/20",
+      border: "border-orange-500/50",
+      icon: AlertCircle,
+      title: "¡Ups! Algo salió mal",
+      defaultMessage: "Ocurrió un error al procesar la solicitud."
+    }
+  };
+
+  const showFeedback = (type, customMessage = "") => {
+    setModalState({
+      isOpen: true,
+      type: type,
+      message: customMessage
+    });
+
+    // Si NO es error, cerramos automáticamente después de 2 segundos
+    if (type !== 'error') {
+      setTimeout(() => {
+        setModalState(prev => ({ ...prev, isOpen: false }));
+        // Aquí podrías redirigir si es necesario
+      }, 2000);
+    }
+  };
+
+  // --- ESTADO PARA CONFIRMACIONES ---
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: null, // Aquí guardaremos la función a ejecutar
+    isDangerous: true // Para poner el botón rojo o azul
+  });
+
+  // --- FUNCIÓN HELPER PARA PEDIR CONFIRMACIÓN ---
+  const askConfirmation = (title, message, action, isDangerous = true) => {
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm: () => action(), // Envolvemos la función
+      isDangerous
+    });
+  };
+
+  // --- EJECUTAR ACCIÓN CONFIRMADA ---
+  const executeConfirmation = () => {
+    if (confirmModal.onConfirm) {
+      confirmModal.onConfirm(); // Ejecutamos la función guardada
+    }
+    setConfirmModal({ ...confirmModal, isOpen: false }); // Cerramos
+  };
+
   const handleAddReview = async (newReviewData) => {
-    if (!user) return alert("Por favor, inicia sesión para comentar.");
+    if (!user) return showFeedback('sesionrequired', "Debes iniciar sesión para agregar una reseña.");
 
     // 1. Preparamos el objeto EXACTO como lo espera tu UI
     const nuevaResena = {
@@ -104,13 +200,13 @@ const MovieDetail = () => {
       mutate(id ? `movie-${id}` : null); // Recarga visual
     } catch (error) {
       console.error("Error editando:", error);
-      alert("Error al editar el comentario");
+      showFeedback('error', "Error al editar el comentario");
     }
   };
 
   // 3. NUEVO: RESPONDER COMENTARIO
   const handleReplyReview = async (reviewId, replyText) => {
-    if (!user) return alert("Inicia sesión.");
+    if (!user) return showFeedback('sesionrequired', "Debes iniciar sesión para responder.");
 
     // Objeto de respuesta
     const newReply = {
@@ -138,6 +234,7 @@ const MovieDetail = () => {
       mutate(id ? `movie-${id}` : null);
     } catch (error) {
       console.error("Error respondiendo:", error);
+      showFeedback('error', "Error al responder el comentario");
     }
   };
 
@@ -155,6 +252,7 @@ const MovieDetail = () => {
 
     } catch (error) {
       console.error("Error eliminando:", error);
+      showFeedback('error', "Error al eliminar el comentario");
     }
   };
 
@@ -174,34 +272,56 @@ const MovieDetail = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const [rawGallery, setRawGallery] = useState("");
+
   useEffect(() => {
     if (movie && !isNew) {
-      setFormData(movie);
+      setFormData({
+        ...INITIAL_STATE, 
+        ...movie 
+      });
     }
   }, [movie, isNew]);
+
+  useEffect(() => {
+    if (showInputs && Array.isArray(formData.galeria)) {
+      setRawGallery(formData.galeria.join('\n'));
+    }
+  }, [showInputs]);
 
   const handleSaveContent = async () => {
     setSaving(true);
     try {
+      const dataToSave = { ...formData };
+        
+      Object.keys(dataToSave).forEach(key => {
+          if (dataToSave[key] === undefined) {
+              dataToSave[key] = ""; // O null
+          }
+      });
+
       if (isNew) {
         // CREAR NUEVO
         const docRef = await addDoc(collection(db, "content"), {
-          ...formData,
-          createdAt: new Date()
+            ...dataToSave,
+            creado: new Date(),   // Usamos nombres en español según tu state
+            actualizado: new Date()
         });
-        alert("Contenido creado con éxito!");
-        navigate(`/peliculas/${docRef.id}`, { replace: true });
+        showFeedback('create');
+        navigate(`/${docRef.tipo}/${docRef.id}`, { replace: true });
       } else {
         // ACTUALIZAR EXISTENTE
         const movieRef = doc(db, "content", id);
-        await updateDoc(movieRef, formData);
+        // Actualizamos la fecha de modificación
+        dataToSave.actualizado = new Date();
+        await updateDoc(movieRef, dataToSave);
         mutate(`movie-${id}`); // Recargar SWR
         setIsEditing(false);
-        alert("Cambios guardados");
+        showFeedback('update');
       }
     } catch (error) {
       console.error("Error guardando:", error);
-      alert("Error al guardar");
+      showFeedback('error', "Error al guardar los cambios");
     } finally {
       setSaving(false);
     }
@@ -245,14 +365,65 @@ const MovieDetail = () => {
 
   const previewUrl = showInputs || isEditing ? formData.preview : movie.preview;
 
-  const addSeason = () => {
-    setFormData(prev => ({
-      ...prev,
-      temporadas: [
-        ...(prev.temporadas || []),
-        { id: "s" + (formData.temporadas.length + 1).toString(), numero: (formData.temporadas.length + 1).toString(), poster: "", episodios: "12", descarga: "" }
-      ]
-    }));
+  // --- GESTIÓN DE TEMPORADAS (CRUD) ---
+
+  // 1. AGREGAR TEMPORADA (Mejorada)
+  const handleAddSeason = (type = "normal") => {
+    setFormData(prev => {
+      const currentSeasons = prev.temporadas || [];
+      let nextLabel = "1";
+      
+      if (type === "normal") {
+          // Filtramos solo las que son números para seguir la secuencia correcta
+          const numericSeasons = currentSeasons.filter(s => !isNaN(parseInt(s.numero)));
+          nextLabel = (numericSeasons.length + 1).toString();
+      } else {
+          // Lógica para OVAs (opcional: autoincrementar OVA 1, OVA 2...)
+          const ovaSeasons = currentSeasons.filter(s => s.numero.toString().toLowerCase().includes("ova"));
+          nextLabel = ovaSeasons.length > 0 ? `OVA ${ovaSeasons.length + 1}` : "OVA";
+      }
+      
+      return {
+        ...prev,
+        temporadas: [
+          ...currentSeasons,
+          { 
+            id: crypto.randomUUID(), // ID único seguro
+            numero: nextLabel, 
+            poster: "", // Heredará el de la serie si está vacío
+            episodios: type === "ova" ? "1" : "12", 
+            descarga: "" 
+          }
+        ]
+      };
+    });
+  };
+
+  // 2. ACTUALIZAR TEMPORADA (Cuando escribes en los inputs de la tarjeta)
+  const handleUpdateSeason = (index, updatedSeasonData) => {
+    setFormData(prev => {
+      const newSeasons = [...(prev.temporadas || [])];
+      newSeasons[index] = updatedSeasonData; // Reemplazamos la vieja con la nueva
+      return { ...prev, temporadas: newSeasons };
+    });
+  };
+
+  // 3. BORRAR TEMPORADA
+  const handleDeleteSeason = (index) => {
+    askConfirmation(
+        "¿Eliminar Temporada?", 
+        "Esta acción eliminará la temporada y toda su información. No se puede deshacer.",
+        () => {
+            // AQUÍ VA LA LÓGICA DE BORRADO REAL (Callback)
+            setFormData(prev => {
+                const newSeasons = [...(prev.temporadas || [])];
+                newSeasons.splice(index, 1);
+                return { ...prev, temporadas: newSeasons };
+            });
+            // Opcional: Mostrar feedback de éxito después
+            // showFeedback('update', 'Temporada eliminada');
+        }
+    );
   };
 
   return (
@@ -323,6 +494,8 @@ const MovieDetail = () => {
                     <img
                       src={formData.poster || '/default.jpg'}
                       alt="Preview Poster"
+                      referrerPolicy="no-referrer"
+                      loading="lazy"
                       className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
                       onError={(e) => { e.target.onerror = null; e.target.src = '/default.jpg'; }}
                     />
@@ -418,7 +591,18 @@ const MovieDetail = () => {
       {/* --- CONTENT SECTION --- */}
       <div className="px-4 md:px-8 lg:px-16 max-w-7xl mx-auto mt-6 md:mt-9">
         <div className="mb-14">
-          <SeasonSection seriesId={movie.id} poster={movie.poster} temporadas={showInputs || isEditing ? formData.temporadas : movie.temporadas} isSeries={movie.tipo === 'serie'} isEditing={isEditing} onAddClick={addSeason} />
+          <SeasonSection
+            seriesId={movie.id}
+            poster={movie.poster}
+            temporadas={showInputs || isEditing ? formData.temporadas : movie.temporadas}
+            peliculas={showInputs || isEditing ? formData.peliculas : movie.peliculas}
+            isSeries={showInputs || isEditing ? formData.tipo === 'serie' : movie.tipo === 'serie'}
+            isEditing={isEditing}
+            showInputs={showInputs}
+            onAddSeason={handleAddSeason}
+            onUpdateSeason={handleUpdateSeason}
+            onDeleteSeason={handleDeleteSeason}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mx-auto">
@@ -436,9 +620,18 @@ const MovieDetail = () => {
             {/* TAB: SINOPSIS */}
             {activeTab === 'sinopsis' && (
               <div className="animate-fadeIn">
-                <p className="text-gray-300 leading-relaxed text-md mb-8">
-                  {movie.sinopsis || "No hay descripción disponible."}
-                </p>
+                {showInputs ? (
+                  <textarea
+                    value={formData.sinopsis || ""}
+                    onChange={(e) => setFormData({...formData, sinopsis: e.target.value})}
+                    className="w-full h-40 bg-slate-800 text-gray-200 p-4 rounded-lg border border-slate-600 focus:border-red-500 outline-none leading-relaxed resize-none"
+                    placeholder="Escribe la sinopsis aquí..."
+                  />
+                ) : (
+                  <p className="text-gray-300 leading-relaxed text-md mb-8">
+                    {isEditing || showInputs ? formData.sinopsis : movie.sinopsis || "No hay descripción disponible."}
+                  </p>
+                )}
               </div>
             )}
 
@@ -446,115 +639,175 @@ const MovieDetail = () => {
             {activeTab === 'informacion' && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6 p-6 bg-slate-800/50 rounded-xl border border-slate-700 animate-fadeIn">
 
-                {/* 1. Tamaño */}
-                <div>
-                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Tamaño por episodio</span>
-                  <span className={`font-medium ${movie.peso ? "text-white" : "text-gray-600 italic"}`}>{movie.peso || "N/A"}</span>
-                </div>
-
-                {/* 2. Formato */}
-                <div>
-                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Formato</span>
-                  <span className={`font-medium ${movie.formato ? "text-white" : "text-gray-600 italic"}`}>{movie.formato || "N/A"}</span>
-                </div>
-
-                {/* 3. Calidad */}
-                <div>
-                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Calidad</span>
-                  <span className={`font-medium ${movie.calidad ? "text-white" : "text-gray-600 italic"}`}>{movie.calidad || "N/A"}</span>
-                </div>
-
-                {/* 4. Codec */}
-                <div>
-                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Codec</span>
-                  <span className={`font-medium ${movie.codec ? "text-white" : "text-gray-600 italic"}`}>{movie.codec || "N/A"}</span>
-                </div>
-
-                {/* 5. Bit Rate */}
-                <div>
-                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Video Bit Rate</span>
-                  <span className={`font-medium ${movie.bitrate ? "text-white" : "text-gray-600 italic"}`}>{movie.bitrate || "N/A"}</span>
-                </div>
-
-                {/* 6. Audio Principal */}
-                <div>
-                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Audio Principal</span>
-                  <span className={`font-medium ${movie.audio ? "text-white" : "text-gray-600 italic"}`}>{movie.audio || "N/A"}</span>
-                </div>
-
-                {/* 7. Resolución */}
-                <div>
-                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Resolución</span>
-                  <span className={`font-medium ${movie.resolucion ? "text-white" : "text-gray-600 italic"}`}>{movie.resolucion || "N/A"}</span>
-                </div>
-
-                {/* 8. Subtítulos */}
-                <div>
-                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Subtítulos</span>
-                  <span className={`font-medium ${movie.subtitulos ? "text-white" : "text-gray-600 italic"}`}>{movie.subtitulos || "N/A"}</span>
-                </div>
-
-                {/* 9. Duración */}
-                <div>
-                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Duración</span>
-                  <span className={`font-medium ${movie.duracion ? "text-white" : "text-gray-600 italic"}`}>{movie.duracion || "N/A"}</span>
-                </div>
-
-                {/* 10. Temporadas */}
-                <div>
-                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Temporadas</span>
-                  <span className={`font-medium ${movie.temporadassize ? "text-white" : "text-gray-600 italic"}`}>{movie.temporadassize || "N/A"}</span>
-                </div>
-
-                {/* 11. Episodios */}
-                <div>
-                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Episodios</span>
-                  <span className={`font-medium ${movie.episodios ? "text-white" : "text-gray-600 italic"}`}>{movie.episodios || "N/A"}</span>
-                </div>
-
-                {/* 12. Aporte */}
-                <div>
-                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Aporte</span>
-                  <span className={`font-medium ${movie.aporte ? "text-white" : "text-gray-600 italic"}`}>{movie.aporte || "N/A"}</span>
-                </div>
-
-                {/* 13. Nota (Ocupa todo el ancho abajo) */}
-                {movie.nota && (
-                  <div className="col-span-2 md:col-span-3 border-t border-slate-700 pt-4 mt-2">
-                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Nota</span>
-                    <p className="text-slate-300 text-sm leading-relaxed">
-                      {movie.nota || "Sin notas adicionales."}
-                    </p>
+                {/* Helper para renderizar campos repetitivos */}
+                {[
+                  { label: "Tamaño", field: "peso" },
+                  { label: "Formato", field: "formato" },
+                  { label: "Calidad", field: "calidad" },
+                  { label: "Codec", field: "codec" },
+                  { label: "Bit Rate", field: "bitrate" },
+                  { label: "Audio", field: "audio" },
+                  { label: "Resolución", field: "resolucion" },
+                  { label: "Subtítulos", field: "subtitulos" },
+                  { label: "Duración", field: "duracion" },
+                  { label: "Temporadas", field: "temporadassize" },
+                  { label: "Episodios", field: "episodios" },
+                  { label: "Aporte", field: "aporte" },
+                ].map((item, i) => (
+                  <div key={i}>
+                    <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">{item.label}</span>
+                    {showInputs ? (
+                      <input
+                        type="text"
+                        value={formData[item.field] || ""}
+                        onChange={(e) => setFormData({ ...formData, [item.field]: e.target.value })}
+                        className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm focus:border-red-500 outline-none"
+                      />
+                    ) : (
+                      <span className={`font-medium ${isEditing || showInputs ? (formData[item.field] ? "text-white" : "text-gray-600 italic") : (movie[item.field] ? "text-white" : "text-gray-600 italic")}`}>
+                        {isEditing || showInputs ? formData[item.field] || "N/A" : movie[item.field] || "N/A"}
+                      </span>
+                    )}
                   </div>
-                )}
+                ))}
+                
+                {/* Nota (Campo especial full width) */}
+                <div className="col-span-2 md:col-span-3 border-t border-slate-700 pt-4 mt-2">
+                  <span className="block text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-wider">Nota</span>
+                  {showInputs ? (
+                    <input
+                      type="text"
+                      value={formData.nota || ""}
+                      onChange={(e) => setFormData({...formData, nota: e.target.value})}
+                      className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm focus:border-red-500 outline-none"
+                      placeholder="Notas adicionales..."
+                    />
+                  ) : (
+                    <p className="text-slate-300 text-sm leading-relaxed">
+                      {isEditing || showInputs ? formData.nota : movie.nota || "Sin notas adicionales."}
+                    </p>
+                  )}
+                </div>
 
               </div>
             )}
 
             {/* TAB: TRAILER */}
             {activeTab === 'trailer' && (
-              <div className="aspect-video w-full bg-black rounded-xl overflow-hidden shadow-2xl animate-fadeIn border border-slate-700">
-                {movie.trailer ? (
-                  <iframe width="100%" height="100%" src={movie.trailer.replace("watch?v=", "embed/")} title="Trailer" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-500"><Film className="w-12 h-12 mb-2 opacity-50" /><p>Trailer no disponible</p></div>
+              <div className="space-y-4 animate-fadeIn">
+                {showInputs && (
+                  <div>
+                    <label className="text-xs text-red-400 uppercase font-bold block mb-1">URL Youtube Trailer</label>
+                    <input
+                      type="text"
+                      value={formData.trailer || ""}
+                      onChange={(e) => setFormData({...formData, trailer: e.target.value})}
+                      className="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white focus:border-red-500 outline-none"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                    />
+                  </div>
                 )}
+                
+                {/* Lógica segura para mostrar el video */}
+                <div className="aspect-video w-full bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-700 relative">
+                  {(() => {
+                      // Calculamos cuál url usar
+                      const currentTrailer = isEditing ? formData.trailer : movie.trailer;
+                      
+                      // 🔴 VALIDACIÓN: Solo mostramos iframe si hay URL y no está vacía
+                      if (currentTrailer && currentTrailer.length > 5) {
+                          return (
+                            <iframe 
+                                width="100%" 
+                                height="100%" 
+                                // Usamos replace de forma segura
+                                src={currentTrailer.replace("watch?v=", "embed/")} 
+                                title="Trailer" 
+                                frameBorder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowFullScreen
+                            ></iframe>
+                          );
+                      } else {
+                          // Si está vacío, mostramos el placeholder
+                          return (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-gray-500">
+                              <p>Trailer no disponible</p>
+                            </div>
+                          );
+                      }
+                  })()}
+                </div>
               </div>
             )}
 
             {/* TAB: GALERÍA */}
             {activeTab === 'galeria' && (
-              <div className="animate-fadeIn grid grid-cols-1 md:grid-cols-2 gap-4">
-                {movie.galeria && movie.galeria.length > 0 ? (
-                  movie.galeria.map((img, index) => (
-                    <div key={index} className="rounded-xl overflow-hidden cursor-pointer group relative h-48 md:h-64">
-                      <img src={img} alt={`Escena ${index}`} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition"></div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="col-span-2 text-center text-gray-500 py-10 bg-slate-800/30 rounded-lg"><ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" /> No hay imágenes disponibles en la galería.</div>
+              <div className="animate-fadeIn">
+                
+                {/* EDITOR DE GALERÍA */}
+                {showInputs && (
+                  <div className="mb-6 p-4 bg-slate-800 rounded-lg border border-slate-700">
+                    <label className="text-xs text-red-400 uppercase font-bold block mb-2">
+                        URLs de Imágenes (Una por línea o separadas por coma)
+                    </label>
+                    <textarea
+                      // ✅ 1. Protección: Si formData.galeria es null, usa []
+                      value={rawGallery}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                          
+                        // 1. Actualizamos el texto visual (permite comas y enters)
+                        setRawGallery(val); 
+
+                        // 2. Actualizamos los datos reales (Array) en segundo plano
+                        const links = val.split(/[\n,]+/).map(l => l.trim()).filter(l => l !== "");
+                        setFormData(prev => ({ ...prev, galeria: links }));
+                      }}
+                      className="w-full h-32 bg-slate-900 text-xs text-gray-300 p-2 rounded border border-slate-600 focus:border-red-500 outline-none resize-none"
+                      placeholder="https://imagen1.jpg&#10;https://imagen2.jpg"
+                    />
+                    <p className="text-[10px] text-gray-500 mt-1">
+                        Pega los enlaces aquí para actualizar la galería.
+                    </p>
+                  </div>
                 )}
+
+                {/* GRILLA DE IMÁGENES */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Definimos qué galería mostrar de forma segura */}
+                  {(() => {
+                      const currentGallery = (showInputs ? formData.galeria : movie.galeria) || [];
+                      // ✅ 2. Filtrado: Solo mostramos links que tengan más de 5 caracteres (https://...)
+                      const validImages = Array.isArray(currentGallery) 
+                          ? currentGallery.filter(link => link && link.length > 5) 
+                          : [];
+
+                      if (validImages.length > 0) {
+                          return validImages.map((img, index) => (
+                              <div key={index} className="rounded-xl overflow-hidden cursor-pointer group relative h-48 md:h-64 border border-slate-700">
+                                {/* ✅ 3. Src seguro: Ya filtramos antes, pero dejamos el || null por seguridad extra */}
+                                <img 
+                                    src={img || null} 
+                                    alt={`Escena ${index}`} 
+                                    referrerPolicy="no-referrer"
+                                    loading="lazy"
+                                    className="w-full h-full object-cover transition duration-500 group-hover:scale-110" 
+                                />
+                                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition"></div>
+                              </div>
+                          ));
+                      } else {
+                          // Estado vacío
+                          return (
+                            <div className="col-span-2 text-center text-gray-500 py-10 bg-slate-800/30 rounded-lg">
+                                <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" /> 
+                                No hay imágenes disponibles.
+                            </div>
+                          );
+                      }
+                  })()}
+                </div>
               </div>
             )}
           </div>
@@ -566,7 +819,13 @@ const MovieDetail = () => {
               {recommendations.length > 0 ? (
                 recommendations.map(rec => (
                   <div key={rec.id} onClick={() => navigate(`/movie/${rec.id}`)} className="flex gap-4 items-center p-2 rounded-lg hover:bg-slate-800 cursor-pointer transition group">
-                    <img src={rec.poster} className="w-16 h-24 object-cover rounded shadow-md group-hover:scale-105 transition bg-slate-700" alt="" />
+                    <img
+                      src={rec.poster}
+                      referrerPolicy="no-referrer"
+                      loading="lazy"
+                      className="w-16 h-24 object-cover rounded shadow-md group-hover:scale-105 transition bg-slate-700"
+                      alt=""
+                    />
                     <div>
                       <h4 className="font-bold text-sm text-gray-200 group-hover:text-red-400 transition line-clamp-2">{rec.titulo}</h4>
                       <p className="text-xs text-gray-500 mt-1">{rec.anio}</p>
@@ -639,7 +898,6 @@ const MovieDetail = () => {
         </div>
       )}
 
-      {/* --- BARRA DE HERRAMIENTAS DE ADMINISTRACIÓN --- */}
       {role === 'admin' && (
         <div className="fixed bottom-6 right-6 z-50 animate-fade-in-up">
           <div className={`
@@ -664,7 +922,25 @@ const MovieDetail = () => {
 
                 <div className="w-px h-6 bg-white/10"></div>
 
-                {/* --- BOTÓN PREVISUALIZAR (NUEVO) --- */}
+                {/* --- NUEVO: TOGGLE ACTIVO/INACTIVO --- */}
+                <button
+                  onClick={() => setFormData({ ...formData, activo: !formData.activo })}
+                  className={`
+                    flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border mx-1
+                    ${formData.activo
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+                      : "bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20"
+                    }
+                  `}
+                  title={formData.activo ? "El contenido es visible para los usuarios" : "El contenido está oculto (Borrador)"}
+                >
+                  <Power className="w-3.5 h-3.5" />
+                  {formData.activo ? "Visible" : "Oculto"}
+                </button>
+
+                <div className="w-px h-6 bg-white/10"></div>
+
+                {/* --- BOTÓN PREVISUALIZAR --- */}
                 <button
                   onClick={() => setIsPreviewing(!isPreviewing)}
                   disabled={saving}
@@ -723,6 +999,121 @@ const MovieDetail = () => {
                 <span>Editar Ficha</span>
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL DINÁMICO DE FEEDBACK --- */}
+      {modalState.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fadeIn">
+          
+          {/* Tarjeta del Modal */}
+          <div className={`bg-slate-900 border ${MODAL_CONFIG[modalState.type].border} rounded-2xl p-8 flex flex-col items-center justify-center shadow-2xl transform scale-105 transition-all max-w-sm text-center relative`}>
+            
+            {/* Botón Cerrar (Solo visible si es Error para dar tiempo a leer) */}
+            {modalState.type === 'error' && (
+              <button 
+                onClick={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+                className="absolute top-3 right-3 text-slate-500 hover:text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+
+            {/* Icono Dinámico */}
+            <div className={`w-16 h-16 ${MODAL_CONFIG[modalState.type].bg} rounded-full flex items-center justify-center mb-4 ${modalState.type === 'error' ? 'animate-pulse' : 'animate-bounce'}`}>
+              {/* Renderizamos el componente de icono dinámicamente */}
+              {React.createElement(MODAL_CONFIG[modalState.type].icon, {
+                 className: `w-8 h-8 ${MODAL_CONFIG[modalState.type].color}`
+              })}
+            </div>
+
+            {/* Título Dinámico */}
+            <h3 className="text-2xl font-bold text-white mb-2">
+              {MODAL_CONFIG[modalState.type].title}
+            </h3>
+
+            {/* Mensaje Dinámico (Usa el custom o el default) */}
+            <p className="text-slate-400">
+              {modalState.message || MODAL_CONFIG[modalState.type].defaultMessage}
+            </p>
+
+            {/* Spinner de recarga (Solo si no es error) */}
+            {modalState.type !== 'error' && (
+              <div className="mt-6 flex items-center gap-2 text-xs text-slate-500 animate-pulse">
+                <Loader2 className="w-3 h-3 animate-spin" /> Procesando...
+              </div>
+            )}
+
+            {/* Botón Cerrar Manual (Solo Error) */}
+            {modalState.type === 'error' && (
+               <button
+                 onClick={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+                 className="mt-6 px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-bold transition border border-slate-700"
+               >
+                 Cerrar
+               </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL DE CONFIRMACIÓN (INTERACTIVO) --- */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fadeIn">
+          
+          <div className="bg-slate-900 border border-yellow-500/30 rounded-2xl p-6 w-full max-w-md shadow-2xl transform scale-100 transition-all relative">
+            
+            {/* Botón X Cerrar */}
+            <button 
+              onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+              className="absolute top-4 right-4 text-slate-500 hover:text-white transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex flex-col items-center text-center">
+              
+              {/* Icono de Advertencia */}
+              <div className="w-14 h-14 bg-yellow-500/20 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="w-8 h-8 text-yellow-500" />
+              </div>
+
+              {/* Título */}
+              <h3 className="text-xl font-bold text-white mb-2">
+                {confirmModal.title}
+              </h3>
+
+              {/* Mensaje */}
+              <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                {confirmModal.message}
+              </p>
+
+              {/* Botones de Acción */}
+              <div className="flex gap-3 w-full">
+                
+                {/* Botón Cancelar */}
+                <button
+                  onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                  className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-bold transition border border-slate-700"
+                >
+                  Cancelar
+                </button>
+
+                {/* Botón Confirmar (Rojo si es peligroso, Azul si no) */}
+                <button
+                  onClick={executeConfirmation}
+                  className={`flex-1 px-4 py-2.5 text-white rounded-lg text-sm font-bold transition shadow-lg flex items-center justify-center gap-2 ${
+                    confirmModal.isDangerous 
+                      ? "bg-red-600 hover:bg-red-500 shadow-red-900/20" 
+                      : "bg-blue-600 hover:bg-blue-500 shadow-blue-900/20"
+                  }`}
+                >
+                  {confirmModal.isDangerous ? "Sí, Eliminar" : "Confirmar"}
+                </button>
+              </div>
+
+            </div>
           </div>
         </div>
       )}

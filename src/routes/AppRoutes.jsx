@@ -36,8 +36,8 @@ export default function AppRoutes() {
         <Route path="/buscar" element={<SearchResults />} />
 
         {/* --- Ruta Dinámica de Detalles --- */}
-        <Route path="/peliculas/:id" element={<MovieDetail />} />
-        <Route path="/series/:id" element={<MovieDetail />} />
+        <Route path="/peliculas/:id" element={<MovieDetail tipo="movie" />} />
+        <Route path="/series/:id" element={<MovieDetail tipo="serie" />} />
 
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

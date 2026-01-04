@@ -231,11 +231,11 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
           `}
         >
 
-          {role === 'admin' && (
+          {role === 'admin' && enableFilters && (
             <div className="shrink-0 snap-center">
               <MovieCard
                 isAddCard={true}
-                onAddClick={() => navigate('/admin/nuevo')}
+                onAddClick={() => navigate('/nuevo')}
                 variant="carousel"
               />
             </div>
@@ -266,10 +266,10 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
       {layout === "grid" && (
         <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
           
-          {role === 'admin' && (
+          {role === 'admin' && enableFilters && (
             <MovieCard
               isAddCard={true}
-              onAddClick={() => navigate('/admin/nuevo')}
+              onAddClick={() => navigate('/nuevo')}
               variant="grid"
             />
           )}

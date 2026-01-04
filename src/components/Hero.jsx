@@ -78,19 +78,19 @@ const Hero = () => {
         </p>
 
         {/* Botones */}
-        <div className="flex flex-wrap gap-4 pt-3 animate-fade-in-up delay-500">
+        <div className="flex flex-wrap gap-3 md:gap-4 pt-3 animate-fade-in-up delay-500">
           <button 
             onClick={() => previewUrl && setShowPlayer(true)}
-            className={`flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-full font-bold hover:bg-green-500 transition shadow-lg shadow-green-900/50 hover:scale-105 transform duration-200 ${!previewUrl && 'opacity-50 cursor-not-allowed'}`}
+            className={`flex items-center gap-2 px-6 py-2 md:px-8 md:py-3 bg-green-600 text-white rounded-full font-bold hover:bg-green-500 transition shadow-lg shadow-green-900/50 hover:scale-105 transform duration-200 ${!previewUrl && 'opacity-50 cursor-not-allowed'}`}
           >
-            <Play className="w-5 h-5 fill-current" /> Ver Ahora
+            <Play className="w-4 h-4 md:w-5 md:h-5 fill-current" /> Ver Ahora
           </button>
           
-          <button 
+          <button
             onClick={() => isSeries ? navigate(`/series/${movie.id}`) : navigate(`/peliculas/${movie.id}`)}
-            className="flex items-center gap-2 px-8 py-3 border border-gray-600 bg-black/30 backdrop-blur-md text-white rounded-full font-bold hover:bg-white hover:text-black transition hover:scale-105 transform duration-200"
+            className="flex items-center gap-2 px-6 py-2 md:px-8 md:py-3 border border-gray-600 bg-black/30 backdrop-blur-md text-white rounded-full font-bold hover:bg-white hover:text-black transition hover:scale-105 transform duration-200"
           >
-            <Info className="w-5 h-5" />
+            <Info className="w-4 h-4 md:w-5 md:h-5" />
             Más Info
           </button>
         </div>

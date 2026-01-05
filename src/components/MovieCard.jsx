@@ -3,7 +3,7 @@ import Badge from "./Badge";
 import { useNavigate } from "react-router-dom";
 
 // Una imagen placeholder elegante por si falla la original
-const DEFAULT_IMAGE = "https://via.placeholder.com/500x750/1e293b/ef4444?text=No+Image";
+const DEFAULT_IMAGE = "/default.jpg";
 
 const MovieCard = ({ movie, variant = "grid", isAddCard = false, onAddClick }) => {
   const navigate = useNavigate();

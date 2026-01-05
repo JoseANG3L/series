@@ -343,7 +343,10 @@ const MovieDetail = ({ tipo, forcedId }) => {
         showFeedback('create');
         
         // 🔴 REDIRECCIÓN A LA LISTA PRINCIPAL
-        navigate(targetRoute, { replace: true });
+        // timer
+        setTimeout(() => {
+          navigate(targetRoute, { replace: true });
+        }, 3000);
       } else {
         // --- ACTUALIZAR EXISTENTE ---
         const movieRef = doc(db, "content", id);
@@ -358,7 +361,9 @@ const MovieDetail = ({ tipo, forcedId }) => {
 
         // 🔴 REDIRECCIÓN A LA LISTA PRINCIPAL (Como pediste)
         // Esto es útil si cambiaste de "Pelicula" a "Serie", para que no te quedes en una URL incorrecta
-        navigate(targetRoute, { replace: true });
+        setTimeout(() => {
+          navigate(targetRoute, { replace: true });
+        }, 3000);
       }
     } catch (error) {
       console.error("Error guardando:", error);

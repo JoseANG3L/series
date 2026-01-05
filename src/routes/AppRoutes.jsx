@@ -42,8 +42,7 @@ export default function AppRoutes() {
             {/* Si ProtectedRoute dice "OK", entonces muestra esto: */}
             <Route path="/admin" element={<AdminPanel />} />
 
-            <Route path="/peliculas/nuevo" element={<MovieDetail tipo="movie" forcedId="nuevo" />} />
-            <Route path="/series/nuevo" element={<MovieDetail tipo="serie" forcedId="nuevo" />} />
+            <Route path="/crear" element={<MovieDetail tipo="serie" forcedId="nuevo" />} />
 
         </Route>
 

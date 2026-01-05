@@ -394,12 +394,12 @@ const MovieDetail = ({ tipo, forcedId }) => {
   };
 
   // --- 2. CARGAR RECOMENDACIONES (SWR) ---
-  const { data: allMovies } = useSWR('all-movies', getMovies);
+  // const { data: allMovies } = useSWR('all-movies', getMovies);
 
   // Filtramos las recomendaciones (si ya cargaron las pelis)
-  const recommendations = allMovies
-    ? allMovies.filter(m => m.id !== parseInt(id)).slice(0, 4)
-    : [];
+  // const recommendations = allMovies
+  //   ? allMovies.filter(m => m.id !== parseInt(id)).slice(0, 4)
+  //   : [];
 
   // --- LOADING ---
   if (loadingMovie) {
@@ -479,6 +479,56 @@ const MovieDetail = ({ tipo, forcedId }) => {
             });
             // Opcional: Mostrar feedback de éxito después
             // showFeedback('update', 'Temporada eliminada');
+        }
+    );
+  };
+
+  // --- GESTIÓN DE PELÍCULAS (CRUD) ---
+
+  // 1. AGREGAR PELÍCULA
+  const handleAddMovie = () => {
+    setFormData(prev => {
+      const currentMovies = prev.peliculas || [];
+      const nextNum = currentMovies.length + 1;
+
+      return {
+        ...prev,
+        peliculas: [
+          ...currentMovies,
+          { 
+            id: crypto.randomUUID(), 
+            titulo: `Película ${nextNum}`, // Título por defecto ej: "Película 2"
+            poster: "",      // Por si cada peli de la saga tiene su poster
+            anio: new Date().getFullYear().toString(),
+            calidad: formData.calidad || "1080p", // Hereda la calidad global o usa default
+            duracion: "",
+            descarga: ""     // Link de descarga/ver
+          }
+        ]
+      };
+    });
+  };
+
+  // 2. ACTUALIZAR PELÍCULA (Cuando editas una fila de película)
+  const handleUpdateMovie = (index, updatedMovieData) => {
+    setFormData(prev => {
+      const newMovies = [...(prev.peliculas || [])];
+      newMovies[index] = updatedMovieData; 
+      return { ...prev, peliculas: newMovies };
+    });
+  };
+
+  // 3. BORRAR PELÍCULA
+  const handleDeleteMovie = (index) => {
+    askConfirmation(
+        "¿Eliminar Película?", 
+        "Esta acción eliminará esta película de la lista de la saga. No se puede deshacer.",
+        () => {
+            setFormData(prev => {
+                const newMovies = [...(prev.peliculas || [])];
+                newMovies.splice(index, 1);
+                return { ...prev, peliculas: newMovies };
+            });
         }
     );
   };
@@ -656,16 +706,16 @@ const MovieDetail = ({ tipo, forcedId }) => {
             isSeries={showInputs || isEditing ? formData.tipo === 'serie' : movie.tipo === 'serie'}
             isEditing={isEditing}
             showInputs={showInputs}
-            onAddSeason={handleAddSeason}
-            onUpdateSeason={handleUpdateSeason}
-            onDeleteSeason={handleDeleteSeason}
+            onAddSeason={formData.tipo === 'serie' ? handleAddSeason : handleAddMovie}
+            onUpdateSeason={formData.tipo === 'serie' ? handleUpdateSeason : handleUpdateMovie}
+            onDeleteSeason={formData.tipo === 'serie' ? handleDeleteSeason : handleDeleteMovie}
           />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mx-auto">
 
           {/* COLUMNA IZQUIERDA (Principal) */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
 
             <div className="flex gap-8 border-b border-gray-700 pb-2 overflow-x-auto">
               <button onClick={() => setActiveTab('sinopsis')} className={`pb-2 text-lg font-bold transition ${activeTab === 'sinopsis' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}>Sinopsis</button>
@@ -870,7 +920,7 @@ const MovieDetail = ({ tipo, forcedId }) => {
           </div>
 
           {/* COLUMNA DERECHA (Similares - Dinámico) */}
-          <div className="lg:col-span-1 border-l border-slate-800 pl-4 lg:pl-8">
+          {/* <div className="lg:col-span-1 border-l border-slate-800 pl-4 lg:pl-8">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2"><Users className="w-5 h-5 text-red-500" /> Recomendados</h3>
             <div className="flex flex-col gap-4">
               {recommendations.length > 0 ? (
@@ -894,7 +944,7 @@ const MovieDetail = ({ tipo, forcedId }) => {
                 <p className="text-slate-500 text-sm">Cargando recomendaciones...</p>
               )}
             </div>
-          </div>
+          </div> */}
 
         </div>
 

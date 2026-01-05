@@ -2,77 +2,92 @@ import SeasonCard from "./SeasonCard";
 import { useRef, useState, useMemo } from "react";
 import { useAuth } from '../context/AuthContext';
 
-// Ahora recibimos 'temporadas' y 'seriesPoster' (por si la temporada no tiene foto propia)
-const SeasonSection = ({ poster, temporadas = [], peliculas = [], isSeries = true, isEditing = false, showInputs = false, onAddSeason, onUpdateSeason, onDeleteSeason }) => {
-  const { user, role, signOut } = useAuth();
+const SeasonSection = ({ 
+  poster, 
+  temporadas = [], 
+  peliculas = [], 
+  isSeries = true, 
+  isEditing = false, 
+  showInputs = false, 
+  onAddSeason,    // Si es peli, aquí viene la fn handleAddMovie
+  onUpdateSeason, // Si es peli, aquí viene la fn handleUpdateMovie
+  onDeleteSeason  // Si es peli, aquí viene la fn handleDeleteMovie
+}) => {
+  const { user } = useAuth();
 
-  let content;
-  
-  // --- LÓGICA DE ORDENAMIENTO (Simple: 1, 2, 3...) ---
-  const sortedSeasons = useMemo(() => {
-    if (isSeries) {
-      content = temporadas;
-    } else {
-      content = peliculas;
-    }
-    
-    if (!content) return [];
-    
-    // En edición devolvemos todo sin ordenar para evitar saltos raros
-    if (isEditing) return content;
+  // --- 1. SELECCIÓN DE CONTENIDO ---
+  const rawContent = isSeries ? temporadas : peliculas;
 
-    return [...content].sort((a, b) => {
+  // --- 2. LÓGICA DE ORDENAMIENTO ---
+  const sortedContent = useMemo(() => {
+    if (!rawContent) return [];
+
+    // Si estamos editando, o son PELÍCULAS, devolvemos el array tal cual (respetamos el orden de creación/lista)
+    // Ordenar películas alfabéticamente suele romper el orden cronológico de las sagas.
+    if (isEditing || !isSeries) return rawContent;
+
+    // Solo ordenamos si son SERIES (Temporada 1, 2, 3...)
+    return [...rawContent].sort((a, b) => {
         const numA = parseInt(a.numero);
         const numB = parseInt(b.numero);
 
-        // CASO 1: Ambos son números (Temp 1 vs Temp 2) -> Orden numérico
-        if (!isNaN(numA) && !isNaN(numB)) {
-            return numA - numB;
-        }
-
-        // CASO 2: A es número, B es texto (Temp 1 vs OVA) -> Número primero
-        if (!isNaN(numA) && isNaN(numB)) {
-            return -1;
-        }
-
-        // CASO 3: A es texto, B es número (OVA vs Temp 1) -> Número primero
-        if (isNaN(numA) && !isNaN(numB)) {
-            return 1;
-        }
-
-        // CASO 4: Ambos son texto (OVA vs Especial) -> Orden alfabético
-        return a.numero.localeCompare(b.numero);
+        // Lógica para ordenar "1", "2", "OVA", "Especial"
+        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+        if (!isNaN(numA) && isNaN(numB)) return -1;
+        if (isNaN(numA) && !isNaN(numB)) return 1;
+        return a.numero?.localeCompare(b.numero || "") || 0;
     });
     
-  }, [content, isSeries, isEditing]);
+  }, [rawContent, isSeries, isEditing]);
 
-  if (sortedSeasons.length === 0 && !showInputs) return null;
+  // Si no hay contenido y no estamos editando, no mostramos nada
+  if (sortedContent.length === 0 && !showInputs) return null;
 
   return (
     <section className="relative z-10">
       
-      {/* Título de la sección (Ej: "Temporadas") */}
+      {/* Título de la sección */}
       <h3 className="text-2xl font-bold text-white border-l-4 border-red-500 pl-4 mb-6">
-        {isSeries ? "Temporadas" : "Peliculas"}
+        {isSeries ? "Temporadas" : "Películas"}
       </h3>
 
       <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          
+          {/* TARJETA DE "AGREGAR NUEVO" */}
           {showInputs && (
-            <SeasonCard isAddCard={true} onAddSeason={onAddSeason} />
+            <SeasonCard 
+                isAddCard={true} 
+                onAddSeason={onAddSeason} // Ejecutará handleAddSeason o handleAddMovie según lo que pasaste
+                isSeries={isSeries}       // Para saber si mostrar icono de "Temp" o "Peli"
+            />
           )}
 
-          {sortedSeasons.map((season, index) => (
+          {/* LISTA DE ITEMS */}
+          {sortedContent.map((item, index) => (
             <SeasonCard 
-              key={season.id || index}
-              season={{
-                id: season.id || `s-${season.numero}`,
-                numero: season.numero,
-                poster: season.poster || poster,
-                episodios: season.episodios || "N/A",
-                descarga: season.descarga || null,
-              }}
+              key={item.id || index}
+              // Pasamos el prop isSeries para que la Card sepa cómo renderizar (si hace falta)
+              isSeries={isSeries} 
               isEditing={isEditing}
               showInputs={showInputs}
+              
+              // --- MAPEO HÍBRIDO DE DATOS ---
+              // Adaptamos los datos de Película para que entren en la estructura de la Card
+              season={{
+                id: item.id || index,
+                poster: item.poster || poster, // Poster individual o el de la serie/saga
+                descarga: item.descarga || "",
+
+                // TRUCO: Si es serie usa 'numero', si es peli usa 'titulo'
+                numero: isSeries ? item.numero : item.titulo, 
+
+                // TRUCO: Si es serie usa 'episodios', si es peli usa 'calidad' o 'año'
+                episodios: isSeries ? item.episodios : (item.calidad || item.anio || "Película"),
+                
+                // Pasamos todo el objeto por si SeasonCard necesita datos extra (como 'duracion')
+                ...item 
+              }}
+              
               onUpdate={(updatedData) => onUpdateSeason(index, updatedData)}
               onDelete={() => onDeleteSeason(index)}
             />

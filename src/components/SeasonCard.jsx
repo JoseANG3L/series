@@ -7,6 +7,7 @@ const SeasonCard = ({
   season, 
   isAddCard = false, 
   onAddSeason, 
+  isSeries = true,
   isEditing = false, // Ahora usamos isEditing en lugar de showInputs para ser consistentes
   showInputs = false, // Mantenemos compatibilidad por si usas esta variable
   onUpdate,
@@ -15,32 +16,51 @@ const SeasonCard = ({
 
   if (isAddCard) {
     return (
-      <div className="relative w-full h-full flex flex-col gap-2">
-        {/* BOTÓN SUPERIOR: AGREGAR TEMPORADA */}
-        <div 
-            onClick={() => onAddSeason("normal")}
-            className="flex-1 relative cursor-pointer group rounded-xl bg-slate-900/50 border-2 border-dashed border-slate-700 hover:border-blue-500 hover:bg-slate-800 transition-all duration-300 flex flex-col items-center justify-center p-2"
-        >
-            <div className="w-10 h-10 rounded-full bg-slate-800 group-hover:bg-blue-600/20 flex items-center justify-center transition-colors mb-1">
-                <MonitorPlay className="w-5 h-5 text-slate-500 group-hover:text-blue-500" />
-            </div>
-            <span className="text-[10px] font-bold text-slate-500 group-hover:text-white uppercase">
+      <div className="relative w-full h-full flex flex-col gap-2 min-h-[12rem]"> {/* min-h ayuda a que no se aplaste */}
+        
+        {isSeries ? (
+          <>
+            {/* OPCIÓN 1: AGREGAR TEMPORADA */}
+            <div 
+              onClick={() => onAddSeason("normal")}
+              className="flex-1 relative cursor-pointer group rounded-xl bg-slate-900/50 border-2 border-dashed border-slate-700 hover:border-blue-500 hover:bg-slate-800 transition-all duration-300 flex flex-col items-center justify-center p-2"
+            >
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-800 group-hover:bg-blue-600/20 flex items-center justify-center transition-colors mb-1">
+                <MonitorPlay className="w-4 h-4 md:w-5 md:h-5 text-slate-500 group-hover:text-blue-500" />
+              </div>
+              <span className="text-[9px] md:text-[10px] font-bold text-slate-500 group-hover:text-white uppercase text-center">
                 + Temporada
-            </span>
-        </div>
-
-        {/* BOTÓN INFERIOR: AGREGAR OVA */}
-        <div 
-            onClick={() => onAddSeason("ova")}
-            className="flex-1 relative cursor-pointer group rounded-xl bg-slate-900/50 border-2 border-dashed border-slate-700 hover:border-purple-500 hover:bg-slate-800 transition-all duration-300 flex flex-col items-center justify-center p-2"
-        >
-             <div className="w-10 h-10 rounded-full bg-slate-800 group-hover:bg-purple-600/20 flex items-center justify-center transition-colors mb-1">
-                <Clapperboard className="w-5 h-5 text-slate-500 group-hover:text-purple-500" />
+              </span>
             </div>
-            <span className="text-[10px] font-bold text-slate-500 group-hover:text-white uppercase">
+
+            {/* OPCIÓN 2: AGREGAR OVA */}
+            <div 
+              onClick={() => onAddSeason("ova")}
+              className="flex-1 relative cursor-pointer group rounded-xl bg-slate-900/50 border-2 border-dashed border-slate-700 hover:border-purple-500 hover:bg-slate-800 transition-all duration-300 flex flex-col items-center justify-center p-2"
+            >
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-800 group-hover:bg-purple-600/20 flex items-center justify-center transition-colors mb-1">
+                <Clapperboard className="w-4 h-4 md:w-5 md:h-5 text-slate-500 group-hover:text-purple-500" />
+              </div>
+              <span className="text-[9px] md:text-[10px] font-bold text-slate-500 group-hover:text-white uppercase text-center">
                 + OVA
+              </span>
+            </div>
+          </>
+        ) : (
+          /* OPCIÓN ÚNICA: AGREGAR PELÍCULA */
+          <div 
+            onClick={() => onAddSeason()} // En pelis no necesitamos argumento, pero si pasas "normal" no pasa nada
+            className="flex-1 relative cursor-pointer group rounded-xl bg-slate-900/50 border-2 border-dashed border-slate-700 hover:border-emerald-500 hover:bg-slate-800 transition-all duration-300 flex flex-col items-center justify-center p-2"
+          >
+            <div className="w-12 h-12 rounded-full bg-slate-800 group-hover:bg-emerald-600/20 flex items-center justify-center transition-colors mb-2">
+              {/* Cambié el icono a Plus o Clapperboard para diferenciar visualmente */}
+              <Plus className="w-6 h-6 text-slate-500 group-hover:text-emerald-500" />
+            </div>
+            <span className="text-xs font-bold text-slate-500 group-hover:text-white uppercase tracking-widest">
+              + Película
             </span>
-        </div>
+          </div>
+        )}
       </div>
     );
   }

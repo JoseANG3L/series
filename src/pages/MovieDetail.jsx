@@ -41,14 +41,15 @@ const INITIAL_STATE = {
   nota: "",
 };
 
-const MovieDetail = () => {
-  const { id } = useParams();
+const MovieDetail = ({ tipo, forcedId }) => {
+  const params = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('sinopsis');
   const { user, role } = useAuth(); // Obtenemos el usuario actual
   // Necesitamos mutate para decirle a SWR que recargue los datos
   const { mutate } = useSWRConfig();
 
+  const id = forcedId || params.id;
   const isNew = id === 'nuevo';
   const [isEditing, setIsEditing] = useState(isNew);
 
@@ -284,6 +285,36 @@ const MovieDetail = () => {
   }, [movie, isNew]);
 
   useEffect(() => {
+    if (isNew) {
+      // Si estamos creando, forzamos el tipo según la URL
+      setFormData(prev => ({
+        ...prev,
+        tipo: tipo || "serie" // Si vienes de /series/nuevo, pone 'serie'
+      }));
+      setIsEditing(true); // Aseguramos modo edición
+    }
+    // No necesitamos else, porque si no es nuevo, SWR cargará los datos reales
+  }, [isNew, tipo]);
+
+  useEffect(() => {
+    // Solo si ya cargó la info (movie) y NO estamos creando uno nuevo
+    if (movie && !isNew) {
+      
+      // 1. Detectamos qué dice la URL actual (¿empieza con series o peliculas?)
+      const currentPath = location.pathname.split('/')[1]; // obtiene "series" o "peliculas"
+      
+      // 2. Detectamos qué debería ser según la base de datos
+      const expectedPath = movie.tipo === 'serie' ? 'series' : 'peliculas';
+
+      // 3. Si no coinciden, forzamos la corrección (Redirección instantánea)
+      if (currentPath === 'movie' || (currentPath !== expectedPath && currentPath !== 'admin')) {
+        // El replace: true evita que el usuario pueda volver atrás a la URL incorrecta
+        navigate(`/${expectedPath}/${movie.id}`, { replace: true });
+      }
+    }
+  }, [movie, isNew, location.pathname, navigate]);
+
+  useEffect(() => {
     if (showInputs && Array.isArray(formData.galeria)) {
       setRawGallery(formData.galeria.join('\n'));
     }
@@ -300,24 +331,34 @@ const MovieDetail = () => {
           }
       });
 
+      const targetRoute = dataToSave.tipo === 'serie' ? '/series' : '/peliculas';
+
       if (isNew) {
-        // CREAR NUEVO
-        const docRef = await addDoc(collection(db, "content"), {
+        await addDoc(collection(db, "content"), {
             ...dataToSave,
-            creado: new Date(),   // Usamos nombres en español según tu state
+            creado: new Date(),
             actualizado: new Date()
         });
+        
         showFeedback('create');
-        navigate(`/${docRef.tipo}/${docRef.id}`, { replace: true });
+        
+        // 🔴 REDIRECCIÓN A LA LISTA PRINCIPAL
+        navigate(targetRoute, { replace: true });
       } else {
-        // ACTUALIZAR EXISTENTE
+        // --- ACTUALIZAR EXISTENTE ---
         const movieRef = doc(db, "content", id);
-        // Actualizamos la fecha de modificación
         dataToSave.actualizado = new Date();
+        
         await updateDoc(movieRef, dataToSave);
-        mutate(`movie-${id}`); // Recargar SWR
-        setIsEditing(false);
+        
+        // Forzamos actualización de caché global por si cambiaste de lista
+        mutate('all-movies'); 
+        
         showFeedback('update');
+
+        // 🔴 REDIRECCIÓN A LA LISTA PRINCIPAL (Como pediste)
+        // Esto es útil si cambiaste de "Pelicula" a "Serie", para que no te quedes en una URL incorrecta
+        navigate(targetRoute, { replace: true });
       }
     } catch (error) {
       console.error("Error guardando:", error);
@@ -327,11 +368,23 @@ const MovieDetail = () => {
     }
   };
 
+  // const handleCancel = () => {
+  //   if (isNew) {
+  //     navigate('/peliculas');
+  //   } else {
+  //     setIsEditing(false);
+  //   }
+  // };
+
   const handleCancel = () => {
     if (isNew) {
-      navigate('/peliculas');
+      // Si cancelas la creación, vuelve a la lista basada en lo que tenías seleccionado
+      const targetPath = formData.tipo === 'serie' ? '/series' : '/peliculas';
+      navigate(targetPath);
     } else {
       setIsEditing(false);
+      // Restauramos los datos originales
+      if (movie) setFormData({ ...INITIAL_STATE, ...movie });
     }
   };
 
@@ -352,8 +405,7 @@ const MovieDetail = () => {
     );
   }
 
-  // --- ERROR ---
-  if (errorMovie || !movie) {
+  if (!isNew && (errorMovie || !movie)) {
     return (
       <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center text-slate-400 gap-4">
         <WifiOff className="w-16 h-16 opacity-50" />
@@ -435,7 +487,7 @@ const MovieDetail = () => {
         {/* 1. FONDO (Dinámico: cambia mientras escribes la URL en modo edición) */}
         <div
           className="absolute inset-0 bg-cover bg-center transition-all duration-500"
-          style={{ backgroundImage: `url('${showInputs || isEditing ? (formData.backdrop || formData.poster) : (movie.backdrop || movie.poster)}')` }}
+          style={{ backgroundImage: `url('${showInputs || isEditing ? (formData.backdrop || formData.poster || '/default.jpg') : (movie.backdrop || movie.poster || '/default.jpg')}')` }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] from-0% via-[#0f172a]/60 via-40% to-transparent to-70%"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/80 from-0% via-[#0f172a]/50 via-30% to-transparent to-50%"></div>
@@ -465,7 +517,7 @@ const MovieDetail = () => {
                     <label className="text-[12px] text-gray-500 uppercase font-bold ml-1">URL del Poster (Vertical)</label>
                     <input
                       type="text"
-                      value={formData.poster}
+                      value={formData.poster || '/default.jpg'}
                       onChange={(e) => handleChange('poster', e.target.value)}
                       placeholder="https://ejemplo.com/poster.jpg"
                       className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition placeholder-gray-500"
@@ -477,7 +529,7 @@ const MovieDetail = () => {
                     <label className="text-[12px] text-gray-500 uppercase font-bold ml-1">URL del Backdrop (Horizontal)</label>
                     <input
                       type="text"
-                      value={formData.backdrop}
+                      value={formData.backdrop || '/default.jpg'}
                       onChange={(e) => handleChange('backdrop', e.target.value)}
                       placeholder="https://ejemplo.com/fondo.jpg (Opcional)"
                       className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition placeholder-gray-500"
@@ -504,7 +556,7 @@ const MovieDetail = () => {
 
               </div>
               <div className="space-y-1 mt-4">
-                <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">URL del Video / Preview</label>
+                <label className="text-[12px] text-gray-500 uppercase font-bold ml-1">URL del Video / Preview</label>
                 <input
                   type="text"
                   value={formData.preview || ""} // Asegúrate de que tu INITIAL_STATE tenga 'preview': ""
@@ -561,14 +613,14 @@ const MovieDetail = () => {
                 className="text-xl bg-transparent border-b border-white/20 w-full italic text-gray-300 placeholder-gray-600 focus:border-blue-500 outline-none pb-1"
               />
             ) : (
-              movie.tagline ? (
+              showInputs || isEditing && formData.tagline ? (
                 <p className="text-gray-100 italic text-lg mb-6 font-light border-l-2 border-red-500 pl-3 line-clamp-2 md:line-clamp-none drop-shadow-md [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">
-                  "{showInputs || isEditing ? formData.tagline : movie.tagline}"
+                  "{formData.tagline}"
                 </p>
               ) : (
-                movie.sinopsis && (
+                movie.tagline && (
                   <p className="text-gray-100 italic text-lg mb-6 font-light border-l-2 border-red-500 pl-3 line-clamp-2 md:line-clamp-none drop-shadow-md [text-shadow:_0_1px_1px_rgb(0_0_0_/_0.5)]">
-                    "{showInputs || isEditing ? formData.sinopsis.split('.')[0] : movie.sinopsis.split('.')[0]}..."
+                    "{movie.tagline}"
                   </p>
                 )
               )
@@ -592,8 +644,8 @@ const MovieDetail = () => {
       <div className="px-4 md:px-8 lg:px-16 max-w-7xl mx-auto mt-6 md:mt-9">
         <div className="mb-14">
           <SeasonSection
-            seriesId={movie.id}
-            poster={movie.poster}
+            seriesId={isNew ? null : movie?.id}
+            poster={showInputs || isEditing ? formData.poster : movie?.poster}
             temporadas={showInputs || isEditing ? formData.temporadas : movie.temporadas}
             peliculas={showInputs || isEditing ? formData.peliculas : movie.peliculas}
             isSeries={showInputs || isEditing ? formData.tipo === 'serie' : movie.tipo === 'serie'}
@@ -843,8 +895,8 @@ const MovieDetail = () => {
 
         <div className="mt-16 mb-12">
           <CommentsSection
-            reviews={movie.resenas}  // Array de reseñas actual
-            currentUser={user}       // Objeto usuario logueado
+            reviews={isNew || !movie ? [] : movie.resenas}
+            currentUser={user}
             onAddReview={handleAddReview}
             onEditReview={handleEditReview}
             onReplyReview={handleReplyReview}

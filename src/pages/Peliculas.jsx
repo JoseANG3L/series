@@ -3,8 +3,11 @@ import useSWR from 'swr'; // <--- 1. Importamos el hook mágico
 import MovieSection from "../components/MovieSection";
 import { getMovies } from '../services/api'; 
 import { Loader2, WifiOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function Peliculas() {
+  const navigate = useNavigate();
+
   // --- LÓGICA AUTOMÁTICA ---
   // useSWR( 'clave-unica', funcion-fetcher )
   // 1. 'all-movies': Es el nombre de la caché.
@@ -13,6 +16,10 @@ function Peliculas() {
     revalidateOnFocus: true, // Esto arregla lo de volver de YouTube automáticamente
     dedupingInterval: 60000, // No vuelve a pedir datos en 1 min si ya los tiene (ahorra peticiones)
   });
+
+  const handleAddClick = () => {
+    navigate('/peliculas/nuevo');
+  };
 
   // --- RENDERIZADO CONDICIONAL (LOADING) ---
   if (isLoading) {
@@ -47,7 +54,8 @@ function Peliculas() {
         // Si movies es undefined (aún no carga), pasamos array vacío [] para que no rompa
         movies={movies || []} 
         layout="grid" 
-        enableFilters={true} 
+        enableFilters={true}
+        onAddClick={handleAddClick}
       />
     </div>
   );

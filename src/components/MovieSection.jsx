@@ -4,7 +4,7 @@ import { Filter, ChevronDown, Calendar, TrendingUp, SortAsc, Star, X, AArrowDown
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from "react-router-dom";
 
-const MovieSection = ({ title, movies, layout = "carousel", enableFilters = false }) => {
+const MovieSection = ({ title, movies, layout = "carousel", enableFilters = false, onAddClick }) => {
   const { user, role, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -235,7 +235,7 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
             <div className="shrink-0 snap-center">
               <MovieCard
                 isAddCard={true}
-                onAddClick={() => navigate('/nuevo')}
+                onAddClick={onAddClick}
                 variant="carousel"
               />
             </div>
@@ -243,18 +243,31 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
           
           {processedMovies.length > 0 ? (
             processedMovies.map((movie) => (
-              <div key={movie.id} onClickCapture={handleCaptureClick} className="shrink-0 snap-center">
-                <MovieCard 
-                    movie={{ 
-                        id: movie.id, 
-                        title: movie.titulo, // Usamos 'titulo' (viene de Supabase)
-                        image: movie.poster, // Usamos 'poster'
-                        type: movie.type,
-                        rating: movie.rating 
-                    }} 
-                    variant="carousel" 
-                />
-              </div>
+              (role === 'admin') ? (
+                <div key={movie.id} onClickCapture={handleCaptureClick} className="shrink-0 snap-center">
+                  <MovieCard 
+                      movie={{ 
+                          id: movie.id, 
+                          title: movie.titulo, // Usamos 'titulo' (viene de Supabase)
+                          image: movie.poster, // Usamos 'poster'
+                          tipo: movie.tipo,
+                      }} 
+                      variant="carousel" 
+                  />
+                </div>
+              ) : (movie.activo === true) && (
+                <div key={movie.id} onClickCapture={handleCaptureClick} className="shrink-0 snap-center">
+                  <MovieCard 
+                      movie={{ 
+                          id: movie.id, 
+                          title: movie.titulo, // Usamos 'titulo' (viene de Supabase)
+                          image: movie.poster, // Usamos 'poster'
+                          tipo: movie.tipo,
+                      }} 
+                      variant="carousel" 
+                  />
+                </div>
+              )
             ))
           ) : (
             <p className="text-gray-500 text-sm italic pl-4">No se encontraron resultados con estos filtros.</p>
@@ -269,24 +282,36 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
           {role === 'admin' && enableFilters && (
             <MovieCard
               isAddCard={true}
-              onAddClick={() => navigate('/nuevo')}
+              onAddClick={onAddClick}
               variant="grid"
             />
           )}
           
           {processedMovies.length > 0 ? (
             processedMovies.map((movie) => (
-              <MovieCard 
-                key={movie.id} 
-                movie={{ 
-                    id: movie.id, 
-                    title: movie.titulo, 
-                    image: movie.poster, 
-                    type: movie.type,
-                    rating: movie.rating 
-                }} 
-                variant="grid" 
-              />
+              (role === 'admin') ? (
+                <MovieCard
+                  key={movie.id} 
+                  movie={{ 
+                      id: movie.id, 
+                      title: movie.titulo, // Usamos 'titulo' (viene de Supabase)
+                      image: movie.poster, // Usamos 'poster'
+                      tipo: movie.tipo,
+                  }} 
+                  variant="grid" 
+                />
+              ) : (movie.activo === true) && (
+                <MovieCard
+                  key={movie.id} 
+                  movie={{ 
+                      id: movie.id, 
+                      title: movie.titulo, // Usamos 'titulo' (viene de Supabase)
+                      image: movie.poster, // Usamos 'poster'
+                      tipo: movie.tipo,
+                  }} 
+                  variant="grid" 
+                />
+              )
             ))
           ) : (
             <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-500">

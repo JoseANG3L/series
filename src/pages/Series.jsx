@@ -3,14 +3,21 @@ import useSWR from 'swr'; // <--- 1. Importamos SWR
 import MovieSection from "../components/MovieSection";
 import { getSeries } from '../services/api'; 
 import { Loader2, WifiOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function Series() {
+  const navigate = useNavigate();
+
   // --- LÓGICA AUTOMÁTICA CON SWR ---
   // Usamos una clave única: 'all-series'
   const { data: series, error, isLoading } = useSWR('all-series', getSeries, {
     revalidateOnFocus: true, // Recarga si vuelves de otra pestaña
     dedupingInterval: 60000, // Mantiene la caché 1 minuto
   });
+
+  const handleAddClick = () => {
+    navigate('/series/nuevo');
+  };
 
   // --- LOADING ---
   if (isLoading) {
@@ -45,6 +52,7 @@ function Series() {
         movies={series || []} 
         layout="grid" 
         enableFilters={true}
+        onAddClick={handleAddClick}
       />
     </div>
   );

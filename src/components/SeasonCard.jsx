@@ -71,7 +71,7 @@ const SeasonCard = ({
   };
 
   // --- 2. MODO EDICIÓN ACTIVO ---
-  if (isEditMode) {
+  if (showInputs) {
     return (
       <div className="relative group w-full animate-fadeIn">
         

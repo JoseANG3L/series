@@ -46,7 +46,7 @@ const SeasonSection = ({ poster, temporadas = [], peliculas = [], isSeries = tru
     
   }, [content, isSeries, isEditing]);
 
-  if (sortedSeasons.length === 0) return null;
+  if (sortedSeasons.length === 0 && !showInputs) return null;
 
   return (
     <section className="relative z-10">
@@ -57,7 +57,7 @@ const SeasonSection = ({ poster, temporadas = [], peliculas = [], isSeries = tru
       </h3>
 
       <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {isEditing && (
+          {showInputs && (
             <SeasonCard isAddCard={true} onAddSeason={onAddSeason} />
           )}
 

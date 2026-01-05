@@ -35,6 +35,18 @@ export default function AppRoutes() {
         <Route path="/mi-lista" element={<MiLista />} />
         <Route path="/buscar" element={<SearchResults />} />
 
+        {/* --- 2. AQUÍ ESTÁ LA PROTECCIÓN --- */}
+        {/* Creamos una "cápsula" que verifica si eres admin */}
+        <Route element={<ProtectedRoute requireAdmin={true} />}>
+            
+            {/* Si ProtectedRoute dice "OK", entonces muestra esto: */}
+            <Route path="/admin" element={<AdminPanel />} />
+
+            <Route path="/peliculas/nuevo" element={<MovieDetail tipo="movie" forcedId="nuevo" />} />
+            <Route path="/series/nuevo" element={<MovieDetail tipo="serie" forcedId="nuevo" />} />
+
+        </Route>
+
         {/* --- Ruta Dinámica de Detalles --- */}
         <Route path="/peliculas/:id" element={<MovieDetail tipo="movie" />} />
         <Route path="/series/:id" element={<MovieDetail tipo="serie" />} />
@@ -49,15 +61,6 @@ export default function AppRoutes() {
         <Route path="/privacy" element={<LegalPage title="Política de Privacidad" type="privacy" />} />
         <Route path="/cookies" element={<LegalPage title="Política de Cookies" type="cookies" />} />
         <Route path="/contact" element={<LegalPage title="Contacto" type="contact" />} />
-
-        {/* --- 2. AQUÍ ESTÁ LA PROTECCIÓN --- */}
-        {/* Creamos una "cápsula" que verifica si eres admin */}
-        <Route element={<ProtectedRoute requireAdmin={true} />}>
-            
-            {/* Si ProtectedRoute dice "OK", entonces muestra esto: */}
-            <Route path="/admin" element={<AdminPanel />} />
-
-        </Route>
 
         <Route path="/perfil" element={<Profile />} />
         {/* ---------------------------------- */}

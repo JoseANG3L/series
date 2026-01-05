@@ -43,7 +43,7 @@ const MovieCard = ({ movie, variant = "grid", isAddCard = false, onAddClick }) =
     e.target.src = DEFAULT_IMAGE;
   };
 
-  const isSeries = movie.tipo === 'series' || (movie.temporadas && movie.temporadas.length > 0);
+  const isSeries = movie.tipo === 'serie';
 
   return (
     <div 

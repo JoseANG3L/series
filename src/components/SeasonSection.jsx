@@ -3,7 +3,8 @@ import { useRef, useState, useMemo } from "react";
 import { useAuth } from '../context/AuthContext';
 
 const SeasonSection = ({ 
-  poster, 
+  poster,
+  titulo = "",
   temporadas = [], 
   peliculas = [], 
   isSeries = true, 
@@ -51,7 +52,7 @@ const SeasonSection = ({
         {isSeries ? "Temporadas" : "Películas"}
       </h3>
 
-      <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
           
           {/* TARJETA DE "AGREGAR NUEVO" */}
           {showInputs && (
@@ -66,6 +67,8 @@ const SeasonSection = ({
           {sortedContent.map((item, index) => (
             <SeasonCard 
               key={item.id || index}
+              titulo={titulo}
+              poster={poster}
               // Pasamos el prop isSeries para que la Card sepa cómo renderizar (si hace falta)
               isSeries={isSeries} 
               isEditing={isEditing}
@@ -75,7 +78,7 @@ const SeasonSection = ({
               // Adaptamos los datos de Película para que entren en la estructura de la Card
               season={{
                 id: item.id || index,
-                poster: item.poster || poster, // Poster individual o el de la serie/saga
+                poster: item.poster || "", // Poster individual o el de la serie/saga
                 descarga: item.descarga || "",
 
                 // TRUCO: Si es serie usa 'numero', si es peli usa 'titulo'

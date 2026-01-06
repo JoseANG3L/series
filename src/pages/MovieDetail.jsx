@@ -11,7 +11,7 @@ import CommentsSection from '../components/CommentsSection';
 import { useAuth } from '../context/AuthContext';
 import useSWR, { useSWRConfig } from "swr";
 import { db } from "../firebase/client";
-import { doc, updateDoc, arrayUnion, addDoc, collection } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion, addDoc, collection, deleteDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
 
 const INITIAL_STATE = {
@@ -133,18 +133,20 @@ const MovieDetail = ({ tipo, forcedId }) => {
     isOpen: false,
     title: "",
     message: "",
-    onConfirm: null, // Aquí guardaremos la función a ejecutar
-    isDangerous: true // Para poner el botón rojo o azul
+    onConfirm: null,
+    isDangerous: true,
+    descartar: false
   });
 
   // --- FUNCIÓN HELPER PARA PEDIR CONFIRMACIÓN ---
-  const askConfirmation = (title, message, action, isDangerous = true) => {
+  const askConfirmation = (title, message, action, isDangerous = true, descartar = false) => {
     setConfirmModal({
       isOpen: true,
       title,
       message,
       onConfirm: () => action(), // Envolvemos la función
-      isDangerous
+      isDangerous,
+      descartar
     });
   };
 
@@ -297,22 +299,25 @@ const MovieDetail = ({ tipo, forcedId }) => {
   }, [isNew, tipo]);
 
   useEffect(() => {
-    // Solo si ya cargó la info (movie) y NO estamos creando uno nuevo
+    // Verificamos que ya existan datos y no sea un formulario de creación
     if (movie && !isNew) {
       
-      // 1. Detectamos qué dice la URL actual (¿empieza con series o peliculas?)
-      const currentPath = location.pathname.split('/')[1]; // obtiene "series" o "peliculas"
-      
-      // 2. Detectamos qué debería ser según la base de datos
+      // 1. PRIORIDAD: SEGURIDAD (Si está inactivo y no es admin, ¡fuera!)
+      if (!movie.activo && role !== 'admin') {
+        navigate('/', { replace: true });
+        return; // 🛑 IMPORTANTE: Detenemos aquí para que no siga ejecutando código
+      }
+
+      // 2. SECUNDARIO: CORRECCIÓN DE URL
+      // Solo llegamos aquí si el contenido es visible o si es admin
+      const currentPath = location.pathname.split('/')[1]; 
       const expectedPath = movie.tipo === 'serie' ? 'series' : 'peliculas';
 
-      // 3. Si no coinciden, forzamos la corrección (Redirección instantánea)
       if (currentPath === 'movie' || (currentPath !== expectedPath && currentPath !== 'admin')) {
-        // El replace: true evita que el usuario pueda volver atrás a la URL incorrecta
         navigate(`/${expectedPath}/${movie.id}`, { replace: true });
       }
     }
-  }, [movie, isNew, location.pathname, navigate]);
+  }, [movie, isNew, role, location.pathname, navigate]);
 
   useEffect(() => {
     if (showInputs && Array.isArray(formData.galeria)) {
@@ -382,15 +387,85 @@ const MovieDetail = ({ tipo, forcedId }) => {
   // };
 
   const handleCancel = () => {
+    // 1. Reconstruimos cuál era la data original para comparar
+    let originalData;
+
     if (isNew) {
-      // Si cancelas la creación, vuelve a la lista basada en lo que tenías seleccionado
-      const targetPath = formData.tipo === 'serie' ? '/series' : '/peliculas';
-      navigate(targetPath);
+      // Si es nuevo, la original es el INITIAL_STATE con el tipo correcto (según tu useEffect)
+      originalData = { 
+        ...INITIAL_STATE, 
+        tipo: tipo || "serie" 
+      };
     } else {
-      setIsEditing(false);
-      // Restauramos los datos originales
-      if (movie) setFormData({ ...INITIAL_STATE, ...movie });
+      // Si es edición, la original es la mezcla de INITIAL + lo que vino de la BD (movie)
+      // Esto debe coincidir con lo que haces en tu useEffect de carga
+      originalData = { 
+        ...INITIAL_STATE, 
+        ...movie 
+      };
     }
+
+    // 2. Comparamos: Convertimos a texto para ver si son idénticos
+    // JSON.stringify es útil aquí para comparar arrays y objetos anidados
+    const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
+
+    // 3. Definimos la acción de salir (para no repetir código)
+    const performExit = () => {
+      if (isNew) {
+        const targetPath = formData.tipo === 'serie' ? '/series' : '/peliculas';
+        navigate(targetPath);
+      } else {
+        setIsEditing(false);
+        // Restauramos visualmente los datos originales
+        if (movie) setFormData(originalData);
+      }
+    };
+
+    // 4. Lógica de Decisión
+    if (hasChanges) {
+      // Si hay cambios, pedimos confirmación
+      askConfirmation(
+        "¿Descartar cambios?",
+        "Tienes cambios sin guardar. Si cancelas ahora, se perderán permanentemente.",
+        performExit, // Si dice "Sí", ejecutamos la salida
+        true, // isDangerous (Botón rojo)
+        true // descartar
+      );
+    } else {
+      // Si NO hay cambios, salimos inmediatamente sin molestar
+      performExit();
+    }
+  };
+
+  const handleDeleteContent = () => {
+    askConfirmation(
+      `¿Eliminar "${formData.titulo}"?`,
+      "Esta acción borrará permanentemente la ficha, sus temporadas y comentarios. No se puede deshacer.",
+      async () => {
+        setSaving(true); // Ponemos loading
+        try {
+            // Borramos de Firebase
+            await deleteDoc(doc(db, "content", id));
+            
+            showFeedback('delete');
+
+            // Redirigimos a la lista correspondiente
+            const targetRoute = formData.tipo === 'serie' ? '/series' : '/peliculas';
+            
+            // Esperamos un segundo para que se vea el mensaje de éxito
+            setTimeout(() => {
+                navigate(targetRoute, { replace: true });
+                mutate('all-movies'); // Forzamos recarga de caché
+            }, 1500);
+
+        } catch (error) {
+            console.error("Error al eliminar:", error);
+            showFeedback('error', "No se pudo eliminar el contenido");
+            setSaving(false);
+        }
+      },
+      true // isDangerous = true (Botón rojo en el modal)
+    );
   };
 
   // --- 2. CARGAR RECOMENDACIONES (SWR) ---
@@ -696,9 +771,10 @@ const MovieDetail = ({ tipo, forcedId }) => {
       <br />
 
       {/* --- CONTENT SECTION --- */}
-      <div className="px-4 md:px-8 lg:px-16 max-w-7xl mx-auto mt-6 md:mt-9">
+      <div className="px-4 md:px-8 lg:px-16 max-w-5xl mx-auto mt-6 md:mt-9">
         <div className="mb-14">
           <SeasonSection
+            titulo={showInputs || isEditing ? formData.titulo : movie?.titulo}
             seriesId={isNew ? null : movie?.id}
             poster={showInputs || isEditing ? formData.poster : movie?.poster}
             temporadas={showInputs || isEditing ? formData.temporadas : movie.temporadas}
@@ -1017,6 +1093,21 @@ const MovieDetail = ({ tipo, forcedId }) => {
 
             {isEditing ? (
               <>
+                {/* --- 🔴 NUEVO: BOTÓN ELIMINAR (Solo si no es nuevo) --- */}
+                {!isNew && (
+                  <>
+                    <button
+                      onClick={handleDeleteContent}
+                      disabled={saving}
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-full text-sm font-medium text-red-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                      title="Eliminar permanentemente"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <div className="w-px h-6 bg-white/10"></div>
+                  </>
+                )}
+
                 {/* --- BOTÓN CANCELAR --- */}
                 <button
                   onClick={handleCancel}
@@ -1029,7 +1120,7 @@ const MovieDetail = ({ tipo, forcedId }) => {
 
                 <div className="w-px h-6 bg-white/10"></div>
 
-                {/* --- NUEVO: TOGGLE ACTIVO/INACTIVO --- */}
+                {/* --- TOGGLE ACTIVO/INACTIVO --- */}
                 <button
                   onClick={() => setFormData({ ...formData, activo: !formData.activo })}
                   className={`
@@ -1039,7 +1130,7 @@ const MovieDetail = ({ tipo, forcedId }) => {
                       : "bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20"
                     }
                   `}
-                  title={formData.activo ? "El contenido es visible para los usuarios" : "El contenido está oculto (Borrador)"}
+                  title={formData.activo ? "El contenido es visible" : "El contenido está oculto"}
                 >
                   <Power className="w-3.5 h-3.5" />
                   {formData.activo ? "Visible" : "Oculto"}
@@ -1216,7 +1307,7 @@ const MovieDetail = ({ tipo, forcedId }) => {
                       : "bg-blue-600 hover:bg-blue-500 shadow-blue-900/20"
                   }`}
                 >
-                  {confirmModal.isDangerous ? "Sí, Eliminar" : "Confirmar"}
+                  {confirmModal.isDangerous ? (confirmModal.descartar ? "Sí, descartar" : "Sí, eliminar") : "Confirmar"}
                 </button>
               </div>
 

@@ -64,10 +64,10 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
         result.sort((a, b) => b.titulo.localeCompare(a.titulo));
         break;
       case "date_asc":
-        result.sort((a, b) => (a.anio || 0) - (b.anio || 0));
+        result.sort((a, b) => (a.creado || 0) - (b.creado || 0));
         break;
       case "date_desc":
-        result.sort((a, b) => (b.anio || 0) - (a.anio || 0));
+        result.sort((a, b) => (b.creado || 0) - (a.creado || 0));
         break;
       default:
         break;
@@ -135,7 +135,7 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
           <div className="flex flex-wrap items-center gap-3 animate-fadeIn" onClick={(e) => e.stopPropagation()}>
             
             {/* 1. CATEGORÍAS */}
-            <div className="relative">
+            {/* <div className="relative">
               <button
                 onClick={() => setOpenMenu(openMenu === 'category' ? null : 'category')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${activeCategory !== 'Todos' ? 'bg-red-600 border-red-600 text-white' : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-500'}`}
@@ -158,7 +158,7 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
                   ))}
                 </div>
               )}
-            </div>
+            </div> */}
 
             {/* 2. ORDENAR */}
             <div className="relative">
@@ -197,23 +197,23 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
             </div>
 
             {/* 3. POPULARES */}
-            <button
+            {/* <button
               onClick={() => setShowPopular(!showPopular)}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${showPopular ? 'bg-yellow-500/10 border-yellow-500 text-yellow-500 shadow-lg shadow-yellow-900/20' : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-500'}`}
             >
               {showPopular ? <Star className="w-4 h-4 fill-current" /> : <TrendingUp className="w-4 h-4" />}
               Populares
-            </button>
+            </button> */}
 
             {/* 4. LIMPIAR */}
-            {(activeCategory !== 'Todos' || sortBy !== 'default' || showPopular) && (
+            {/* {(activeCategory !== 'Todos' || sortBy !== 'default' || showPopular) && (
                 <button 
                     onClick={() => { setActiveCategory('Todos'); setSortBy('default'); setShowPopular(false); }}
                     className="text-xs text-slate-500 hover:text-white underline ml-2"
                 >
                     Limpiar todo
                 </button>
-            )}
+            )} */}
           </div>
         )}
       </div>
@@ -253,6 +253,7 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
                         title: movie.titulo, // Usamos 'titulo' (viene de Supabase)
                         image: movie.poster, // Usamos 'poster'
                         tipo: movie.tipo,
+                        actualizado: movie.actualizado,
                     }} 
                     variant="carousel" 
                 />
@@ -285,6 +286,7 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
                     title: movie.titulo, // Usamos 'titulo' (viene de Supabase)
                     image: movie.poster, // Usamos 'poster'
                     tipo: movie.tipo,
+                    actualizado: movie.actualizado,
                 }} 
                 variant="grid" 
               />

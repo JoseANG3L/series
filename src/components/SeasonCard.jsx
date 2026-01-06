@@ -4,7 +4,9 @@ import { Ban, Download, Plus, Trash2, Link as LinkIcon, Image as ImageIcon, Moni
 const DEFAULT_IMAGE = "/default.jpg";
 
 const SeasonCard = ({ 
-  season, 
+  season,
+  titulo,
+  poster,
   isAddCard = false, 
   onAddSeason, 
   isSeries = true,
@@ -25,10 +27,10 @@ const SeasonCard = ({
               onClick={() => onAddSeason("normal")}
               className="flex-1 relative cursor-pointer group rounded-xl bg-slate-900/50 border-2 border-dashed border-slate-700 hover:border-blue-500 hover:bg-slate-800 transition-all duration-300 flex flex-col items-center justify-center p-2"
             >
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-800 group-hover:bg-blue-600/20 flex items-center justify-center transition-colors mb-1">
-                <MonitorPlay className="w-4 h-4 md:w-5 md:h-5 text-slate-500 group-hover:text-blue-500" />
+              <div className="w-12 h-12 rounded-full bg-slate-800 group-hover:bg-blue-600/20 flex items-center justify-center transition-colors mb-3">
+                <MonitorPlay className="w-6 h-6 text-slate-500 group-hover:text-blue-500" />
               </div>
-              <span className="text-[9px] md:text-[10px] font-bold text-slate-500 group-hover:text-white uppercase text-center">
+              <span className="text-xs font-bold text-slate-500 group-hover:text-white uppercase tracking-widest">
                 + Temporada
               </span>
             </div>
@@ -38,10 +40,10 @@ const SeasonCard = ({
               onClick={() => onAddSeason("ova")}
               className="flex-1 relative cursor-pointer group rounded-xl bg-slate-900/50 border-2 border-dashed border-slate-700 hover:border-purple-500 hover:bg-slate-800 transition-all duration-300 flex flex-col items-center justify-center p-2"
             >
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-800 group-hover:bg-purple-600/20 flex items-center justify-center transition-colors mb-1">
-                <Clapperboard className="w-4 h-4 md:w-5 md:h-5 text-slate-500 group-hover:text-purple-500" />
+              <div className="w-12 h-12 rounded-full bg-slate-800 group-hover:bg-purple-600/20 flex items-center justify-center transition-colors mb-3">
+                <Clapperboard className="w-6 h-6 text-slate-500 group-hover:text-purple-500" />
               </div>
-              <span className="text-[9px] md:text-[10px] font-bold text-slate-500 group-hover:text-white uppercase text-center">
+              <span className="text-xs font-bold text-slate-500 group-hover:text-white uppercase tracking-widest">
                 + OVA
               </span>
             </div>
@@ -52,9 +54,9 @@ const SeasonCard = ({
             onClick={() => onAddSeason()} // En pelis no necesitamos argumento, pero si pasas "normal" no pasa nada
             className="flex-1 relative cursor-pointer group rounded-xl bg-slate-900/50 border-2 border-dashed border-slate-700 hover:border-emerald-500 hover:bg-slate-800 transition-all duration-300 flex flex-col items-center justify-center p-2"
           >
-            <div className="w-12 h-12 rounded-full bg-slate-800 group-hover:bg-emerald-600/20 flex items-center justify-center transition-colors mb-2">
+            <div className="w-12 h-12 rounded-full bg-slate-800 group-hover:bg-emerald-600/20 flex items-center justify-center transition-colors mb-3">
               {/* Cambié el icono a Plus o Clapperboard para diferenciar visualmente */}
-              <Plus className="w-6 h-6 text-slate-500 group-hover:text-emerald-500" />
+              <Clapperboard className="w-6 h-6 text-slate-500 group-hover:text-emerald-500" />
             </div>
             <span className="text-xs font-bold text-slate-500 group-hover:text-white uppercase tracking-widest">
               + Película
@@ -77,12 +79,16 @@ const SeasonCard = ({
 
   let displayText = "";
   
-  if (isOva) {
+  if (isSeries) {
+    if (isOva) {
       displayText = rawNum; // Ej: "OVA 1", "Colección OVAs"
-  } else if (isPlural) {
+    } else if (isPlural) {
       displayText = `Temporadas ${rawNum}`; // Ej: "Temporadas 1-3", "Temporadas 1 y 2"
-  } else {
+    } else {
       displayText = `Temporada ${rawNum}`; // Ej: "Temporada 1"
+    }
+  } else {
+    displayText = season.titulo ?? titulo; // Usar el título de la película o "Película" por defecto
   }
 
   const handleImageError = (e) => {
@@ -105,7 +111,7 @@ const SeasonCard = ({
 
         <div className="relative overflow-hidden rounded-xl aspect-[2/3] bg-slate-800 shadow-lg border border-red-500/30">
           <img 
-            src={season.poster || DEFAULT_IMAGE} 
+            src={season.poster || poster || DEFAULT_IMAGE} 
             alt="Poster Preview"
             referrerPolicy="no-referrer"
             loading="lazy"
@@ -134,7 +140,7 @@ const SeasonCard = ({
                 <div className="flex-1">
                     {/* 🔴 CAMBIO: Label dinámico */}
                     <label className="text-[9px] text-gray-500 uppercase block">
-                        {isOva ? "Título (OVA)" : "Nums (Ej: 1-3)"}
+                        {isSeries ? (isOva ? "Título (OVA)" : "Nums (Ej: 1-3)") : "Título Película"}
                     </label>
                     {/* 🔴 CAMBIO: Type Text y quitamos parseInt para permitir escribir "OVA" */}
                     <input 
@@ -145,15 +151,17 @@ const SeasonCard = ({
                         placeholder="Ej: 1-3"
                     />
                 </div>
-                <div className="flex-1">
+                {isSeries && (
+                  <div className="flex-1">
                     <label className="text-[9px] text-gray-500 uppercase block">Episodios</label>
                     <input 
                         type="text" 
                         value={season.episodios || ""}
                         onChange={(e) => onUpdate({ ...season, episodios: e.target.value })}
                         className="w-full bg-slate-800 border-b border-slate-600 focus:border-red-500 outline-none text-xs text-gray-400 py-1"
-                    />
-                </div>
+                        />
+                  </div>
+                )}
             </div>
 
             <div>
@@ -181,7 +189,7 @@ const SeasonCard = ({
     >
       <div className="relative overflow-hidden rounded-xl aspect-[2/3] bg-slate-800 shadow-lg border border-white/5">
         <img 
-          src={season.poster || DEFAULT_IMAGE} 
+          src={season.poster || poster || DEFAULT_IMAGE} 
           alt={displayText} 
           onError={handleImageError}
           referrerPolicy="no-referrer"
@@ -206,9 +214,12 @@ const SeasonCard = ({
         <h4 className="text-sm font-bold text-slate-200 truncate group-hover:text-red-500 transition-colors">
             {displayText}
         </h4>
-        <p className="text-xs text-slate-500 mt-1 font-medium">
-            {season.episodios === "1" ? "1 Episodio" : `${season.episodios} Episodios`}
-        </p>
+        {isSeries && (
+            <p className="text-xs text-slate-500 mt-1 font-medium">
+                {season.episodios === "1" ? "1 Episodio" : `${season.episodios} Episodios`}
+            </p>
+          )
+        }
       </div>
     </div>
   );

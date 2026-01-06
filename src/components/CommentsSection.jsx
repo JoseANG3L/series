@@ -69,7 +69,7 @@ const CommentsSection = ({ reviews = [], currentUser, onAddReview, onEditReview,
   };
 
   return (
-    <div className="animate-fadeIn space-y-8 max-w-4xl mx-auto">
+    <div className="animate-fadeIn space-y-8 max-w-5xl mx-auto">
       
       {/* 1. INPUT PRINCIPAL */}
       <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50 shadow-xl">

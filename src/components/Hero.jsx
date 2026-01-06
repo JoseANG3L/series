@@ -214,8 +214,8 @@ const Hero = () => {
       {/* FONDO */}
       {slides.map((slide, index) => (
          <div key={slide.id} className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`} style={{ backgroundImage: `url('${slide.backdrop || slide.poster}')` }}>
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] from-0% via-[#0f172a]/60 via-40% to-transparent to-70%"></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/80 from-0% via-[#0f172a]/50 via-30% to-transparent to-50%"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] from-0% via-[#0f172a]/50 via-30% to-transparent to-50%"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] from-0% via-[#0f172a]/50 via-30% to-transparent to-50%"></div>
          </div>
       ))}
 

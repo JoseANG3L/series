@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Play, CheckCircle, AlertCircle, ChevronLeft, Trash2, PlusCircle, Star, Users,
-  AlertTriangle, Power, MessageSquare, Image as ImageIcon, Loader2, WifiOff,
+  AlertTriangle, Power, KeyRound, Image as ImageIcon, Loader2, WifiOff,
   Edit3, X, Save, Eye, EyeOff
 } from 'lucide-react';
 import { getContentById, getMovies } from '../services/api';
@@ -619,8 +619,8 @@ const MovieDetail = ({ tipo, forcedId }) => {
           className="absolute inset-0 bg-cover bg-center transition-all duration-500"
           style={{ backgroundImage: `url('${showInputs || isEditing ? (formData.backdrop || formData.poster || '/default.jpg') : (movie.backdrop || movie.poster || '/default.jpg')}')` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] from-0% via-[#0f172a]/60 via-40% to-transparent to-70%"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/80 from-0% via-[#0f172a]/50 via-30% to-transparent to-50%"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] from-0% via-[#0f172a]/50 via-30% to-transparent to-50%"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] from-0% via-[#0f172a]/50 via-30% to-transparent to-50%"></div>
         </div>
 
         <div className="relative z-30 flex flex-col justify-between pt-16 md:pt-20 px-4 md:px-8 lg:px-16 gap-10">
@@ -772,7 +772,7 @@ const MovieDetail = ({ tipo, forcedId }) => {
 
       {/* --- CONTENT SECTION --- */}
       <div className="px-4 md:px-8 lg:px-16 max-w-5xl mx-auto mt-6 md:mt-9">
-        <div className="mb-14">
+        <div className="mb-10">
           <SeasonSection
             titulo={showInputs || isEditing ? formData.titulo : movie?.titulo}
             seriesId={isNew ? null : movie?.id}
@@ -787,6 +787,15 @@ const MovieDetail = ({ tipo, forcedId }) => {
             onDeleteSeason={formData.tipo === 'serie' ? handleDeleteSeason : handleDeleteMovie}
           />
         </div>
+
+        <div className="mb-10 rounded-3xl p-[1px]
+                        bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+          <div className="rounded-3xl bg-slate-800 p-4 text-white text-lg text-center
+                          flex items-center justify-center gap-2">
+            <KeyRound className="" /> Contraseña: <span className="font-bold text-green-500 text-xl">LuisF</span>
+          </div>
+        </div>
+
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mx-auto">
 

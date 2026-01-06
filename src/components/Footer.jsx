@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Instagram, Heart, Mail } from "lucide-react";
+import { Facebook, Twitter, Instagram, Youtube, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Loader2, Check } from "lucide-react";
@@ -84,11 +84,11 @@ const Footer = () => {
                 Cookies
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link to="/contact" className="hover:text-red-500 transition duration-200">
                 Contacto
               </Link>
-            </li>
+            </li> */}
           </ul>
         </div>
 
@@ -98,7 +98,7 @@ const Footer = () => {
           
           {/* REDES SOCIALES (Ahora son enlaces) */}
           <div className="flex gap-4 mb-6">
-            <a 
+            {/* <a 
               href="https://facebook.com" 
               target="_blank" 
               rel="noopener noreferrer" 
@@ -121,10 +121,18 @@ const Footer = () => {
               className="bg-slate-800 p-2 rounded-full hover:bg-red-600 hover:text-white text-slate-400 cursor-pointer transition transform hover:scale-110"
             >
               <Instagram className="w-5 h-5" />
+            </a> */}
+            <a
+              href="https://www.youtube.com/@LuisF-Series"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-slate-800 p-2 rounded-full hover:bg-red-600 hover:text-white text-slate-400 cursor-pointer transition transform hover:scale-110"
+            >
+              <Youtube className="w-5 h-5" />
             </a>
           </div>
 
-          {/* NEWSLETTER FUNCIONAL */}
+          {/* NEWSLETTER FUNCIONAL
           <form onSubmit={handleSubscribe} className="relative">
             <input 
               type="email" 
@@ -160,7 +168,7 @@ const Footer = () => {
                 <Mail className="w-4 h-4" />
               )}
             </button>
-          </form>
+          </form> */}
           
           {/* Mensaje pequeño de feedback (opcional) */}
           {status === 'success' && (

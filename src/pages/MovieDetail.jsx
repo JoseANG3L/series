@@ -413,9 +413,9 @@ const MovieDetail = ({ tipo, forcedId }) => {
         mutate('all-movies'); 
         showFeedback('update');
 
-        setTimeout(() => {
-          navigate(targetRoute, { replace: true });
-        }, 3000);
+        // setTimeout(() => {
+        //   navigate(targetRoute, { replace: true });
+        // }, 3000);
       }
 
     } catch (error) {
@@ -853,7 +853,7 @@ const MovieDetail = ({ tipo, forcedId }) => {
             <div className="flex gap-8 border-b border-gray-700 pb-2 overflow-x-auto">
               <button onClick={() => setActiveTab('sinopsis')} className={`pb-2 text-lg font-bold transition ${activeTab === 'sinopsis' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}>Sinopsis</button>
               <button onClick={() => setActiveTab('informacion')} className={`pb-2 text-lg font-bold transition ${activeTab === 'informacion' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}>Información</button>
-              <button onClick={() => setActiveTab('trailer')} className={`pb-2 text-lg font-bold transition ${activeTab === 'trailer' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}>Trailer</button>
+              {/* <button onClick={() => setActiveTab('trailer')} className={`pb-2 text-lg font-bold transition ${activeTab === 'trailer' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}>Trailer</button> */}
               <button onClick={() => setActiveTab('galeria')} className={`pb-2 text-lg font-bold transition flex items-center gap-2 ${activeTab === 'galeria' ? 'text-red-500 border-b-2 border-red-500' : 'text-gray-400 hover:text-white'}`}>Galería</button>
             </div>
 

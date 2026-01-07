@@ -3,7 +3,8 @@ import useSWR from 'swr'; // <--- 1. Importamos SWR
 import { Loader2, WifiOff } from 'lucide-react';
 import MovieSection from "../components/MovieSection";
 import Hero from "../components/Hero";
-import { getMovies, getSeries, getNovedades } from '../services/api'; 
+import { getMovies, getSeries, getNovedades } from '../services/api';
+import AdsterraBanner from '../components/AdsterraBanner';
 
 function Inicio() {
   // --- CONFIGURACIÓN SWR ---
@@ -36,6 +37,9 @@ function Inicio() {
       
       {/* El Hero carga su propia data internamente */}
       <Hero />
+
+      <AdsterraBanner />
+
       {/* Contenedor con margen negativo para solapar el Hero (Estilo Netflix) */}
       <div className="relative space-y-4 md:space-y-8  mt-2 md:mt-4">
         

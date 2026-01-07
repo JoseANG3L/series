@@ -13,6 +13,7 @@ import useSWR, { useSWRConfig } from "swr";
 import { db } from "../firebase/client";
 import { doc, updateDoc, arrayUnion, addDoc, collection, deleteDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
+import AdsterraBanner from '../components/AdsterraBanner';
 
 const INITIAL_STATE = {
   // --- Identificadores y Datos Principales ---
@@ -1086,6 +1087,8 @@ const MovieDetail = ({ tipo, forcedId }) => {
           </div> */}
 
         </div>
+
+        <AdsterraBanner />
 
         <div className="mt-16 mb-12">
           <CommentsSection

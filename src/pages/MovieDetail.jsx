@@ -15,30 +15,50 @@ import { doc, updateDoc, arrayUnion, addDoc, collection, deleteDoc } from "fireb
 import { v4 as uuidv4 } from 'uuid';
 
 const INITIAL_STATE = {
+  // --- Identificadores y Datos Principales ---
   titulo: "Nuevo Título",
-  tipo: "movie", // o 'serie'
-  slug: "nuevo-titulo",
-  sinopsis: "Escribe aquí la sinopsis...",
-  tagline: "Frase promocional",
+  tipo: "movie", // 'movie' o 'serie'
+  slug: "",      // Sugerencia: déjalo vacío para generarlo automáticamente al guardar
+  activo: true,
+  
+  // --- Textos ---
+  sinopsis: "",
+  tagline: "",
+  
+  // --- Multimedia (URLs) ---
   poster: "",
   backdrop: "",
   trailer: "",
   preview: "",
-  temporadas: [], // Array de temporadas
-  peliculas: [], // Array de películas
+  
+  // --- Arrays (Listas) ---
+  temporadas: [], 
+  peliculas: [],
   resenas: [],
   galeria: [],
+  
+  // --- Metadatos de Sistema ---
   creado: null,
   actualizado: null,
-  activo: true,
 
-  // Info técnica
-  peso: "", formato: "", calidad: "", codec: "", bitrate: "",
-  audio: "", resolucion: "", subtitulos: "", duracion: "",
-  temporadassize: "1", // Texto
-  episodios: "",
+  // --- INFORMACIÓN TÉCNICA (Aplanada para el Formulario) ---
+  peso: "", 
+  formato: "", 
+  calidad: "1080p", // Valor por defecto común
+  codec: "", 
+  bitrate: "",
+  audio: "", 
+  resolucion: "", 
+  subtitulos: "", 
+  duracion: "",
+  episodios: "", // Cantidad de eps (texto)
   aporte: "",
   nota: "",
+  
+  // Nota sobre 'temporadassize': 
+  // En tu mapDatabaseToModel lo calculas dinámicamente (array.length).
+  // No es necesario guardarlo en DB, pero tenerlo en state no hace daño.
+  temporadassize: "0", 
 };
 
 const MovieDetail = ({ tipo, forcedId }) => {
@@ -328,48 +348,76 @@ const MovieDetail = ({ tipo, forcedId }) => {
   const handleSaveContent = async () => {
     setSaving(true);
     try {
-      const dataToSave = { ...formData };
+      // 1. DESESTRUCTURACIÓN: Separamos los datos técnicos del resto
+      const {
+        // Estos campos van DENTRO de 'informacion'
+        peso, formato, calidad, codec, bitrate, audio, resolucion, 
+        subtitulos, duracion, episodios, aporte, nota, temporadassize,
         
+        // Estos campos se quedan FUERA (Raíz)
+        ...restOfData 
+      } = formData;
+
+      // 2. RECONSTRUCCIÓN: Creamos el objeto con la estructura correcta para Firebase
+      const dataToSave = {
+        ...restOfData, // titulo, poster, arrays, activo, etc.
+        
+        // Creamos el sub-objeto
+        informacion: {
+          peso: peso || "",
+          formato: formato || "",
+          calidad: calidad || "",
+          codec: codec || "",
+          bitrate: bitrate || "",
+          audio: audio || "",
+          resolucion: resolucion || "",
+          subtitulos: subtitulos || "",
+          duracion: duracion || "",
+          episodios: episodios || "",
+          aporte: aporte || "",
+          nota: nota || ""
+        },
+        
+        // Actualizamos la fecha
+        actualizado: new Date()
+      };
+
+      // Limpieza de seguridad para campos principales (por si algo viene undefined)
       Object.keys(dataToSave).forEach(key => {
-          if (dataToSave[key] === undefined) {
-              dataToSave[key] = ""; // O null
-          }
+        if (dataToSave[key] === undefined) {
+            dataToSave[key] = ""; 
+        }
       });
 
       const targetRoute = dataToSave.tipo === 'serie' ? '/series' : '/peliculas';
 
+      // 3. GUARDADO EN FIREBASE
       if (isNew) {
-        await addDoc(collection(db, "content"), {
-            ...dataToSave,
-            creado: new Date(),
-            actualizado: new Date()
-        });
+        // Si es nuevo, agregamos la fecha de creación
+        dataToSave.creado = new Date();
+        
+        await addDoc(collection(db, "content"), dataToSave);
         
         showFeedback('create');
         
-        // 🔴 REDIRECCIÓN A LA LISTA PRINCIPAL
-        // timer
         setTimeout(() => {
           navigate(targetRoute, { replace: true });
         }, 3000);
+
       } else {
-        // --- ACTUALIZAR EXISTENTE ---
+        // Si es edición
         const movieRef = doc(db, "content", id);
-        dataToSave.actualizado = new Date();
         
         await updateDoc(movieRef, dataToSave);
         
-        // Forzamos actualización de caché global por si cambiaste de lista
         mutate('all-movies'); 
-        
         showFeedback('update');
 
-        // 🔴 REDIRECCIÓN A LA LISTA PRINCIPAL (Como pediste)
-        // Esto es útil si cambiaste de "Pelicula" a "Serie", para que no te quedes en una URL incorrecta
         setTimeout(() => {
           navigate(targetRoute, { replace: true });
         }, 3000);
       }
+
     } catch (error) {
       console.error("Error guardando:", error);
       showFeedback('error', "Error al guardar los cambios");

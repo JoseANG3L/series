@@ -410,9 +410,15 @@ const MovieDetail = ({ tipo, forcedId }) => {
         
         await updateDoc(movieRef, dataToSave);
         
-        mutate('all-movies'); 
+        mutate('all-movies');       
         showFeedback('update');
 
+        // Recargar pagina
+        //window.location.reload();
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
         // setTimeout(() => {
         //   navigate(targetRoute, { replace: true });
         // }, 3000);
@@ -1141,7 +1147,7 @@ const MovieDetail = ({ tipo, forcedId }) => {
       {role === 'admin' && (
         <div className="fixed bottom-6 right-6 z-50 animate-fade-in-up">
           <div className={`
-            flex items-center gap-2 p-1.5 rounded-full border transition-all duration-300 ease-in-out
+            flex flex-wrap items-center gap-2 p-1.5 rounded-full border transition-all duration-300 ease-in-out
             ${isEditing
               ? "bg-slate-900/90 border-red-500/30 shadow-[0_0_30px_rgba(220,38,38,0.2)] pr-2"
               : "bg-slate-900/60 hover:bg-slate-800/80 border-white/10 hover:border-blue-500/50 shadow-2xl backdrop-blur-xl"

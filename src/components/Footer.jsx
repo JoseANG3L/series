@@ -182,7 +182,7 @@ const Footer = () => {
       {/* Barra inferior */}
       <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-center items-center gap-4">
         <p className="text-slate-500 text-sm text-center md:text-left">
-          © 2025 LuisFSeries. Todos los derechos reservados.
+          © 2026 LuisFSeries | Series Para Todos
         </p>
         {/* <div className="flex items-center gap-2 text-slate-500 text-sm">
           <span>Hecho con</span>

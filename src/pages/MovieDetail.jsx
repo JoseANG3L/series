@@ -1105,7 +1105,10 @@ const MovieDetail = ({ tipo, forcedId }) => {
             
             {/* Botón Cerrar */}
             <button 
-                onClick={() => setShowPlayer(false)}
+                onClick={() => {
+                  triggerAd(); // 1. Dispara la publicidad
+                  if (previewUrl) setShowPlayer(true); // 2. Abre el video
+                }}
                 className="absolute top-6 right-6 z-50 bg-black/50 hover:bg-white/20 p-2 rounded-full text-white transition border border-white/10"
             >
                 <X className="w-8 h-8" />

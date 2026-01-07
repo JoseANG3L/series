@@ -11,6 +11,7 @@ import { getContentById } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { collection, getDocs, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'; 
 import { db } from '../firebase/client';
+import { triggerAd } from '../config/ads';
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -253,7 +254,10 @@ const Hero = () => {
           {/* Botones */}
           <div className="flex flex-wrap gap-3 md:gap-4 pt-3 animate-fade-in-up delay-500">
             <button 
-              onClick={() => previewUrl && setShowPlayer(true)}
+              onClick={() => {
+                triggerAd(); // 1. Dispara la publicidad
+                if (previewUrl) setShowPlayer(true); // 2. Abre el video
+              }}
               className={`flex items-center gap-2 px-6 py-2 md:px-8 md:py-3 bg-green-600 text-white rounded-full font-bold hover:bg-green-500 transition shadow-lg shadow-green-900/50 hover:scale-105 transform duration-200 ${!previewUrl && 'opacity-50 cursor-not-allowed'}`}
             >
               <Play className="w-4 h-4 md:w-5 md:h-5 fill-current" /> Ver Ahora

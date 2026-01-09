@@ -3,6 +3,7 @@ import { useRef, useState, useMemo, useEffect } from "react";
 import { Filter, ChevronDown, Calendar, TrendingUp, SortAsc, Star, X, AArrowDown, AArrowUp } from "lucide-react";
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from "react-router-dom";
+import AdsterraBanner from './AdsterraBanner';
 
 const MovieSection = ({ title, movies, layout = "carousel", enableFilters = false, onAddClick }) => {
   const { user, role, signOut } = useAuth();
@@ -214,11 +215,13 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
                     Limpiar todo
                 </button>
             )} */}
+          <AdsterraBanner />
           </div>
         )}
       </div>
 
       {/* --- CONTENIDO --- */}
+
 
       {/* Carrusel */}
       {layout === "carousel" && (

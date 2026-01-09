@@ -48,7 +48,7 @@ function Peliculas() {
 
   // --- RENDERIZADO FINAL ---
   return (
-    <div className="pt-20 md:pt-24 min-h-screen bg-[#0f172a]">
+    <div className="pt-20 md:pt-24 pb-14 min-h-screen bg-[#0f172a]">
       <MovieSection 
         title="Todas las Películas" 
         // Si movies es undefined (aún no carga), pasamos array vacío [] para que no rompa

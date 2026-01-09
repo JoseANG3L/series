@@ -99,7 +99,7 @@ const Signup = () => {
 
             {/* Nombre */}
             <div className="space-y-1">
-              <label className="text-gray-300 text-sm font-medium ml-1">Nombre Completo</label>
+              <label className="text-gray-300 text-sm font-medium ml-1">Nombre de Usuario</label>
               <div className="relative">
                 <input 
                   name="name"

@@ -45,7 +45,7 @@ function Series() {
 
   // --- RENDER ---
   return (
-    <div className="pt-20 md:pt-24 min-h-screen bg-[#0f172a]">
+    <div className="pt-20 md:pt-24 pb-14 min-h-screen bg-[#0f172a]">
       <MovieSection 
         title="Todas las Series" 
         // Si aún no hay datos, pasamos array vacío para evitar errores

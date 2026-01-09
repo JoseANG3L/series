@@ -229,17 +229,19 @@ const MovieDetail = ({ tipo, forcedId }) => {
   };
 
   // 3. NUEVO: RESPONDER COMENTARIO
-  const handleReplyReview = async (reviewId, replyText) => {
+  const handleReplyReview = async (reviewId, replyText, targetUser = null) => {
     if (!user) return showFeedback('sesionrequired', "Debes iniciar sesión para responder.");
 
     // Objeto de respuesta
     const newReply = {
+      id: crypto.randomUUID(),
       usuario: user.displayName || "Usuario",
       avatar: user.photoURL,
       avatarConfig: user.avatarConfig,
       comentario: replyText,
       fecha: new Date().toLocaleDateString('es-ES'),
-      userId: user.uid
+      userId: user.uid,
+      replyToUser: targetUser
     };
 
     // Buscamos y agregamos la respuesta al comentario padre
@@ -259,6 +261,51 @@ const MovieDetail = ({ tipo, forcedId }) => {
     } catch (error) {
       console.error("Error respondiendo:", error);
       showFeedback('error', "Error al responder el comentario");
+    }
+  };
+
+  // --- B. EDITAR RESPUESTA (NUEVA FUNCIÓN) ---
+  const handleEditReply = async (reviewId, replyId, newText) => {
+    const updatedReviews = movie.resenas.map(review => {
+      if (review.id === reviewId && review.replies) {
+        // Buscamos la respuesta dentro del review y la actualizamos
+        const updatedReplies = review.replies.map(reply => {
+            if (reply.id === replyId) {
+                return { ...reply, comentario: newText };
+            }
+            return reply;
+        });
+        return { ...review, replies: updatedReplies };
+      }
+      return review;
+    });
+
+    try {
+      await updateDoc(doc(db, "content", id), { resenas: updatedReviews });
+      mutate(id ? `movie-${id}` : null);
+    } catch (error) {
+      console.error(error);
+      showFeedback('error', "Error al editar respuesta");
+    }
+  };
+
+  // --- C. ELIMINAR RESPUESTA (NUEVA FUNCIÓN) ---
+  const handleDeleteReply = async (reviewId, replyId) => {
+    const updatedReviews = movie.resenas.map(review => {
+      if (review.id === reviewId && review.replies) {
+        // Filtramos para quitar la respuesta
+        const updatedReplies = review.replies.filter(reply => reply.id !== replyId);
+        return { ...review, replies: updatedReplies };
+      }
+      return review;
+    });
+
+    try {
+      await updateDoc(doc(db, "content", id), { resenas: updatedReviews });
+      mutate(id ? `movie-${id}` : null);
+    } catch (error) {
+      console.error(error);
+      showFeedback('error', "Error al eliminar respuesta");
     }
   };
 
@@ -1098,6 +1145,8 @@ const MovieDetail = ({ tipo, forcedId }) => {
             onEditReview={handleEditReview}
             onReplyReview={handleReplyReview}
             onDeleteReview={handleDeleteReview}
+            onEditReply={handleEditReply}
+            onDeleteReply={handleDeleteReply}
           />
         </div>
       </div>

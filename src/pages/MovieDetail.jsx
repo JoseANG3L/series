@@ -14,6 +14,7 @@ import { db } from "../firebase/client";
 import { doc, updateDoc, arrayUnion, addDoc, collection, deleteDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
 import AdsterraBanner from '../components/AdsterraBanner';
+import { triggerAd } from '../config/ads';
 
 const INITIAL_STATE = {
   // --- Identificadores y Datos Principales ---
@@ -860,7 +861,10 @@ const MovieDetail = ({ tipo, forcedId }) => {
 
             <div className="flex gap-4 mt-6">
               <button 
-                onClick={() => previewUrl && setShowPlayer(true)}
+                onClick={() => {
+                  triggerAd(); // 1. Dispara la publicidad
+                  if (previewUrl) setShowPlayer(true); // 2. Abre el video
+                }}
                 className={`flex items-center gap-2 px-8 py-3 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition ${!previewUrl && 'opacity-50 cursor-not-allowed'}`}
               >
                 <Play className="w-5 h-5 fill-black" /> Reproducir
@@ -1157,10 +1161,7 @@ const MovieDetail = ({ tipo, forcedId }) => {
             
             {/* Botón Cerrar */}
             <button 
-                onClick={() => {
-                  triggerAd(); // 1. Dispara la publicidad
-                  if (previewUrl) setShowPlayer(true); // 2. Abre el video
-                }}
+                onClick={() => setShowPlayer(false)}
                 className="absolute top-6 right-6 z-50 bg-black/50 hover:bg-white/20 p-2 rounded-full text-white transition border border-white/10"
             >
                 <X className="w-8 h-8" />

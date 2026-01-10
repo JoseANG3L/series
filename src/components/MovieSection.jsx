@@ -125,7 +125,7 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
   return (
     <section className="px-4 md:px-8 lg:px-16 relative z-10">
 
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-8 gap-6">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-4 md:mb-8 gap-6">
         {/* Título */}
         <h3 className="text-2xl font-bold text-white border-l-4 border-red-500 pl-4 shrink-0">
           {title}
@@ -215,10 +215,14 @@ const MovieSection = ({ title, movies, layout = "carousel", enableFilters = fals
                     Limpiar todo
                 </button>
             )} */}
-          <AdsterraBanner />
           </div>
         )}
       </div>
+      {enableFilters && (
+        <div id="ads" className="overflow-auto py-3 mb-5">
+          <AdsterraBanner />
+        </div>
+      )}
 
       {/* --- CONTENIDO --- */}
 

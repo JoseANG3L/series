@@ -84,3 +84,23 @@ html, body {
 .animate-slide-up {
   animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+#ads > :first-child {
+  margin: 0 auto !important;
+  justify-content: start !important;
+}
+@media (min-width: 768px) {
+  #ads > :first-child {
+    justify-content: center !important;
+  }
+  
+}
+.container-8cadb933668acb77fe41e3a83e10b7d3__stand {
+  overflow: auto !important;
+  display: flex !important;
+  flex-flow: row !important;
+  flex-direction: row !important;
+  color: rgb(255, 255, 255) !important;
+  font-size: .875rem !important;
+  font-weight: 500 !important;
+}

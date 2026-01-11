@@ -1139,7 +1139,9 @@ const MovieDetail = ({ tipo, forcedId }) => {
 
         </div>
 
-        <AdsterraBanner />
+        <div id="ads" className="overflow-auto py-3 mb-5">
+          <AdsterraBanner />
+        </div>
 
         <div className="mt-16 mb-12">
           <CommentsSection

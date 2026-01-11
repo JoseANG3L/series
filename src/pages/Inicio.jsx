@@ -38,7 +38,9 @@ function Inicio() {
       {/* El Hero carga su propia data internamente */}
       <Hero />
 
-      <AdsterraBanner />
+      <div id="ads" className="overflow-auto py-3 mb-5">
+        <AdsterraBanner />
+      </div>
 
       {/* Contenedor con margen negativo para solapar el Hero (Estilo Netflix) */}
       <div className="relative space-y-4 md:space-y-8  mt-2 md:mt-4">
